@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import api
 
 urlpatterns = [
     path('', views.inicio, name='inicio'),
@@ -28,4 +29,6 @@ urlpatterns = [
     path('pacientes/importar/', views.importar_pacientes_excel, name='importar_pacientes_excel'),
     path('roles/', views.lista_roles, name='lista_roles'),
     path('roles/nuevo/', views.crear_rol, name='crear_rol'),
+    path('api/municipios/', api.buscar_municipios, name="api_municipios"),
+
 ]
