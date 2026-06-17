@@ -1,0 +1,232 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Facturación - NeuroEsencia{% endblock %}
+
+{% block content %}
+<style>
+    /* --- VARIABLES LOCALES (Sistema Unificado) --- */
+    :root {
+        --card-bg: #ffffff;
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --purple-light: #4c3b73;
+        --purple-pastel: #b09ade;
+        --text-dark: #2b3674;
+        --text-gray: #a3aed1;
+        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+    }
+
+    /* --- ANIMACIONES --- */
+    .fade-in-up {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Botón Principal */
+    .btn-add-invoice {
+        background: var(--purple-brand);
+        color: white !important; border: none; border-radius: 50px;
+        padding: 0 24px; height: 48px; font-weight: 600;
+        display: inline-flex; align-items: center; gap: 10px;
+        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2); transition: all 0.3s ease;
+    }
+    .btn-add-invoice:hover { 
+        background: var(--purple-light); 
+        transform: translateY(-2px); 
+        box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3); 
+    }
+
+    /* --- TABLA PREMIUM --- */
+    .table-wrapper {
+        background: var(--card-bg);
+        border-radius: 24px;
+        padding: 10px; 
+        box-shadow: var(--shadow-soft);
+        border: 1px solid rgba(0,0,0,0.02);
+        overflow: hidden; 
+    }
+    
+    .table-premium { margin-bottom: 0; }
+    .table-premium thead { background-color: rgba(244, 247, 254, 0.6); }
+    .table-premium thead th {
+        color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        border: none; padding: 20px 24px; font-weight: 700;
+    }
+    .table-premium thead th:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+    .table-premium thead th:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+
+    .table-premium tbody td {
+        vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.02);
+        padding: 15px 24px; color: var(--text-dark); font-weight: 500;
+    }
+    .table-premium tbody tr { transition: all 0.2s ease; border-radius: 16px; }
+    .table-premium tbody tr:hover { background-color: rgba(176, 154, 222, 0.05); }
+    .table-premium tbody tr:last-child td { border-bottom: none; }
+
+    /* Componentes visuales de la tabla */
+    .invoice-badge {
+        background: var(--page-bg);
+        color: var(--text-gray);
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    .patient-avatar {
+        width: 40px; height: 40px; border-radius: 12px;
+        background: rgba(176, 154, 222, 0.15);
+        color: var(--purple-brand);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Etiquetas de Estado de Pago */
+    .status-paid {
+        background-color: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);
+        font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center;
+    }
+    .status-pending {
+        background-color: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);
+        font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center;
+    }
+
+    /* Acciones Suavizadas (Ghost Buttons) */
+    .btn-action {
+        width: 40px; height: 40px; border-radius: 12px;
+        display: inline-flex; align-items: center; justify-content: center;
+        transition: all 0.2s; background: var(--page-bg);
+        color: var(--text-gray); border: 1px solid transparent; text-decoration: none;
+    }
+    .btn-action.view:hover { background: rgba(176, 154, 222, 0.1); color: var(--purple-brand); border-color: rgba(176, 154, 222, 0.3); transform: scale(1.05); }
+    .btn-action.download:hover { background: #fef2f2; color: #ef4444; border-color: #fecaca; transform: scale(1.05); }
+    
+    .amount-text {
+        font-size: 1.05rem;
+        color: var(--purple-brand);
+        letter-spacing: -0.5px;
+    }
+</style>
+
+<div class="fade-in-up" style="animation-delay: 0.1s;">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Facturación</h3>
+            <p class="mt-1 m-0" style="color: var(--text-gray); font-weight: 500;">Historial de cobros y recibos de pacientes.</p>
+        </div>
+        <a href="{% url 'crear_factura' %}" class="btn-add-invoice text-decoration-none">
+            <i class="fa-solid fa-plus"></i> Nueva Factura
+        </a>
+    </div>
+</div>
+
+<div class="table-wrapper fade-in-up" style="animation-delay: 0.2s;">
+    <div class="table-responsive">
+        <table class="table table-premium table-borderless table-hover align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Nº Factura</th>
+                    <th style="width: 30%;">Paciente</th>
+                    <th style="width: 15%;">Fecha de Emisión</th>
+                    <th style="width: 15%;">Importe Total</th>
+                    <th class="text-center" style="width: 15%;">Estado</th>
+                    <th class="text-end pe-4" style="width: 10%;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for factura in facturas %}
+                <tr>
+                    <td>
+                        <span class="invoice-badge">
+                            {{ factura.nro_factura|default:factura.id }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="patient-avatar shadow-sm">
+                                {{ factura.paciente.nombre_completo|slice:":1"|upper }}
+                            </div>
+                            <span class="d-block fw-bold" style="color: var(--text-dark);">
+                                {{ factura.paciente.nombre_completo }}
+                            </span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="fw-semibold" style="color: var(--text-dark);">
+                            {{ factura.fecha|date:"d M, Y" }}
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="fw-bold amount-text">
+                            ${{ factura.total }}
+                        </div>
+                    </td>
+
+                    <td class="text-center">
+                        {% if factura.estado_pago == 'Pagada' %}
+                            <span class="status-paid shadow-sm">
+                                <i class="fa-solid fa-check-circle me-1"></i> Pagada
+                            </span>
+                        {% elif factura.estado_pago == 'Anulada' %}
+                            <span class="badge bg-danger text-white px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.75rem;">
+                                <i class="fa-solid fa-ban me-1"></i> Anulada
+                            </span>
+                        {% else %}
+                            <span class="status-pending shadow-sm">
+                                <i class="fa-solid fa-clock me-1"></i> Pendiente
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-end pe-3">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'detalle_factura' factura.id %}" class="btn-action view" data-bs-toggle="tooltip" title="Ver Detalles">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            <a href="{% url 'exportar_factura_pdf' factura.id %}" class="btn-action download" data-bs-toggle="tooltip" title="Descargar PDF">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="py-4">
+                            <div class="mx-auto mb-3" style="width: 70px; height: 70px; background: rgba(176, 154, 222, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--purple-brand);">
+                                <i class="fa-solid fa-receipt" style="font-size: 2rem;"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-1">Sin historial de facturación</h5>
+                            <p style="color: var(--text-gray); font-size: 0.95rem; max-width: 400px; margin: 0 auto;">
+                                Aún no has generado ningún recibo o factura en el sistema.
+                            </p>
+                            <a href="{% url 'crear_factura' %}" class="btn-add-invoice mt-4 text-decoration-none">
+                                <i class="fa-solid fa-plus"></i> Crear Primera Factura
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Inicializar tooltips
+    document.addEventListener("DOMContentLoaded", function(){
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
+{% endblock %}

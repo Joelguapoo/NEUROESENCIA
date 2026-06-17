@@ -1,0 +1,34 @@
+{% extends 'usuarios/base.html' %}
+
+{% block content %}
+<div class="animate-item d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card border-0 shadow-lg p-5 text-center" style="border-radius: 25px; max-width: 550px;">
+        <div class="mb-4">
+            <i class="fa-solid fa-file-invoice-dollar text-primary display-3 mb-3"></i>
+            <h2 class="fw-bold">Resumen de tu Cita</h2>
+            <p class="text-muted">Estás agendando una consulta para <strong>{{ cita.paciente.nombre_completo }}</strong></p>
+        </div>
+
+        <div class="bg-light p-4 rounded-4 mb-4">
+            <h3 class="fw-bold text-dark mb-0">${{ valor_plano|add:0 }}</h3>
+            <span class="small text-uppercase text-muted">Tarifa Única de Consulta</span>
+        </div>
+
+        <p class="mb-4">¿Cómo deseas realizar el pago?</p>
+
+        <div class="d-grid gap-3">
+            <a href="{% url 'generar_pago' cita.id 'virtual' %}" class="btn btn-primary btn-lg fw-bold py-3 rounded-pill shadow-sm">
+                <i class="fa-solid fa-credit-card me-2"></i>Pagar Ahora (Virtual)
+            </a>
+            
+            <a href="{% url 'generar_pago' cita.id 'presencial' %}" class="btn btn-outline-secondary btn-lg fw-bold py-3 rounded-pill">
+                <i class="fa-solid fa-hand-holding-dollar me-2"></i>Pagar en la Clínica
+            </a>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{% url 'mis_citas_paciente' %}" class="text-decoration-none text-muted small">Cancelar y volver</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

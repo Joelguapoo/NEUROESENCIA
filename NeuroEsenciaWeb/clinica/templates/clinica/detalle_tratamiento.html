@@ -1,0 +1,58 @@
+{% extends 'usuarios/base.html' %}
+{% block content %}
+<div class="container py-4 fade-in-up">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark m-0">Expediente de Tratamiento</h2>
+        <a href="{% url 'lista_tratamientos' %}" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fa-solid fa-arrow-left me-2"></i> Volver al listado
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg p-5" style="border-radius: 30px; background: white;">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-4 p-3">
+                        <i class="fa-solid fa-file-medical-alt fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ tratamiento.diagnostico }}</h4>
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Estado: {{ tratamiento.estado_tratamiento }}</span>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-4">
+                        <label class="small fw-bold text-muted text-uppercase d-block mb-1">Paciente</label>
+                        <p class="fw-bold text-dark">{{ tratamiento.historial.paciente.nombre_completo }}</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="small fw-bold text-muted text-uppercase d-block mb-1">Enfoque Terapéutico</label>
+                        <p class="fw-bold text-dark">{{ tratamiento.enfoque_terapeutico }}</p>
+                    </div>
+                    <div class="col-12 mb-4">
+                        <label class="small fw-bold text-muted text-uppercase d-block mb-1">Objetivos del Plan</label>
+                        <div class="bg-light p-3 rounded-4">
+                            {{ tratamiento.objetivos_tratamiento|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4 mb-4" style="border-radius: 25px;">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Cronología</h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Fecha Inicio:</span>
+                    <span class="fw-bold small">{{ tratamiento.fecha_inicio|date:"d/m/Y" }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Fecha Fin Est.:</span>
+                    <span class="fw-bold small">{{ tratamiento.fecha_fin|date:"d/m/Y"|default:"En curso" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

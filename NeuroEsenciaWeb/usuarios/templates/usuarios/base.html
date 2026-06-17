@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NeuroEsencia | Portal{% endblock %}</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-sidebar: #1e1b3a; /* Un morado más oscuro y elegante */
+            --sidebar-accent: #3b3472;  
+            --purple-pastel: #b09ade;   
+            --bg-main: #f8faff; /* Un fondo más limpio */
+            --text-main: #2b3674;       
+            --text-muted: #a3aed1;      
+            --sidebar-text: #d1d5db;    
+            --white: #ffffff;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.dark-mode {
+            --bg-main: #0b0e14;
+            --text-main: #e2e8f0;
+            --card-bg: #161b22;
+            --white: #161b22;
+        }
+
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-main); color: var(--text-main); overflow: hidden; margin: 0; }
+        
+        .app-container { display: flex; height: 100vh; width: 100vw; }
+
+        /* --- SIDEBAR PREMIUM --- */
+        .sidebar {
+            width: 280px; flex-shrink: 0; background-color: var(--bg-sidebar); 
+            display: flex; flex-direction: column; z-index: 1000;
+            border-right: 1px solid rgba(255,255,255,0.05); transition: var(--transition);
+        }
+
+        .brand-section { padding: 2.5rem 2rem; }
+        .brand-logo { 
+            display: flex; align-items: center; text-decoration: none; 
+            color: var(--white); font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px;
+        }
+
+        /* Enlaces de Navegación */
+        .nav-menu { padding: 0 1.2rem; flex-grow: 1; overflow-y: auto; }
+        .nav-menu::-webkit-scrollbar { width: 0; }
+
+        .nav-group-label {
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.3); font-weight: 700; margin: 2rem 0 0.8rem 1rem;
+        }
+
+        .nav-item-main {
+            color: var(--sidebar-text); font-weight: 500; padding: 10px 1.2rem;
+            border-radius: 12px; margin-bottom: 5px; display: flex; align-items: center;
+            text-decoration: none; transition: var(--transition); font-size: 0.9rem;
+            border: none; background: transparent; width: 100%; text-align: left;
+        }
+
+        .nav-item-main i:first-child { width: 20px; margin-right: 15px; font-size: 1rem; opacity: 0.7; }
+        .nav-item-main:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+        
+        .nav-item-main.active { 
+            background: var(--sidebar-accent); color: var(--white); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+
+        /* Flecha de Submenú */
+        .chevron { margin-left: auto; font-size: 0.7rem; transition: transform 0.3s ease; opacity: 0.5; }
+        .nav-item-main:not(.collapsed) .chevron { transform: rotate(180deg); opacity: 1; color: var(--purple-pastel); }
+
+        /* Estilo del Submenú */
+        .submenu-container { list-style: none; padding: 5px 0 10px 2.8rem; }
+        .submenu-item {
+            color: var(--sidebar-text); text-decoration: none; font-size: 0.85rem;
+            padding: 8px 0; display: block; transition: 0.3s; position: relative;
+            opacity: 0.7;
+        }
+        .submenu-item:hover { color: var(--white); opacity: 1; padding-left: 5px; }
+        .submenu-item.active { color: var(--purple-pastel); font-weight: 600; opacity: 1; }
+
+        /* Perfil inferior */
+        .sidebar-footer { padding: 1.5rem; background: rgba(0,0,0,0.2); }
+        .user-widget {
+            display: flex; align-items: center; gap: 12px; padding: 10px;
+            background: rgba(255,255,255,0.05); border-radius: 15px; margin-bottom: 1rem;
+        }
+        .user-widget img { width: 40px; height: 40px; border-radius: 10px; }
+        .user-info { line-height: 1.2; }
+        .user-name { font-size: 0.85rem; font-weight: 600; color: white; display: block; }
+        .user-role { font-size: 0.7rem; color: var(--text-muted); }
+
+        .main-wrapper { flex-grow: 1; padding: 2.5rem; overflow-y: auto; }
+
+        @media (max-width: 991px) {
+            .sidebar { position: fixed; left: -280px; height: 100vh; }
+            .sidebar.active { left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        {% if not ocultar_sidebar and user.is_authenticated or request.session.paciente_id %}
+        <aside class="sidebar" id="sidebar">
+            <div class="brand-section">
+                <a href="/" class="brand-logo">
+                    <div style="background: var(--purple-pastel); width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                        <i class="fa-solid fa-brain" style="color: var(--bg-sidebar); font-size: 0.9rem;"></i>
+                    </div>
+                    NeuroEsencia
+                </a>
+            </div>
+
+            <nav class="nav-menu">
+                {% if request.session.paciente_id %}
+                    <a href="{% url 'dashboard_paciente' %}" class="nav-item-main {% if request.resolver_match.url_name == 'dashboard_paciente' %}active{% endif %}">
+                        <i class="fa-solid fa-grid-2"></i> Mi Espacio
+                    </a>
+                {% else %}
+                    <a href="{% url 'bienvenido' %}" class="nav-item-main {% if request.resolver_match.url_name == 'bienvenido' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-line"></i> Resumen General
+                    </a>
+                {% endif %}
+
+                <div class="nav-group-label">Operaciones</div>
+                
+                {% if request.session.paciente_id %}
+                    <a href="{% url 'mis_citas_paciente' %}" class="nav-item-main"><i class="fa-regular fa-calendar-check"></i> Mis Citas</a>
+                    <a href="{% url 'mis_facturas' %}" class="nav-item-main"><i class="fa-solid fa-receipt"></i> Facturación</a>
+                {% else %}
+                    <button class="nav-item-main collapsed" data-bs-toggle="collapse" data-bs-target="#colClinica">
+                        <i class="fa-solid fa-Stethoscope"></i> Area Clínica <i class="fa-solid fa-chevron-down chevron"></i>
+                    </button>
+                    <div class="collapse {% if 'paciente' in request.path or 'tratamiento' in request.path %}show{% endif %}" id="colClinica">
+                        <ul class="submenu-container">
+                            <li><a href="{% url 'lista_pacientes' %}" class="submenu-item">Pacientes</a></li>
+                            <li><a href="{% url 'lista_tratamientos' %}" class="submenu-item">Planes de Tratamiento</a></li>
+                            <li><a href="{% url 'lista_citas' %}" class="submenu-item">Agenda</a></li>
+                        </ul>
+                    </div>
+
+                    {% if user.is_superuser or user.groups.all.0.name == 'Administrador' %}
+                    <button class="nav-item-main collapsed" data-bs-toggle="collapse" data-bs-target="#colAdmin">
+                        <i class="fa-solid fa-shield-halved"></i> Gestión Admin <i class="fa-solid fa-chevron-down chevron"></i>
+                    </button>
+                    <div class="collapse {% if 'staff' in request.path or 'rol' in request.path or 'importar' in request.path %}show{% endif %}" id="colAdmin">
+                        <ul class="submenu-container">
+                            <li><a href="{% url 'lista_staff' %}" class="submenu-item">Equipo de Especialistas</a></li>
+                            <li><a href="{% url 'lista_roles' %}" class="submenu-item">Cargos</a></li>
+                            <li><a href="{% url 'importar_pacientes_excel' %}" class="submenu-item">Importación Masiva</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <a href="{% url 'lista_facturas' %}" class="nav-item-main"><i class="fa-solid fa-wallet"></i> Facturacion</a>
+                {% endif %}
+
+                <div class="nav-group-label">Sistema</div>
+                <a href="{% url 'perfil_usuario' %}" class="nav-item-main"><i class="fa-solid fa-circle-user"></i> Mi Perfil</a>
+                <a href="{% url 'configuracion_sistema' %}" class="nav-item-main"><i class="fa-solid fa-sliders"></i> Ajustes UI</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-widget">
+                    <img src="https://ui-avatars.com/api/?name={% if request.session.paciente_id %}{{ paciente.nombre_completo|default:'P' }}{% else %}{{ user.first_name|default:user.username }}{% endif %}&background=b09ade&color=fff&bold=true" alt="">
+                    <div class="user-info">
+                        <span class="user-name">{% if request.session.paciente_id %}{{ paciente.nombre_completo|truncatechars:15 }}{% else %}{{ user.first_name|capfirst }}{% endif %}</span>
+                        <span class="user-role">{% if request.session.paciente_id %}Paciente{% else %}Staff Clínico{% endif %}</span>
+                    </div>
+                </div>
+                <a href="{% url 'cerrar_sesion' %}" class="nav-item-main" style="color: #ff6b6b; opacity: 1;">
+                    <i class="fa-solid fa-power-off"></i> Finalizar Sesión
+                </a>
+            </div>
+        </aside>
+        {% endif %}
+
+        <main class="main-wrapper">
+            <button class="btn btn-white shadow-sm d-lg-none mb-3" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <div class="container-fluid p-0">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+                            <i class="fa-solid fa-circle-info me-2"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        // Aplicación de tema y modo oscuro
+        (function() {
+            const darkMode = localStorage.getItem('neuro_dark_mode') === 'true';
+            if (darkMode) document.body.classList.add('dark-mode');
+        })();
+    </script>
+</body>
+</html>

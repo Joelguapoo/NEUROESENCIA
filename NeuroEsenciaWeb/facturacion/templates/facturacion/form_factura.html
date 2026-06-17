@@ -1,0 +1,281 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Generar Factura - Gestión Financiera{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --purple-main: #7d5e9e;
+        --purple-hover: #624a7b;
+        --bg-light: #f8f9fa;
+        --success-green: #2ecc71;
+    }
+
+    .billing-card {
+        background: white;
+        border-radius: 30px;
+        border: none;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    }
+
+    .step-header {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 800;
+        color: #adb5bd;
+        margin-bottom: 1.5rem;
+        display: block;
+        border-bottom: 2px solid var(--bg-light);
+        padding-bottom: 10px;
+    }
+
+    .total-display-card {
+        background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-hover) 100%);
+        border-radius: 20px;
+        color: white;
+        text-align: center;
+        padding: 30px 20px;
+        box-shadow: 0 10px 25px rgba(125, 94, 158, 0.3);
+    }
+
+    .btn-confirmar {
+        background: var(--success-green);
+        color: white;
+        padding: 15px 40px;
+        border-radius: 15px;
+        font-weight: 700;
+        border: none;
+        transition: 0.3s;
+        box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+    }
+    .btn-confirmar:hover {
+        transform: translateY(-2px);
+        background: #27ae60;
+        color: white;
+    }
+    /* Estilos para mensajes de error JS */
+    .error-text {
+        color: #ef4444;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+</style>
+
+<div class="container py-4 animate-item">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold text-dark">Nueva Factura</h2>
+            <p class="text-muted">Registro de cobros y servicios terapéuticos.</p>
+        </div>
+        <a href="{% url 'lista_facturas' %}" class="btn btn-light fw-bold px-4 border rounded-pill">
+            <i class="fa-solid fa-arrow-left me-2"></i>Volver al Listado
+        </a>
+    </div>
+
+    <form method="POST" id="billingForm">
+        {% csrf_token %}
+        {{ form.nro_factura }} <div class="card billing-card p-4 p-lg-5">
+            <div class="row g-5">
+                
+                <div class="col-lg-6 border-end border-light">
+                    <span class="step-header"><i class="fa-solid fa-file-medical me-2"></i>1. Detalles del Servicio</span>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-secondary">PACIENTE</label>
+                        {{ form.paciente }}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-secondary">CITA ASOCIADA</label>
+                        {{ form.cita }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold small text-secondary">MÉTODO DE PAGO</label>
+                            {{ form.metodo }}
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold small text-secondary">ESTADO DEL PAGO</label>
+                            {{ form.estado_pago }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <span class="step-header"><i class="fa-solid fa-calculator me-2"></i>2. Desglose de Valores</span>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">SUBTOTAL ($)</label>
+                            {{ form.subtotal }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-secondary">IMPUESTOS ($)</label>
+                            {{ form.impuestos }}
+                        </div>
+                    </div>
+
+                    <div class="total-display-card mt-4">
+                        <p class="mb-1 fw-bold text-light" style="letter-spacing: 2px; font-size: 0.9rem;">TOTAL A COBRAR</p>
+                        <h1 class="display-4 fw-bold mb-0" id="totalDisplay">$0.00</h1>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="text-end mt-4">
+            <button type="submit" class="btn btn-confirmar">
+                <i class="fa-solid fa-file-invoice-dollar me-2"></i>Generar Factura Oficial
+            </button>
+        </div>
+    </form>
+</div>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        const form = document.getElementById('billingForm');
+        if (form) form.setAttribute('novalidate', 'true'); // Apaga alertas feas del navegador
+
+        // ==========================================
+        // 1. FUNCIONES DE APOYO PARA ERRORES
+        // ==========================================
+        function mostrarError(inputElement, mensaje) {
+            let errorSpan = inputElement.parentNode.querySelector('.error-text-js');
+            if (!errorSpan) {
+                errorSpan = document.createElement('div');
+                errorSpan.className = 'error-text error-text-js fade-in-up';
+                inputElement.parentNode.appendChild(errorSpan);
+            }
+            errorSpan.style.display = 'flex';
+            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${mensaje}`;
+        }
+
+        function ocultarError(inputElement) {
+            let errorSpan = inputElement.parentNode.querySelector('.error-text-js');
+            if (errorSpan) {
+                errorSpan.style.display = 'none';
+            }
+        }
+
+        // ==========================================
+        // 2. VALIDACIÓN FINANCIERA (Subtotal e Impuestos)
+        // ==========================================
+        const inputSubtotal = document.getElementById('id_subtotal');
+        const inputImpuestos = document.getElementById('id_impuestos');
+        const totalDisplay = document.getElementById('totalDisplay');
+
+        // Función para asegurar que solo escriban dinero real
+        function limpiarYValidarMonto(input, permiteCero) {
+            if (!input) return true;
+            
+            let valorOriginal = input.value;
+            // Expresión regular: Elimina todo lo que NO sea un número o un punto decimal
+            let valorLimpio = valorOriginal.replace(/[^0-9.]/g, ''); 
+            
+            // Si intentó meter letras, limpiamos el campo al instante
+            if (valorOriginal !== valorLimpio) {
+                input.value = valorLimpio;
+                mostrarError(input, 'Solo se permiten números.');
+                setTimeout(() => ocultarError(input), 2000);
+            }
+
+            let monto = parseFloat(valorLimpio);
+
+            if (isNaN(monto)) {
+                return false; // Está vacío
+            } else if (!permiteCero && monto <= 0) {
+                mostrarError(input, 'El subtotal debe ser mayor a $0.');
+                return false;
+            } else if (permiteCero && monto < 0) {
+                mostrarError(input, 'Los impuestos no pueden ser negativos.');
+                return false;
+            } else {
+                ocultarError(input);
+                return true;
+            }
+        }
+
+        // Cálculos matemáticos en vivo
+        function calcularTotal() {
+            let subtotal = parseFloat(inputSubtotal.value) || 0;
+            let impuestos = parseFloat(inputImpuestos.value) || 0;
+            let total = subtotal + impuestos;
+            
+            // Formatea a 2 decimales y actualiza el cartel morado
+            totalDisplay.innerText = '$' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        if (inputSubtotal && inputImpuestos) {
+            inputSubtotal.addEventListener('input', function() {
+                limpiarYValidarMonto(inputSubtotal, false);
+                calcularTotal();
+            });
+            inputImpuestos.addEventListener('input', function() {
+                limpiarYValidarMonto(inputImpuestos, true);
+                calcularTotal();
+            });
+            calcularTotal(); // Llamada inicial por si hay datos cargados (Editar)
+        }
+
+        // ==========================================
+        // 3. INTERCEPTOR FINAL: PREVENIR ENVÍO CON ERRORES
+        // ==========================================
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let formValido = true;
+
+                // A. Validar que no falten los campos Select (Listas desplegables)
+                const camposSelect = ['id_paciente', 'id_cita', 'id_metodo', 'id_estado_pago'];
+                camposSelect.forEach(id => {
+                    const selectEl = document.getElementById(id);
+                    if (selectEl && selectEl.value === '') {
+                        mostrarError(selectEl, 'Este campo es obligatorio.');
+                        formValido = false;
+                    } else if (selectEl) {
+                        ocultarError(selectEl);
+                    }
+                });
+
+                // B. Validar vacíos en dinero
+                if (inputSubtotal && inputSubtotal.value.trim() === '') {
+                    mostrarError(inputSubtotal, 'El subtotal es obligatorio.');
+                    formValido = false;
+                } else if (inputSubtotal && !limpiarYValidarMonto(inputSubtotal, false)) {
+                    formValido = false; // Falla porque es $0
+                }
+
+                if (inputImpuestos && inputImpuestos.value.trim() === '') {
+                    // Si lo dejan vacío por accidente, lo forzamos a 0 para que no estalle Django
+                    inputImpuestos.value = '0'; 
+                }
+
+                if (!formValido) {
+                    e.preventDefault(); 
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+        
+        // Aplicar clases de Bootstrap/Custom a los inputs de Django dinámicamente
+        const allInputs = document.querySelectorAll('#billingForm input, #billingForm select');
+        allInputs.forEach(el => {
+            if (el.tagName === 'SELECT') {
+                el.classList.add('form-select');
+            } else if (el.type !== 'hidden') {
+                el.classList.add('form-control');
+            }
+        });
+
+    });
+</script>
+{% endblock %}

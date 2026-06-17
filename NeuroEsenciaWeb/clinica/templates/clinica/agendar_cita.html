@@ -1,0 +1,406 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Agendar Cita - NeuroEsencia{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/light.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<style>
+    :root {
+        --card-bg: #ffffff;
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --purple-light: #4c3b73;
+        --purple-pastel: #b09ade;
+        --text-dark: #2b3674;
+        --text-gray: #a3aed1;
+        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+    .booking-card {
+        background: var(--card-bg);
+        border-radius: 24px;
+        border: 1px solid rgba(0,0,0,0.02);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+    }
+
+    .step-header {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 800;
+        color: var(--purple-pastel);
+        margin-bottom: 1.5rem;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .step-number {
+        background: rgba(176, 154, 222, 0.15);
+        color: var(--purple-brand);
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        display: inline-flex; justify-content: center; align-items: center;
+    }
+
+    .form-label-custom {
+        font-weight: 700; font-size: 0.75rem; color: var(--text-gray);
+        letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px;
+    }
+    
+    select, input[type="text"] {
+        width: 100%; border-radius: 12px !important; border: 2px solid transparent !important;
+        background-color: var(--page-bg) !important; padding: 12px 18px !important;
+        font-weight: 600; color: var(--text-dark); transition: all 0.3s ease;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important;
+    }
+    select:focus, input:focus {
+        background-color: #ffffff !important; border-color: var(--purple-pastel) !important;
+        box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15) !important; outline: none !important;
+    }
+
+    .specialist-card {
+        cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent;
+        background: var(--page-bg); border-radius: 16px;
+    }
+    .specialist-card:hover { background: white; border-color: rgba(176, 154, 222, 0.3); transform: translateX(5px); }
+    .specialist-card.selected { border-color: var(--purple-brand); background: white; box-shadow: 0 10px 20px rgba(42, 31, 69, 0.08); }
+    
+    .specialist-avatar {
+        background: rgba(176, 154, 222, 0.15); color: var(--purple-brand);
+        width: 45px; height: 45px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: 0.3s;
+    }
+    .specialist-card.selected .specialist-avatar { background: var(--purple-brand); color: white; }
+
+    .time-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .time-slot {
+        padding: 12px 10px; border-radius: 12px; background: var(--page-bg);
+        border: 2px solid transparent; font-weight: 700; color: var(--text-dark);
+        transition: all 0.2s; cursor: pointer; text-align: center; font-size: 0.95rem;
+    }
+    .time-slot:hover:not(.disabled) { border-color: var(--purple-pastel); background: white; color: var(--purple-brand); }
+    .time-slot.selected { background: var(--purple-brand) !important; color: white !important; border-color: var(--purple-brand); box-shadow: 0 4px 15px rgba(42, 31, 69, 0.2); }
+    
+    /* --- CLASE MAGICA PARA BLOQUEAR HORAS OCUPADAS --- */
+    .time-slot.disabled { 
+        background: rgba(220, 53, 69, 0.08) !important; 
+        color: #dc3545 !important; 
+        border: 1px solid rgba(220, 53, 69, 0.2) !important;
+        text-decoration: line-through; 
+        opacity: 0.6; 
+        cursor: not-allowed; 
+        pointer-events: none; 
+    }
+
+    .btn-confirmar {
+        background: var(--purple-brand); color: white; padding: 18px 40px; border-radius: 50px;
+        font-weight: 700; font-size: 1.05rem; border: none; transition: all 0.3s; box-shadow: 0 10px 25px rgba(42, 31, 69, 0.2);
+    }
+    .btn-confirmar:hover { background: var(--purple-light); transform: translateY(-3px); box-shadow: 0 15px 35px rgba(42, 31, 69, 0.3); }
+
+    .flatpickr-calendar { border-radius: 16px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important; border: 1px solid rgba(0,0,0,0.05) !important; padding: 10px !important; width: 100% !important; max-width: 320px; }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background: var(--purple-brand) !important; border-color: var(--purple-brand) !important; }
+    .flatpickr-day:hover { background: rgba(176, 154, 222, 0.2) !important; border-color: transparent !important; color: var(--purple-brand); }
+    .select2-container { width: 100% !important; }
+    
+    .select2-container--default .select2-selection--single {
+        background-color: var(--page-bg) !important;
+        border: 2px solid transparent !important;
+        border-radius: 12px !important;
+        height: 48px !important;
+        padding: 10px 18px !important;
+        font-weight: 600;
+        color: var(--text-dark);
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important;
+        transition: all 0.3s ease;
+    }
+    
+    .select2-container--default.select2-container--focus .select2-selection--single {
+        background-color: #ffffff !important;
+        border-color: var(--purple-pastel) !important;
+        box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15) !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: var(--text-dark) !important;
+        line-height: 24px !important;
+        padding-left: 0 !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px !important;
+        right: 15px !important;
+    }
+    
+    /* Estilo de la cajita donde escribes para buscar */
+    .select2-search__field {
+        border-radius: 8px !important;
+        border: 1px solid var(--purple-pastel) !important;
+        padding: 8px 12px !important;
+        outline: none !important;
+    }
+    
+    /* Color morado cuando pasas el mouse por un paciente en la lista */
+    .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--purple-brand) !important;
+        color: white !important;
+        border-radius: 6px;
+        margin: 0 4px;
+    }
+</style>
+
+<div class="container-fluid py-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Agendamiento de Cita</h3>
+            <p class="mt-1 m-0" style="color: var(--text-gray); font-weight: 500;">Control de disponibilidad clínica.</p>
+        </div>
+        <a href="{% url 'lista_citas' %}" class="btn btn-light text-decoration-none fw-bold rounded-pill border" style="color: var(--text-gray);">
+            <i class="fa-solid fa-arrow-left-long me-2"></i>Volver
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-exclamation me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" id="bookingForm">
+        {% csrf_token %}
+        <input type="hidden" name="psicologo" id="psicologo_id" required>
+        <input type="hidden" name="fecha_cita" id="fecha_seleccionada" required>
+        <input type="hidden" name="hora_cita" id="hora_seleccionada" required>
+        <input type="hidden" name="duracion_horas" id="duracion_horas" value="1" required>
+
+        <div class="booking-card p-4 p-lg-5 mb-5">
+            <div class="row g-4 g-lg-5">
+                
+                <div class="col-lg-4">
+                    <div class="step-header"><span class="step-number">1</span> Datos de la Sesión</div>
+                    <div class="mb-4"><label class="form-label-custom">SELECCIONAR PACIENTE</label>{{ form.paciente }}</div>
+                    <div class="mb-4"><label class="form-label-custom">MODALIDAD DE ATENCIÓN</label>{{ form.modalidad }}</div>
+
+                    <label class="form-label-custom">PROFESIONAL ASIGNADO</label>
+                    <div class="specialist-list">
+                        {% for psico in psicologos %}
+                        <div class="specialist-card p-3 mb-2 d-flex align-items-center" onclick="selectPsico(this, '{{ psico.pk }}')">
+                            <div class="specialist-avatar me-3"><i class="fa-solid fa-user-doctor"></i></div>
+                            <div>
+                                <h6 class="mb-0 fw-bold" style="color: var(--text-dark); font-size: 0.95rem;">{{ psico.nombre_completo }}</h6>
+                                <small style="color: var(--text-gray); font-weight: 600;">Especialista Clínico</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="p-4 text-center rounded-3 bg-light border"><p class="text-muted small m-0">No hay especialistas activos.</p></div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="col-lg-4 border-start border-end border-light px-lg-4 d-flex flex-column align-items-center">
+                    <div class="step-header w-100 justify-content-center"><span class="step-number">2</span> Fecha</div>
+                    <div id="calendarInline" class="d-inline-block w-100"></div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="step-header"><span class="step-number">3</span> Horario y Duración</div>
+                    <div class="mb-4 p-3 rounded-3" style="background: rgba(176, 154, 222, 0.1);">
+                        <label class="form-label-custom" style="color: var(--purple-brand);">DURACIÓN DE LA CITA</label>
+                        <select id="selectDuracion" class="form-select border-0 shadow-sm" onchange="actualizarDuracion()">
+                            <option value="1" selected>Normal (1 Hora)</option>
+                            <option value="2">Extendida (2 Horas consecutivas)</option>
+                            <option value="3">Intensiva (3 Horas consecutivas)</option>
+                        </select>
+                    </div>
+
+                    <div id="timeContainer" class="time-grid">
+                        <div class="col-12 text-center py-4">
+                            <p style="color: var(--text-gray); font-weight: 500; font-size: 0.9rem;">
+                                Selecciona un profesional y una fecha.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn-confirmar" id="submitBtn"> Confirmar y Agendar Cita <i class="fa-solid fa-check-to-slot ms-2"></i></button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const slotsBase = ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
+    let horasOcupadasGlobal = [];
+    
+    // --- INICIALIZAR EL BUSCADOR PROFESIONAL DE PACIENTES ---
+    $(document).ready(function() {
+        $('#id_paciente').select2({
+            placeholder: "Buscar paciente",
+            allowClear: true,
+            language: {
+                noResults: function() {
+                    return "No se encontraron pacientes registrados.";
+                }
+            }
+        });
+
+        // Evento: Si cambias de paciente y ya tenías una fecha elegida, re-verifica la disponibilidad
+        $('#id_paciente').on('select2:select', function (e) {
+            const fecha = document.getElementById('fecha_seleccionada').value;
+            const psicoId = document.getElementById('psicologo_id').value;
+            const pacienteId = e.params.data.id;
+            
+            if (fecha && psicoId) {
+                checkDisponibilidadTotal(psicoId, fecha, pacienteId);
+            }
+        });
+    });
+
+    function selectPsico(element, id) {
+        document.querySelectorAll('.specialist-card').forEach(c => c.classList.remove('selected'));
+        element.classList.add('selected');
+        document.getElementById('psicologo_id').value = id;
+
+        const fecha = document.getElementById('fecha_seleccionada').value;
+        const paciente = document.getElementById('id_paciente').value;
+        if (fecha && paciente) checkDisponibilidadTotal(id, fecha, paciente);
+    }
+
+    function actualizarDuracion() {
+        document.getElementById('duracion_horas').value = parseInt(document.getElementById('selectDuracion').value);
+        document.getElementById('hora_seleccionada').value = ""; 
+        if (document.getElementById('fecha_seleccionada').value) renderTimeSlots(horasOcupadasGlobal);
+    }
+
+    const fp = flatpickr("#calendarInline", {
+        inline: true, locale: "es", minDate: "today",
+        disable: [ function(date) { return (date.getDay() === 0 || date.getDay() === 6); } ], 
+        onChange: function(selectedDates, dateStr) {
+            document.getElementById('fecha_seleccionada').value = dateStr;
+            const psicoId = document.getElementById('psicologo_id').value;
+            const pacienteId = document.getElementById('id_paciente').value;
+            
+            if (!pacienteId) {
+                Swal.fire({ icon: 'warning', title: 'Atención', text: 'Selecciona un paciente primero.' });
+                fp.clear(); return;
+            }
+            if (!psicoId) {
+                Swal.fire({ icon: 'info', title: 'Atención', text: 'Selecciona un profesional.', toast: true, position: 'top-end', timer: 3000 });
+                return;
+            }
+            checkDisponibilidadTotal(psicoId, dateStr, pacienteId);
+        }
+    });
+
+    // --- MAGIA FRONTEND: Valida paciente Y doctor al mismo tiempo ---
+    function checkDisponibilidadTotal(psicoId, fecha, pacienteId) {
+        const container = document.getElementById('timeContainer');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        container.style.display = "block";
+        container.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border" style="color: var(--purple-brand);"></div></div>';
+
+        // 1. Verificar límite del paciente (1 cita al día)
+        fetch(`{% url 'verificar_limite_paciente' %}?paciente_id=${pacienteId}&fecha=${fecha}`)
+            .then(res => res.json())
+            .then(dataPaciente => {
+                if (dataPaciente.tiene_cita) {
+                    Swal.fire({ icon: 'error', title: 'Límite de Agendamiento', text: 'Este paciente ya tiene una cita en esta fecha.', confirmButtonColor: '#2a1f45' });
+                    container.innerHTML = `<div class="col-12 text-center p-3 rounded bg-light text-danger fw-bold border border-danger">Paciente Bloqueado para hoy.</div>`;
+                    submitBtn.disabled = true;
+                    return; // Si el paciente ya tiene cita, no mostramos horas.
+                }
+
+                // 2. Si el paciente está libre, verificamos al doctor
+                submitBtn.disabled = false;
+                fetch(`{% url 'obtener_disponibilidad' %}?psicologo_id=${psicoId}`)
+                    .then(res => res.json())
+                    .then(dataDoctor => {
+                        // Cortamos el HH:MM:SS a HH:MM para que la validación funcione
+                        horasOcupadasGlobal = dataDoctor.ocupados
+                            .filter(c => c.fecha === fecha)
+                            .map(c => c.hora.substring(0, 5)); 
+                        renderTimeSlots(horasOcupadasGlobal);
+                    });
+            })
+            .catch(err => { container.innerHTML = '<p class="text-danger text-center fw-bold">Error de conexión.</p>'; });
+    }
+
+    function renderTimeSlots(ocupadas) {
+        const container = document.getElementById('timeContainer');
+        container.innerHTML = '';
+        container.style.display = "grid"; 
+        
+        const fechaSeleccionada = document.getElementById('fecha_seleccionada').value;
+        const duracionRequerida = parseInt(document.getElementById('selectDuracion').value);
+        const ahora = new Date(); 
+
+        slotsBase.forEach((horaStr, index) => {
+            const [year, month, day] = fechaSeleccionada.split('-').map(Number);
+            const [horaFormato, minutosFormato] = horaStr.split(':').map(Number);
+            const fechaDelBloque = new Date(year, month - 1, day, horaFormato, minutosFormato);
+            
+            const yaPaso = fechaDelBloque < ahora;
+            let estaOcupada = ocupadas.includes(horaStr) || yaPaso;
+
+            let bloquePosible = true;
+            if (!estaOcupada && duracionRequerida > 1) {
+                for (let i = 1; i < duracionRequerida; i++) {
+                    const nextSlot = slotsBase[index + i];
+                    if (!nextSlot || ocupadas.includes(nextSlot)) { bloquePosible = false; break; }
+                }
+            }
+
+            const div = document.createElement('div');
+            div.innerText = horaStr;
+            div.style.animationDelay = `${(index + 1) * 0.05}s`; 
+
+            // --- APLICACIÓN VISUAL ROJA Y BLOQUEO DE CLIC ---
+            if (estaOcupada || !bloquePosible) {
+                div.className = 'time-slot disabled fade-in-up'; 
+            } else {
+                div.className = 'time-slot fade-in-up';
+                div.onclick = function() {
+                    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                    div.classList.add('selected');
+                    let currentDiv = div;
+                    for(let i = 1; i < duracionRequerida; i++) {
+                        currentDiv = currentDiv.nextElementSibling;
+                        if(currentDiv && !currentDiv.classList.contains('disabled')) currentDiv.classList.add('selected');
+                    }
+                    document.getElementById('hora_seleccionada').value = horaStr;
+                };
+            }
+            container.appendChild(div);
+        });
+    }
+
+    document.getElementById('bookingForm').onsubmit = function(e) {
+        if (!document.getElementById('psicologo_id').value || !document.getElementById('hora_seleccionada').value) {
+            e.preventDefault();
+            Swal.fire({ icon: 'error', title: 'Faltan datos', text: 'Selecciona paciente, profesional, fecha y un horario disponible.', confirmButtonColor: '#2a1f45' });
+        }
+    };
+</script>
+{% endblock %}

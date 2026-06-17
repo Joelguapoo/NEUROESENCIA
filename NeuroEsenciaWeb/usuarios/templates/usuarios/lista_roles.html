@@ -1,0 +1,217 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Roles - NeuroEsencia{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    :root {
+        --card-bg: #ffffff;
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --purple-light: #4c3b73;
+        --purple-pastel: #b09ade;
+        --text-dark: #2b3674;
+        --text-gray: #a3aed1;
+        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+        --shadow-hover: 0 15px 35px rgba(42, 31, 69, 0.08);
+    }
+
+    /* Animaciones */
+    .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Card de Estadísticas */
+    .stat-card-single { background: linear-gradient(135deg, var(--purple-brand) 0%, var(--purple-light) 100%); border-radius: 24px; padding: 30px 40px; color: white; box-shadow: 0 15px 25px rgba(42, 31, 69, 0.15); display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; transition: transform 0.3s ease; }
+    .stat-card-single:hover { transform: translateY(-3px); }
+    .stat-card-single::after { content: ''; position: absolute; right: -20px; top: -50px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(176, 154, 222, 0.2) 0%, rgba(255,255,255,0) 70%); pointer-events: none; }
+    .stat-card-single h3 { font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .stat-card-single p { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: 0.5px; opacity: 0.8; text-transform: uppercase; margin-bottom: 8px; }
+    
+    .stat-icon-large { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); width: 85px; height: 85px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; color: var(--purple-pastel); border: 1px solid rgba(255, 255, 255, 0.2); z-index: 1; }
+
+    /* Toolbar y Buscador */
+    .toolbar-container { background: var(--card-bg); border-radius: 20px; padding: 15px 20px; box-shadow: var(--shadow-soft); margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; border: 1px solid rgba(0,0,0,0.02); }
+    .search-input-container { position: relative; flex-grow: 1; max-width: 450px; }
+    .search-input-container .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-gray); font-size: 1.1rem; }
+    .search-input-container .form-control { padding-left: 55px; border-radius: 50px; height: 50px; border: 2px solid transparent; background: var(--page-bg); font-weight: 500; color: var(--text-dark); transition: all 0.3s ease; }
+    .search-input-container .form-control:focus { background: white; border-color: var(--purple-pastel); box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15); outline: none; }
+
+    .btn-add-premium { background: var(--purple-brand); color: white !important; border: none; border-radius: 50px; padding: 0 24px; height: 50px; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2); transition: all 0.3s ease; text-decoration: none; }
+    .btn-add-premium:hover { background: var(--purple-light); transform: translateY(-2px); box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3); }
+
+    /* Tabla */
+    .table-wrapper { background: var(--card-bg); border-radius: 24px; padding: 10px; box-shadow: var(--shadow-soft); border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
+    .table-premium thead { background-color: rgba(244, 247, 254, 0.6); }
+    .table-premium thead th { color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; border: none; padding: 20px 24px; font-weight: 700; }
+    .table-premium tbody td { vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.02); padding: 20px 24px; color: var(--text-dark); font-weight: 500; }
+    .table-premium tbody tr:hover { background-color: rgba(176, 154, 222, 0.05); }
+
+    .role-avatar { width: 45px; height: 45px; border-radius: 14px; background: rgba(176, 154, 222, 0.15); color: var(--purple-brand); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; }
+    
+    .status-badge { font-weight: 700; padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; display: inline-block; }
+    .status-badge.activo { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .status-badge.inactivo { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+
+    .btn-action { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; background: var(--page-bg); color: var(--text-gray); border: none; }
+    .btn-action.edit:hover { background: #fff8e6; color: #f59e0b; transform: scale(1.05); }
+    .btn-action.delete:hover { background: #fee2e2; color: #dc2626; transform: scale(1.05); }
+    .btn-action.reactivar:hover { background: #d1fae5; color: #059669; transform: scale(1.05); }
+
+    .badge-permission { background: #f4f7fe; color: var(--purple-light); border: 1px solid #e2e8f0; font-size: 0.65rem; font-weight: 700; padding: 4px 10px; border-radius: 8px; margin-right: 4px; }
+</style>
+
+<div class="mb-4 fade-in-up" style="animation-delay: 0.1s;">
+    <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Gestión de Roles</h3>
+    <p class="mt-1" style="color: var(--text-gray); font-weight: 500;">Define los niveles de acceso y permisos del personal clínico.</p>
+</div>
+
+<div class="row mb-4 fade-in-up" style="animation-delay: 0.2s;">
+    <div class="col-12 col-md-8 col-xl-4">
+        <div class="stat-card-single">
+            <div class="info">
+                <p>Roles Definidos</p>
+                <h3>{{ roles|length }}</h3>
+            </div>
+            <div class="stat-icon-large">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toolbar-container fade-in-up" style="animation-delay: 0.3s;">
+    <div class="d-flex gap-3 flex-grow-1 align-items-center flex-wrap w-100">
+        <div class="search-input-container flex-grow-1">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="roleSearch" class="form-control" placeholder="Buscar por nombre de rol...">
+        </div>
+
+        <a href="{% url 'crear_rol' %}" class="btn-add-premium text-nowrap">
+            <i class="fa-solid fa-shield-plus"></i> <span>Nuevo Rol</span>
+        </a>
+    </div>
+</div>
+
+<div class="table-wrapper fade-in-up" style="animation-delay: 0.4s;">
+    <div class="table-responsive">
+        <table class="table table-premium table-borderless table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">Rol</th>
+                    <th>Nivel / Autoridad</th>
+                    <th>Matriz de Permisos</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-end pe-4">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rol in roles %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="role-avatar">
+                                {{ rol.nombre_rol|make_list|first|upper }}
+                            </div>
+                            <div>
+                                <span class="d-block fw-bold" style="color: var(--text-dark);">{{ rol.nombre_rol }}</span>
+                                <small style="color: var(--text-gray); font-size: 0.75rem; font-weight: 600;">ID: #R{{ forloop.counter|stringformat:"02d" }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if rol.es_superadmin %}
+                        <span class="text-primary fw-bold small"><i class="fa-solid fa-crown me-1"></i> ADMINISTRADOR TOTAL</span>
+                        {% else %}
+                        <span class="text-muted small fw-bold">PERSONAL OPERATIVO</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            <span class="badge-permission">LECTURA</span>
+                            <span class="badge-permission">ESCRITURA</span>
+                            {% if rol.es_superadmin %}
+                            <span class="badge-permission" style="background: #fff5f5; color: #e53e3e; border-color: #feb2b2;">ELIMINACIÓN</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        {% if rol.estado_rol == 'Activo' %}
+                            <span class="status-badge activo">Activo</span>
+                        {% else %}
+                            <span class="status-badge inactivo">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <a href="#" class="btn-action edit" data-bs-toggle="tooltip" title="Editar Permisos">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        {% if rol.estado_rol == 'Activo' %}
+                            <button type="button" class="btn-action delete ms-2" onclick="confirmarCambioEstado({{ rol.id }}, '{{ rol.nombre_rol }}', 'inactivar')" title="Desactivar Rol">
+                                <i class="fa-solid fa-shield-xmark"></i>
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn-action reactivar ms-2" onclick="confirmarCambioEstado({{ rol.id }}, '{{ rol.nombre_rol }}', 'reactivar')" title="Activar Rol">
+                                <i class="fa-solid fa-shield-check"></i>
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <i class="fa-solid fa-shield-halved fa-3x mb-3" style="opacity: 0.1; color: var(--purple-brand);"></i>
+                        <h5 class="text-muted fw-normal">No hay roles configurados</h5>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Inicializar Tooltips
+    document.addEventListener("DOMContentLoaded", function(){
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Buscador en tiempo real (opcional)
+        document.getElementById('roleSearch').addEventListener('keyup', function() {
+            let value = this.value.toLowerCase();
+            document.querySelectorAll(".table-premium tbody tr").forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+            });
+        });
+    });
+
+    function confirmarCambioEstado(rolId, nombre, accion) {
+        const esInactivar = accion === 'inactivar';
+        Swal.fire({
+            title: esInactivar ? '¿Inactivar rol?' : '¿Reactivar rol?',
+            text: esInactivar ? `El rol "${nombre}" dejará de ser asignable.` : `El rol "${nombre}" estará disponible nuevamente.`,
+            icon: esInactivar ? 'warning' : 'info',
+            showCancelButton: true,
+            confirmButtonColor: esInactivar ? '#dc2626' : '#059669',
+            cancelButtonColor: '#a3aed1',
+            confirmButtonText: esInactivar ? 'Sí, inactivar' : 'Sí, reactivar',
+            cancelButtonText: 'Cancelar',
+            background: '#ffffff',
+            color: '#2b3674',
+            customClass: {
+                confirmButton: 'btn btn-lg rounded-pill px-4',
+                cancelButton: 'btn btn-lg rounded-pill px-4 ms-2'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Aquí iría tu lógica de fetch similar a la de pacientes
+                Swal.fire('¡Éxito!', 'El estado ha sido actualizado.', 'success').then(() => location.reload());
+            }
+        });
+    }
+</script>
+{% endblock %}

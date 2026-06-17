@@ -1,0 +1,216 @@
+{% extends 'usuarios/base.html' %}
+{% block title %}Mi Perfil - NeuroEsencia{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos específicos para la página de Perfil */
+    .profile-container {
+        max-width: 850px;
+        margin: auto;
+    }
+
+    .profile-card {
+        background: var(--white);
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(42, 31, 69, 0.06);
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    /* Cabecera del Perfil */
+    .profile-header-banner {
+        height: 140px;
+        background: linear-gradient(135deg, var(--bg-sidebar) 0%, var(--sidebar-accent) 100%);
+        position: relative;
+    }
+
+    .profile-avatar-wrapper {
+        margin-top: -70px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-avatar {
+        width: 140px;
+        height: 140px;
+        border-radius: 40px; /* Estilo squircle moderno */
+        border: 6px solid var(--white);
+        background: var(--white);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        object-fit: cover;
+    }
+
+    /* Etiquetas y Secciones */
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 25px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--bg-main);
+    }
+
+    .section-header i {
+        color: var(--purple-pastel);
+        font-size: 1.2rem;
+    }
+
+    .section-header h5 {
+        margin: 0;
+        font-weight: 700;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+
+    /* Inputs Estilizados */
+    .input-group-custom {
+        position: relative;
+        margin-bottom: 5px;
+    }
+
+    .input-group-custom i {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        transition: var(--transition);
+        z-index: 10;
+    }
+
+    .form-control-profile {
+        padding-left: 50px !important;
+        border: 2px solid transparent !important;
+        background-color: var(--bg-main) !important;
+        border-radius: 18px !important;
+        height: 60px;
+        font-weight: 500;
+        color: var(--text-main);
+    }
+
+    .form-control-profile:focus {
+        border-color: var(--purple-pastel) !important;
+        background-color: var(--white) !important;
+        box-shadow: 0 10px 20px rgba(176, 154, 222, 0.15) !important;
+    }
+
+    .form-control-profile:focus + i {
+        color: var(--purple-pastel);
+    }
+
+    /* Botón */
+    .btn-update {
+        background: var(--bg-sidebar);
+        color: white;
+        border: none;
+        border-radius: 18px;
+        padding: 18px 40px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: var(--transition);
+        box-shadow: 0 10px 20px rgba(42, 31, 69, 0.2);
+    }
+
+    .btn-update:hover {
+        background: var(--sidebar-accent);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(42, 31, 69, 0.3);
+        color: white;
+    }
+
+    /* Dark Mode Adjustments */
+    body.dark-mode .profile-avatar {
+        background: var(--card-bg);
+        border-color: var(--card-bg);
+    }
+    body.dark-mode .form-control-profile {
+        background-color: #252525 !important;
+        color: white;
+    }
+</style>
+
+<div class="profile-container fade-in-up">
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center" role="alert">
+                <i class="fa-solid fa-circle-check me-3 fs-4"></i>
+                <div>{{ message }}</div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="profile-card">
+        <div class="profile-header-banner"></div>
+
+        <div class="p-4 p-md-5 pt-0 text-center">
+            <div class="profile-avatar-wrapper">
+                <img src="https://ui-avatars.com/api/?name={{ perfil.nombre_completo }}&background=b09ade&color=fff&size=200&bold=true" class="profile-avatar" alt="Avatar">
+                <div class="position-absolute bottom-0 end-0 p-1">
+                    <span class="badge bg-success border border-white border-4 rounded-circle p-2" title="Cuenta Activa"></span>
+                </div>
+            </div>
+
+            <div class="mt-3 mb-5">
+                <h3 class="fw-bold text-dark m-0">{{ perfil.nombre_completo }}</h3>
+                <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
+                    <span class="badge bg-light text-primary border rounded-pill px-4 py-2 fw-bold">
+                        <i class="fa-solid fa-id-badge me-2"></i>{% if es_paciente %}Paciente{% else %}{{ perfil.rol.nombre_rol }}{% endif %}
+                    </span>
+                    <span class="text-muted small fw-medium">@{{ perfil.usuario|default:"usuario_activo" }}</span>
+                </div>
+            </div>
+
+            <form method="POST" class="text-start">
+                {% csrf_token %}
+                
+                <div class="section-header">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <h5>Datos Personales</h5>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12">
+                        <label class="form-label fw-bold small text-muted ms-2">NOMBRE COMPLETO</label>
+                        <div class="input-group-custom">
+                            <input type="text" name="nombre_completo" class="form-control form-control-profile" value="{{ perfil.nombre_completo }}" placeholder="Tu nombre..." required>
+                            <i class="fa-solid fa-signature"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted ms-2">CORREO ELECTRÓNICO</label>
+                        <div class="input-group-custom">
+                            <input type="email" name="correo" class="form-control form-control-profile" value="{{ perfil.correo }}" placeholder="correo@ejemplo.com" required>
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted ms-2">TELÉFONO DE CONTACTO</label>
+                        <div class="input-group-custom">
+                            <input type="text" name="telefono" class="form-control form-control-profile" value="{{ perfil.telefono }}" placeholder="+57 000 0000000">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-center mt-5">
+                        <button type="submit" class="btn btn-update">
+                            <i class="fa-solid fa-arrows-rotate me-2"></i>Actualizar Información de Perfil
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 mb-5">
+        <p class="text-muted small">
+            <i class="fa-solid fa-shield-halved me-1"></i> 
+            Tus datos están protegidos bajo los protocolos de seguridad de NeuroEsencia.
+        </p>
+    </div>
+</div>
+{% endblock %}

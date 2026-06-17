@@ -1,0 +1,239 @@
+{% extends 'usuarios/base.html' %}
+{% block title %}Configuración - NeuroEsencia{% endblock %}
+
+{% block content %}
+<style>
+    /* --- ESTILOS DE CONFIGURACIÓN PREMIUM --- */
+    .config-container { max-width: 900px; margin: auto; }
+
+    .settings-card {
+        background: var(--white);
+        border-radius: 25px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(42, 31, 69, 0.04);
+        border: 1px solid rgba(0,0,0,0.02);
+        height: 100%;
+        transition: var(--transition);
+    }
+
+    .settings-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .settings-title i { color: var(--purple-pastel); }
+
+    /* --- OPCIONES DE SELECCIÓN --- */
+    .option-card {
+        background: var(--bg-main);
+        border: 2px solid transparent;
+        border-radius: 18px;
+        padding: 15px 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: var(--transition);
+        margin-bottom: 12px;
+    }
+
+    .option-card:hover { transform: translateX(5px); background: #f8faff; }
+
+    /* Estado Activo */
+    .option-card.active {
+        border-color: var(--purple-pastel);
+        background: var(--white);
+        box-shadow: 0 5px 15px rgba(176, 154, 222, 0.2);
+    }
+
+    .option-info { display: flex; align-items: center; gap: 15px; }
+
+    .color-circle {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 3px solid var(--white);
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+    }
+
+    .check-icon {
+        color: var(--purple-pastel);
+        font-size: 1.1rem;
+        display: none;
+    }
+
+    .option-card.active .check-icon { display: block; }
+
+    /* --- SWITCH MODO OSCURO --- */
+    .dark-mode-toggle-card {
+        background: linear-gradient(135deg, var(--bg-sidebar) 0%, var(--sidebar-accent) 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        box-shadow: 0 15px 25px rgba(42, 31, 69, 0.2);
+    }
+
+    /* --- TAMAÑO DE FUENTE --- */
+    .font-btn-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .font-option {
+        background: var(--bg-main);
+        border: 2px solid transparent;
+        border-radius: 15px;
+        padding: 20px 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .font-option i { display: block; margin-bottom: 8px; color: var(--text-muted); }
+    .font-option span { font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
+
+    .font-option.active { border-color: var(--purple-pastel); background: var(--white); }
+    .font-option.active i { color: var(--purple-pastel); }
+
+    /* --- MODO OSCURO CSS --- */
+    body.dark-mode .settings-card { background: #1e1e1e; border-color: #333; }
+    body.dark-mode .option-card { background: #252525; }
+    body.dark-mode .option-card:hover { background: #2d2d2d; }
+    body.dark-mode .font-option { background: #252525; }
+</style>
+
+<div class="config-container fade-in-up">
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark m-0">Preferencias del Sistema</h3>
+        <p class="text-muted">Personaliza tu entorno de trabajo para mayor comodidad.</p>
+    </div>
+
+    <div class="dark-mode-toggle-card">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-white bg-opacity-20 p-3 rounded-circle">
+                <i class="fa-solid fa-moon fs-4"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold m-0">Modo Oscuro</h5>
+                <small class="opacity-75">Reduce la fatiga visual en entornos oscuros.</small>
+            </div>
+        </div>
+        <div class="form-check form-switch fs-3">
+            <input class="form-check-input" type="checkbox" id="darkModeSwitch" onclick="toggleDarkMode()" style="cursor: pointer;">
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="settings-card">
+                <div class="settings-title">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>Temas de Color</span>
+                </div>
+
+                <div id="themeOptions">
+                    <div class="option-card" data-theme="" onclick="setTheme('')">
+                        <div class="option-info">
+                            <div class="color-circle" style="background: #2a1f45;"></div>
+                            <span class="fw-bold">Morado Profundo</span>
+                        </div>
+                        <i class="fa-solid fa-circle-check check-icon"></i>
+                    </div>
+
+                    <div class="option-card" data-theme="theme-vibrant-purple" onclick="setTheme('theme-vibrant-purple')">
+                        <div class="option-info">
+                            <div class="color-circle" style="background: #6a0dad;"></div>
+                            <span class="fw-bold">Morado Eléctrico</span>
+                        </div>
+                        <i class="fa-solid fa-circle-check check-icon"></i>
+                    </div>
+
+                    <div class="option-card" data-theme="theme-soft-purple" onclick="setTheme('theme-soft-purple')">
+                        <div class="option-info">
+                            <div class="color-circle" style="background: #9f86c0;"></div>
+                            <span class="fw-bold">Lavanda Suave</span>
+                        </div>
+                        <i class="fa-solid fa-circle-check check-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="settings-card">
+                <div class="settings-title">
+                    <i class="fa-solid fa-font"></i>
+                    <span>Accesibilidad de Texto</span>
+                </div>
+
+                <div class="font-btn-group">
+                    <div class="font-option" data-font="font-small" onclick="setFont('font-small')">
+                        <i class="fa-solid fa-font" style="font-size: 0.8rem;"></i>
+                        <span>Pequeña</span>
+                    </div>
+                    <div class="font-option" data-font="font-medium" onclick="setFont('font-medium')">
+                        <i class="fa-solid fa-font" style="font-size: 1.1rem;"></i>
+                        <span>Normal</span>
+                    </div>
+                    <div class="font-option" data-font="font-large" onclick="setFont('font-large')">
+                        <i class="fa-solid fa-font" style="font-size: 1.4rem;"></i>
+                        <span>Grande</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 rounded-4 bg-light text-center">
+                    <p class="m-0 small text-muted">Este cambio afectará a todos los menús y tablas del portal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setTheme(t) {
+        localStorage.setItem('neuro_tema', t);
+        aplicarPreferencias();
+        actualizarUI();
+    }
+
+    function setFont(f) {
+        localStorage.setItem('neuro_fuente', f);
+        aplicarPreferencias();
+        actualizarUI();
+    }
+
+    function actualizarUI() {
+        const temaActual = localStorage.getItem('neuro_tema') || '';
+        const fuenteActual = localStorage.getItem('neuro_fuente') || 'font-medium';
+        const darkModeActual = localStorage.getItem('neuro_dark_mode') === 'true';
+
+        // Actualizar tarjetas de tema
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.classList.toggle('active', card.dataset.theme === temaActual);
+        });
+
+        // Actualizar tarjetas de fuente
+        document.querySelectorAll('.font-option').forEach(card => {
+            card.classList.toggle('active', card.dataset.font === fuenteActual);
+        });
+
+        // Sincronizar Switch
+        document.getElementById('darkModeSwitch').checked = darkModeActual;
+    }
+
+    // Inicializar UI al cargar
+    document.addEventListener('DOMContentLoaded', actualizarUI);
+</script>
+{% endblock %}

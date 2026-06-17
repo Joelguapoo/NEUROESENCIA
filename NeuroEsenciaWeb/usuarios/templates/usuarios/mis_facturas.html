@@ -1,0 +1,192 @@
+{% extends 'usuarios/base.html' %}
+{% block title %}Banca NeuroEsencia - Mis Movimientos{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --purple-deep: #1a142e;
+        --purple-main: #2a1f45;
+        --accent-gold: #c5a059;
+        --success-emerald: #10b981;
+    }
+
+    /* Animación de entrada suave */
+    .fade-in-up { animation: fadeInUp 0.7s cubic-bezier(0.19, 1, 0.22, 1) forwards; opacity: 0; transform: translateY(30px); }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* --- TARJETA BANCARIA ELITE --- */
+    .premium-card {
+        background: linear-gradient(135deg, var(--purple-deep) 0%, #3d2b63 100%);
+        border-radius: 30px;
+        padding: 40px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .premium-card::before {
+        content: ''; position: absolute; top: -50%; left: -20%; width: 100%; height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+        transform: rotate(30deg);
+    }
+
+    .chip-gold {
+        width: 50px; height: 38px;
+        background: linear-gradient(135deg, #e3c08d 0%, #b88a44 100%);
+        border-radius: 8px; position: relative; margin-bottom: 25px;
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    }
+
+    .card-number { font-family: 'Courier New', Courier, monospace; font-size: 1.4rem; letter-spacing: 3px; opacity: 0.9; margin: 20px 0; }
+
+    /* --- CONTENEDOR DE TRANSACCIONES --- */
+    .bank-container { max-width: 1000px; margin: 0 auto; }
+
+    .section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-gray); font-weight: 800; margin-bottom: 20px; }
+
+    /* --- FILAS DE TRANSACCIÓN --- */
+    .transaction-item {
+        background: var(--glass-bg);
+        border-radius: 22px;
+        padding: 22px 28px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        border: 1px solid rgba(0,0,0,0.03);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    /* Efecto al pasar el mouse por facturas pendientes */
+    .transaction-item.pending:hover {
+        transform: scale(1.02);
+        box-shadow: 0 15px 30px rgba(42, 31, 69, 0.1);
+        border-color: var(--purple-pastel);
+    }
+
+    .status-icon-box {
+        width: 55px; height: 55px; border-radius: 18px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; margin-right: 20px; flex-shrink: 0;
+    }
+
+    .status-icon-box.paid { background: #dcfce7; color: var(--success-emerald); }
+    .status-icon-box.pending { background: #fef3c7; color: #d97706; }
+
+    .info-group { flex-grow: 1; }
+    .info-group h6 { color: var(--text-dark); font-weight: 700; margin-bottom: 4px; font-size: 1rem; }
+    .info-group p { color: var(--text-gray); font-size: 0.85rem; margin: 0; font-weight: 500; }
+
+    .amount-group { text-align: right; margin-right: 30px; }
+    .amount-val { font-size: 1.25rem; font-weight: 900; color: var(--purple-main); display: block; }
+    .amount-sub { font-size: 0.7rem; text-transform: uppercase; color: var(--text-gray); letter-spacing: 1px; }
+
+    /* --- BOTÓN DE PAGO --- */
+    .btn-pay-action {
+        background: var(--purple-main); color: white !important;
+        padding: 12px 28px; border-radius: 15px; font-weight: 700;
+        text-decoration: none; transition: 0.3s;
+        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2);
+    }
+    .btn-pay-action:hover { background: var(--purple-light); transform: translateY(-2px); }
+
+    /* Mensaje de pagada (Sin botón) */
+    .completed-tag {
+        color: var(--success-emerald); font-weight: 800; font-size: 0.85rem;
+        display: flex; align-items: center; gap: 6px;
+    }
+</style>
+
+<div class="container-fluid py-4 bank-container">
+    
+    <div class="fade-in-up" style="animation-delay: 0.1s;">
+        <div class="premium-card mb-5">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="chip-gold"></div>
+                    <p class="mb-0 opacity-50 small">CLIENTE PREFERENCIAL</p>
+                    <h3 class="fw-bold mb-0" style="letter-spacing: 1px;">{{ paciente.nombre_completo|upper }}</h3>
+                </div>
+                <div class="text-end">
+                    <i class="fa-solid fa-brain fa-3x opacity-25"></i>
+                </div>
+            </div>
+            <div class="card-number">**** **** **** {{ paciente.dni_paciente|slice:"-4:" }}</div>
+            <div class="d-flex justify-content-between align-items-end">
+                <div>
+                    <p class="mb-0 opacity-50 small">ID PACIENTE</p>
+                    <p class="fw-bold mb-0">NE-{{ paciente.id|stringformat:"05d" }}</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-white text-dark rounded-pill px-3 py-2 fw-bold" style="font-size: 0.7rem;">
+                        <i class="fa-solid fa-crown text-warning me-1"></i> MIEMBRO ACTIVO
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fade-in-up" style="animation-delay: 0.2s;">
+        <h5 class="section-title"><i class="fa-solid fa- wallet me-2"></i>Por Liquidar</h5>
+        {% for factura in facturas %}
+            {% if factura.estado_pago == 'Pendiente' %}
+            <div class="transaction-item pending">
+                <div class="status-icon-box pending">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </div>
+                <div class="info-group">
+                    <h6>Servicio de Psicología Clínica</h6>
+                    <p>Factura: {{ factura.nro_factura|default:factura.id }} • {{ factura.fecha_emision|date:"d M, Y" }}</p>
+                </div>
+                <div class="amount-group">
+                    <span class="amount-val">${{ factura.total }}</span>
+                    <span class="amount-sub">Pesos COP</span>
+                </div>
+                <div>
+                    <a href="{% url 'detalle_factura' factura.id %}" class="btn-pay-action">
+                        Pagar <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="fade-in-up" style="animation-delay: 0.3s; margin-top: 40px;">
+        <h5 class="section-title"><i class="fa-solid fa-clock-rotate-left me-2"></i>Historial de Pagos</h5>
+        {% for factura in facturas %}
+            {% if factura.estado_pago == 'Pagada' %}
+            <div class="transaction-item" style="opacity: 0.85; filter: grayscale(0.2);">
+                <div class="status-icon-box paid">
+                    <i class="fa-solid fa-check-double"></i>
+                </div>
+                <div class="info-group">
+                    <h6 style="color: #6b7280;">Sesión Realizada</h6>
+                    <p>{{ factura.fecha_emision|date:"d M, Y" }} • Ref: {{ factura.nro_factura|default:factura.id }}</p>
+                </div>
+                <div class="amount-group">
+                    <span class="amount-val" style="color: #9ca3af;">${{ factura.total }}</span>
+                    <span class="amount-sub">Liquidada</span>
+                </div>
+                <div class="completed-tag">
+                    <i class="fa-solid fa-circle-check"></i> PAGADA
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if not facturas %}
+    <div class="text-center py-5 fade-in-up">
+        <div class="mb-4">
+            <i class="fa-solid fa-receipt fa-4x opacity-10"></i>
+        </div>
+        <h4 class="fw-bold text-muted">Sin movimientos registrados</h4>
+        <p class="text-muted">Tus facturas aparecerán aquí una vez agendes tu primera cita.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,855 @@
+{% extends 'usuarios/base.html' %}
+{% block title %}Nota de Evolución - NeuroEsencia{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    /* --- VARIABLES REACTIVAS --- */
+    :root {
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --text-dark: #1e293b;
+        --text-gray: #64748b;
+        --dynamic-color: #cbd5e1; 
+        --dynamic-glow: rgba(203, 213, 225, 0.15);
+        --dynamic-border: rgba(203, 213, 225, 0.3);
+    }
+
+    /* --- ANIMACIONES --- */
+    .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulseGlow { 0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.3; } 100% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.6; } }
+
+    /* --- LAYOUT DEL FORMULARIO Y ROBOT --- */
+    .form-wrapper { background: white; border-radius: 30px; box-shadow: 0 15px 40px rgba(42, 31, 69, 0.05); overflow: hidden; border: 1px solid rgba(0,0,0,0.02); }
+    
+    .robot-panel {
+        background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
+        border-right: 1px solid rgba(0,0,0,0.05);
+        position: relative;
+        display: flex; flex-direction: column; align-items: center; padding: 40px 20px;
+        transition: box-shadow 1.5s ease;
+        box-shadow: inset -10px 0 30px var(--dynamic-glow);
+    }
+    .avatar-bg-glow {
+        position: absolute; top: 40%; left: 50%; width: 250px; height: 250px;
+        background: radial-gradient(circle, var(--dynamic-glow) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%; pointer-events: none; z-index: 0;
+        animation: pulseGlow 4s infinite alternate ease-in-out;
+        transition: background 1.5s ease;
+    }
+    #neuroAvatar {
+        position: relative; z-index: 1; transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        filter: drop-shadow(0 15px 25px var(--dynamic-glow));
+    }
+
+    /* --- ESTILOS DE INPUTS --- */
+    .section-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; color: var(--purple-pastel); margin: 2.5rem 0 1.5rem 0; display: flex; align-items: center; gap: 10px; }
+    .section-title::after { content: ""; flex-grow: 1; height: 1px; background: rgba(0,0,0,0.05); }
+    
+    .form-label-custom { font-weight: 700; font-size: 0.75rem; color: var(--text-gray); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; display: block; }
+    
+    input[type="text"], input[type="number"], input[type="date"], input[type="time"], select, textarea {
+        width: 100%; border-radius: 12px !important; border: 2px solid transparent !important; background-color: var(--page-bg) !important;
+        padding: 12px 18px !important; font-weight: 500; color: var(--text-dark); transition: all 0.3s ease;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important; appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+        background-color: #ffffff !important; border-color: var(--dynamic-color) !important;
+        box-shadow: 0 0 0 4px var(--dynamic-glow) !important; outline: none !important;
+    }
+
+    /* --- CHECKBOXES DE SÍNTOMAS --- */
+    .custom-checkbox-wrapper { background: var(--page-bg); border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; gap: 12px; border: 2px solid transparent; transition: 0.3s; }
+    .form-check-input { width: 1.2rem; height: 1.2rem; cursor: pointer; }
+    .form-check-input:checked { background-color: var(--purple-brand); border-color: var(--purple-brand); }
+    .danger-check { background: rgba(239, 68, 68, 0.05); }
+    .danger-check .form-check-input:checked { background-color: #ef4444; border-color: #ef4444; }
+
+    /* --- ZONA DE EVIDENCIA --- */
+    .evidence-preview-box {
+        border: 2px dashed rgba(176, 154, 222, 0.5); border-radius: 16px; background: rgba(176, 154, 222, 0.05);
+        padding: 20px; text-align: center; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        transition: 0.3s; overflow: hidden; position: relative;
+    }
+    .evidence-preview-box img { max-width: 100%; max-height: 250px; border-radius: 8px; display: none; object-fit: cover; z-index: 2;}
+
+    /* --- GESTOR DE TAREAS --- */
+    .task-manager { background: var(--page-bg); border-radius: 16px; padding: 20px; border: 1px solid rgba(0,0,0,0.03); }
+    .task-item { background: white; border-radius: 10px; padding: 10px 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    
+    /* --- BOTONES --- */
+    .btn-main { background: var(--purple-brand); color: white; font-weight: 600; border-radius: 12px; padding: 12px 25px; transition: all 0.3s; border: none; box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2); display: inline-flex; align-items: center; justify-content: center;}
+    .btn-main:hover { background: var(--purple-light); transform: translateY(-2px); box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3); color: white;}
+    .btn-outline-custom { background: white; color: var(--purple-brand); border: 2px solid var(--purple-pastel); font-weight: 600; border-radius: 12px; padding: 10px 20px; transition: 0.3s; }
+    .btn-outline-custom:hover { background: var(--purple-pastel); color: white; }
+
+    /* Estilo del Header Icon Activo */
+    .form-header-icon-active { background: rgba(245, 158, 11, 0.15); color: #d97706; width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;}
+
+    /* --- ESTILOS DE VALIDACIÓN JS --- */
+    .error-text {
+        color: #ef4444;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+</style>
+
+<div class="container-fluid py-3 fade-in-up">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold m-0" style="color: var(--text-dark);">Registro de Evolución</h3>
+            <p class="text-muted m-0 fw-medium">Paciente: <strong style="color: var(--purple-brand);">{{ cita.paciente.nombre_completo }}</strong> | Cita: #{{ cita.codigo_cita }}</p>
+        </div>
+        <a href="{% url 'ver_historial' cita.paciente.id %}" class="btn btn-light rounded-pill border fw-bold text-muted">
+            <i class="fa-solid fa-arrow-left me-2"></i>Volver
+        </a>
+    </div>
+
+    <div class="form-wrapper row m-0">
+        
+        <div class="col-lg-4 robot-panel d-none d-lg-flex">
+            <div class="avatar-bg-glow" id="bgGlow"></div>
+            
+            <span class="badge bg-white text-dark shadow-sm px-3 py-2 rounded-pill position-relative z-1 mb-4">
+                <i class="fa-solid fa-satellite-dish me-2" style="color: var(--dynamic-color);"></i>Estado en Vivo
+            </span>
+
+            <svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg" id="neuroAvatar" style="width: 100%; max-width: 250px;">
+                <defs>
+                    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ffffff" />
+                        <stop offset="100%" stop-color="#cbd5e1" id="gradColor" style="transition: stop-color 1s ease;" />
+                    </linearGradient>
+                </defs>
+                <rect x="40" y="20" width="120" height="90" rx="35" fill="url(#bodyGrad)" />
+                <circle cx="75" cy="65" r="6" fill="#1e293b" />
+                <circle cx="125" cy="65" r="6" fill="#1e293b" />
+                <path id="avatarMouth" d="M 90 80 Q 100 80 110 80" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" style="transition: d 0.5s cubic-bezier(0.4, 0, 0.2, 1);" />
+                <rect x="55" y="115" width="90" height="85" rx="30" fill="url(#bodyGrad)" />
+                <rect x="35" y="125" width="16" height="55" rx="8" fill="url(#bodyGrad)" />
+                <rect x="149" y="125" width="16" height="55" rx="8" fill="url(#bodyGrad)" />
+                <rect x="70" y="190" width="16" height="40" rx="8" fill="url(#bodyGrad)" />
+                <rect x="114" y="190" width="16" height="40" rx="8" fill="url(#bodyGrad)" />
+            </svg>
+
+            <h4 class="fw-bold mt-4 mb-1 position-relative z-1 text-center" id="textoAnimo" style="color: var(--text-dark);">Neutral</h4>
+            <p class="text-muted small text-center position-relative z-1" id="robotInfoText">El asistente cambiará al seleccionar el estado de ánimo.</p>
+        </div>
+
+        <div class="col-lg-8 p-4 p-lg-5 position-relative">
+            
+            <form method="POST" id="evolucionForm">
+                {% csrf_token %}
+                
+                <div class="d-flex align-items-center gap-3 mb-2 pb-3">
+                    <div class="form-header-icon-active m-0" id="header-icon-box">
+                        <i class="fa-solid fa-pen" id="header-icon"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h4 id="titulo-pagina" class="fw-bold m-0" style="color: var(--text-dark);">Edición de Nota Clínica</h4>
+                        <span class="badge bg-warning text-dark border border-warning px-3 py-1 mt-1 rounded-pill shadow-sm" id="badge-estado">Modo Edición Activo</span>
+                    </div>
+                </div>
+
+                <fieldset id="form-fieldset">
+                    
+                    <div class="section-title mt-0"><i class="fa-solid fa-clipboard-user"></i> 1. Evaluación Inicial</div>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="form-label-custom">Plan Asociado</label>
+                            {{ form.tratamiento }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Estado de Ánimo <i class="fa-solid fa-wand-magic-sparkles ms-1"></i></label>
+                            <div id="selector-animo-container">{{ form.estado_animo }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Afecto Observado</label>
+                            {{ form.afecto_observado }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Nivel de Energía (1-10)</label>
+                            <div class="d-flex align-items-center gap-3 mt-1">
+                                <span class="fw-bold text-muted">1</span>
+                                {{ form.nivel_energia }}
+                                <span class="fw-bold" style="color: var(--purple-brand);">10</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom text-danger">Nivel de Riesgo</label>
+                            {{ form.riesgo }}
+                        </div>
+                    </div>
+
+                    <div class="section-title"><i class="fa-solid fa-bed-pulse"></i> 2. Indicadores Biológicos</div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="custom-checkbox-wrapper">
+                                {{ form.sueno_alterado }} <label class="fw-bold m-0" style="font-size:0.85rem;" for="{{ form.sueno_alterado.id_for_label }}">Sueño Alterado</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="custom-checkbox-wrapper">
+                                {{ form.apetito_alterado }} <label class="fw-bold m-0" style="font-size:0.85rem;" for="{{ form.apetito_alterado.id_for_label }}">Apetito Alterado</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="custom-checkbox-wrapper danger-check">
+                                {{ form.ideacion_suicida }} <label class="fw-bold m-0 text-danger" style="font-size:0.85rem;" for="{{ form.ideacion_suicida.id_for_label }}">Ideación Suicida</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title"><i class="fa-solid fa-comments"></i> 3. Desarrollo de Sesión</div>
+                    <div class="row g-4">
+                        <div class="col-12"><label class="form-label-custom">Motivo de Consulta</label>{{ form.motivo_consulta }}</div>
+                        <div class="col-12"><label class="form-label-custom">Estresores Recientes</label>{{ form.estresores_recientes }}</div>
+                        <div class="col-12"><label class="form-label-custom">Descripción del Proceso Terapéutico</label>{{ form.descripcion_sesion }}</div>
+                    </div>
+
+                    <div class="section-title"><i class="fa-solid fa-microscope"></i> 4. Diagnóstico y Evidencia</div>
+                    <div class="row g-4">
+                        <div class="col-md-6"><label class="form-label-custom">Impresión Diagnóstica</label>{{ form.diagnostico_sesion }}</div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Link de Evidencia (Foto/Signos)</label>
+                            {{ form.evidencia }}
+                            <div class="evidence-preview-box mt-3" id="evidenceBox">
+                                <i class="fa-solid fa-image fa-2x mb-2" style="color: var(--purple-pastel); opacity:0.5;" id="evidencePlaceholder"></i>
+                                <p class="small text-muted m-0 fw-bold" id="evidenceText">Pega una URL de imagen para verla aquí</p>
+                                <img id="previewImg" src="" alt="Vista previa">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title"><i class="fa-solid fa-list-check"></i> 5. Plan de Acción y Tareas</div>
+                    <div class="row g-4">
+                        <div class="col-12"><label class="form-label-custom">Objetivo Logrado en Sesión</label>{{ form.objetivo }}</div>
+                        <div class="col-12"><label class="form-label-custom">Recomendaciones al Paciente</label>{{ form.recomendaciones }}</div>
+                    </div>
+                    
+                    <div class="task-manager mt-4 mb-4">
+                        <label class="form-label-custom text-dark mb-3">Gestor de Tareas para el Paciente</label>
+                        <div class="d-none">{{ form.proximo_paso }}</div>
+                        
+                        <div id="taskList" class="mb-3"></div>
+                        
+                        <div class="input-group" id="taskInputContainer" style="display: flex;">
+                            <input type="text" id="newTaskInput" class="form-control" placeholder="Escribe una tarea nueva (Ej: Hacer ejercicio 30 min)..." style="border-radius: 12px 0 0 12px !important;">
+                            <button class="btn btn-main m-0" type="button" id="addTaskBtn" style="border-radius: 0 12px 12px 0;"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+
+                </fieldset>
+
+                <div class="mt-4 pt-4 border-top border-light text-end">
+                    <button type="submit" id="btn-guardar-cambios" class="btn-main px-5">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Registro Clínico
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-5 pt-4">
+                <div class="d-flex align-items-center justify-content-between p-4 rounded-4" style="background: rgba(176, 154, 222, 0.05); border: 1px dashed var(--purple-pastel);">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h6 class="fw-bold m-0" style="color: var(--purple-brand);">¿Agendar siguiente consulta?</h6>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill" style="font-size: 0.7rem;">Opcional</span>
+                        </div>
+                        <small class="text-muted">Asigna la cita ahora mismo sin salir ni perder los datos de esta evaluación.</small>
+                    </div>
+                    <button type="button" class="btn-outline-custom" data-bs-toggle="modal" data-bs-target="#modalAgendarCita">
+                        <i class="fa-solid fa-calendar-plus me-2"></i>Agendar Control
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAgendarCita" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 24px; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.1);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="color: var(--purple-brand);">Programar Cita de Control</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted small mb-4">Agendando para: <strong>{{ cita.paciente.nombre_completo }}</strong></p>
+                
+                <form id="formAgendarAjax" action="{% url 'agendar_cita' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="paciente" value="{{ cita.paciente.id }}">
+                    <input type="hidden" name="psicologo" value="{{ cita.psicologo.id }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label-custom">Fecha Sugerida</label>
+                        <input type="date" name="fecha_cita" class="form-control" required>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <label class="form-label-custom">Hora</label>
+                            <input type="time" name="hora_cita" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label-custom">Modalidad</label>
+                            <select name="modalidad" class="form-select">
+                                <option value="Virtual" selected>Virtual</option>
+                                <option value="Presencial">Presencial</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" id="btnConfirmarAjax" class="btn-main w-100 justify-content-center">
+                        Confirmar Cita de Control
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // Bloquear validación por defecto del navegador
+        const formEvolucion = document.getElementById('evolucionForm');
+        if (formEvolucion) formEvolucion.setAttribute('novalidate', 'true');
+
+        // ==========================================
+        // 0. FUNCIONES DE APOYO PARA VALIDACIÓN
+        // ==========================================
+        function mostrarError(inputElement, mensaje) {
+            let errorSpan = inputElement.parentNode.querySelector('.error-text-js');
+            if (!errorSpan) {
+                errorSpan = document.createElement('div');
+                errorSpan.className = 'error-text error-text-js fade-in-up';
+                inputElement.parentNode.appendChild(errorSpan);
+            }
+            errorSpan.style.display = 'flex';
+            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${mensaje}`;
+        }
+
+        function ocultarError(inputElement) {
+            let errorSpan = inputElement.parentNode.querySelector('.error-text-js');
+            if (errorSpan) {
+                errorSpan.style.display = 'none';
+            }
+        }
+
+        // --- VALIDACIONES EN TIEMPO REAL ---
+        const inputsTextoLargo = ['id_motivo_consulta', 'id_descripcion_sesion', 'id_objetivo'];
+        inputsTextoLargo.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', function() {
+                    if (el.value.trim().length > 0 && el.value.trim().length < 15) {
+                        mostrarError(el, 'La descripción clínica es muy corta (mín. 15 caracteres).');
+                    } else {
+                        ocultarError(el);
+                    }
+                });
+            }
+        });
+
+        const nivelEnergia = document.getElementById('id_nivel_energia');
+        if (nivelEnergia) {
+            nivelEnergia.setAttribute('min', '1');
+            nivelEnergia.setAttribute('max', '10');
+            nivelEnergia.addEventListener('input', function() {
+                let val = parseInt(nivelEnergia.value);
+                if (val < 1 || val > 10 || isNaN(val)) {
+                    mostrarError(nivelEnergia, 'La energía debe estar en un rango de 1 a 10.');
+                    nivelEnergia.value = '';
+                    setTimeout(() => ocultarError(nivelEnergia), 2000);
+                } else {
+                    ocultarError(nivelEnergia);
+                }
+            });
+        }
+
+        // ==========================================
+        // 1. LÓGICA DEL ROBOT
+        // ==========================================
+        const emoLogic = {
+            'Aburrimiento': { color: '#94a3b8', hex: 'rgba(148, 163, 184, 0.4)', text: 'Aburrimiento', mouth: 'M 90 80 L 110 80' },
+            'Apatia': { color: '#64748b', hex: 'rgba(100, 116, 139, 0.4)', text: 'Apatía', mouth: 'M 90 80 L 110 80' },
+            'Decepcion': { color: '#64748b', hex: 'rgba(100, 116, 139, 0.4)', text: 'Decepción', mouth: 'M 90 85 Q 100 75 110 85' },
+            'Soledad': { color: '#3b82f6', hex: 'rgba(59, 130, 246, 0.4)', text: 'Soledad', mouth: 'M 90 85 Q 100 75 110 85' },
+            'Tristeza': { color: '#0ea5e9', hex: 'rgba(14, 165, 233, 0.4)', text: 'Tristeza', mouth: 'M 90 85 Q 100 75 110 85' },
+            'Aceptacion': { color: '#0ea5e9', hex: 'rgba(14, 165, 233, 0.4)', text: 'Aceptación', mouth: 'M 90 78 Q 100 82 110 78' },
+            'Alegria': { color: '#10b981', hex: 'rgba(16, 185, 129, 0.4)', text: 'Alegría', mouth: 'M 90 75 Q 100 85 110 75' },
+            'Alivio': { color: '#06b6d4', hex: 'rgba(6, 182, 212, 0.4)', text: 'Alivio', mouth: 'M 90 78 Q 100 82 110 78' },
+            'Entusiasmo': { color: '#14b8a6', hex: 'rgba(20, 184, 166, 0.4)', text: 'Entusiasmo', mouth: 'M 90 75 Q 100 95 110 75' },
+            'Gratitud': { color: '#10b981', hex: 'rgba(16, 185, 129, 0.4)', text: 'Gratitud', mouth: 'M 90 75 Q 100 85 110 75' },
+            'Admiracion': { color: '#f59e0b', hex: 'rgba(245, 158, 11, 0.4)', text: 'Admiración', mouth: 'M 95 80 A 5 5 0 1 0 105 80 A 5 5 0 1 0 95 80' },
+            'Ansiedad': { color: '#f97316', hex: 'rgba(249, 115, 22, 0.4)', text: 'Ansiedad', mouth: 'M 90 82 Q 95 78 100 82 T 110 82' },
+            'Inseguridad': { color: '#f59e0b', hex: 'rgba(245, 158, 11, 0.4)', text: 'Inseguridad', mouth: 'M 90 82 Q 95 78 100 82 T 110 82' },
+            'Frustracion': { color: '#ef4444', hex: 'rgba(239, 68, 68, 0.4)', text: 'Frustración', mouth: 'M 90 82 Q 95 78 100 82 T 110 82' },
+            'Ira': { color: '#dc2626', hex: 'rgba(220, 38, 38, 0.4)', text: 'Ira', mouth: 'M 90 85 Q 100 75 110 85' },
+            'Irritabilidad': { color: '#f43f5e', hex: 'rgba(244, 63, 94, 0.4)', text: 'Irritabilidad', mouth: 'M 90 82 L 110 82' },
+            'Amor': { color: '#ec4899', hex: 'rgba(236, 72, 153, 0.4)', text: 'Amor', mouth: 'M 90 75 Q 100 85 110 75' },
+            'Asombro': { color: '#8b5cf6', hex: 'rgba(139, 92, 246, 0.4)', text: 'Asombro', mouth: 'M 95 80 A 5 5 0 1 0 105 80 A 5 5 0 1 0 95 80' },
+            'Calma': { color: '#8b5cf6', hex: 'rgba(139, 92, 246, 0.4)', text: 'Calma', mouth: 'M 90 78 Q 100 80 110 78' },
+            'Culpa': { color: '#6366f1', hex: 'rgba(99, 102, 241, 0.4)', text: 'Culpa', mouth: 'M 90 85 Q 100 75 110 85' },
+            'Miedo': { color: '#8b5cf6', hex: 'rgba(139, 92, 246, 0.4)', text: 'Miedo', mouth: 'M 95 80 A 5 5 0 1 0 105 80 A 5 5 0 1 0 95 80' },
+            'Default': { color: '#cbd5e1', hex: 'rgba(203, 213, 225, 0.2)', text: 'Neutral', mouth: 'M 90 80 Q 100 80 110 80' }
+        };
+
+        const selectAnimo = document.querySelector('select[name="estado_animo"]') || document.getElementById('id_estado_animo');
+        const gradColor = document.getElementById('gradColor');
+        const avatarMouth = document.getElementById('avatarMouth');
+        const textoAnimo = document.getElementById('textoAnimo');
+        const root = document.documentElement;
+
+        function updateRobot() {
+            if(!selectAnimo) return;
+            const animoVal = selectAnimo.value;
+            const emoProfile = emoLogic[animoVal] || emoLogic['Default'];
+            root.style.setProperty('--dynamic-color', emoProfile.color);
+            root.style.setProperty('--dynamic-glow', emoProfile.hex);
+            gradColor.setAttribute('stop-color', emoProfile.color);
+            avatarMouth.setAttribute('d', emoProfile.mouth);
+            textoAnimo.innerText = emoProfile.text;
+        }
+
+        if(selectAnimo) {
+            updateRobot(); 
+            selectAnimo.addEventListener('change', updateRobot); 
+        }
+
+        // ==========================================
+        // 2. VISTA PREVIA DE EVIDENCIA (ARREGLADA)
+        // ==========================================
+        const inputEvidencia = document.querySelector('input[name="evidencia"]') || document.getElementById('id_evidencia');
+        const imgPreview = document.getElementById('previewImg');
+        const placeholder = document.getElementById('evidencePlaceholder');
+        const txtPreview = document.getElementById('evidenceText');
+
+        function checkImage(url) {
+            if (!url || url.trim() === '') {
+                imgPreview.style.display = 'none';
+                placeholder.style.display = 'block';
+                txtPreview.style.display = 'block';
+                txtPreview.innerText = "Pega una URL de imagen para verla aquí";
+                return;
+            }
+
+            // Validar que parece un link
+            if (!url.startsWith('http') && !url.startsWith('data:image')) {
+                imgPreview.style.display = 'none';
+                placeholder.style.display = 'block';
+                txtPreview.style.display = 'block';
+                txtPreview.innerText = "Debe ser un enlace válido (Ej: https://...)";
+                return;
+            }
+
+            // Intentamos cargar la imagen de forma invisible
+            const imgTemp = new Image();
+            imgTemp.onload = function() {
+                imgPreview.src = url;
+                imgPreview.style.display = 'block';
+                placeholder.style.display = 'none';
+                txtPreview.style.display = 'none';
+            };
+            imgTemp.onerror = function() {
+                imgPreview.style.display = 'none';
+                placeholder.style.display = 'block';
+                txtPreview.style.display = 'block';
+                txtPreview.innerText = "No se pudo cargar la imagen de ese enlace.";
+            };
+            imgTemp.src = url;
+        }
+
+        if(inputEvidencia) {
+            checkImage(inputEvidencia.value);
+            inputEvidencia.addEventListener('input', (e) => checkImage(e.target.value));
+        }
+
+        // ==========================================
+        // 3. GESTOR DE TAREAS
+        // ==========================================
+        const textareaPasos = document.querySelector('textarea[name="proximo_paso"]');
+        const taskList = document.getElementById('taskList');
+        const newTaskInput = document.getElementById('newTaskInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            if(!textareaPasos.value) return;
+            const tasks = textareaPasos.value.split('\n').filter(t => t.trim() !== '');
+            tasks.forEach((task, index) => {
+                const isChecked = task.startsWith('[x] ') || task.startsWith('[X] ');
+                const cleanText = task.replace(/^\[[xX\s]\]\s*/, ''); 
+                const taskHtml = `
+                    <div class="task-item">
+                        <input class="form-check-input mt-0" type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleTask(${index}, this.checked)">
+                        <span class="fw-medium flex-grow-1 ${isChecked ? 'text-decoration-line-through text-muted' : 'text-dark'}">${cleanText}</span>
+                        <button type="button" class="btn text-danger p-0" onclick="removeTask(${index})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                taskList.insertAdjacentHTML('beforeend', taskHtml);
+            });
+        }
+
+        window.toggleTask = function(index, checked) {
+            let tasks = textareaPasos.value.split('\n').filter(t => t.trim() !== '');
+            let cleanText = tasks[index].replace(/^\[[xX\s]\]\s*/, '');
+            tasks[index] = checked ? `[x] ${cleanText}` : `[ ] ${cleanText}`;
+            textareaPasos.value = tasks.join('\n');
+            renderTasks();
+        }
+
+        window.removeTask = function(index) {
+            let tasks = textareaPasos.value.split('\n').filter(t => t.trim() !== '');
+            tasks.splice(index, 1);
+            textareaPasos.value = tasks.join('\n');
+            renderTasks();
+        }
+
+        if(addTaskBtn) {
+            addTaskBtn.addEventListener('click', () => {
+                const val = newTaskInput.value.trim();
+                if(val) {
+                    const currentVal = textareaPasos.value;
+                    textareaPasos.value = currentVal ? `${currentVal}\n[ ] ${val}` : `[ ] ${val}`;
+                    newTaskInput.value = '';
+                    renderTasks();
+                }
+            });
+            newTaskInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); addTaskBtn.click(); }
+            });
+        }
+        if(textareaPasos) renderTasks();
+
+        // ==========================================
+        // 4. AJAX: AGENDAR CITA CORREGIDO
+        // ==========================================
+        const formAgendarAjax = document.getElementById('formAgendarAjax');
+        if (formAgendarAjax) {
+            formAgendarAjax.addEventListener('submit', function(e) {
+                e.preventDefault(); 
+                
+                const formData = new FormData(this);
+                const codigoGenerado = "CIT-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+                formData.append('codigo_cita', codigoGenerado);
+                
+                const btnSubmit = document.getElementById('btnConfirmarAjax');
+                const btnOriginalText = btnSubmit.innerHTML;
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                
+                btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-2"></i> Procesando...';
+                btnSubmit.disabled = true;
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken 
+                    }
+                })
+                .then(response => {
+                    if (response.redirected || response.url.includes('facturacion') || response.url.includes('lista_citas')) {
+                        return { status: 'success' };
+                    }
+                    if (!response.ok) throw new Error('Error en el servidor');
+                    return response.text().then(text => ({ status: 'check', html: text }));
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        const modalElement = document.getElementById('modalAgendarCita');
+                        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                        if(modalInstance) modalInstance.hide();
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Cita Asignada!',
+                            text: 'La cita de control se guardó correctamente.',
+                            confirmButtonColor: '#10b981'
+                        });
+                        formAgendarAjax.reset();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Verifica los datos',
+                            text: 'Asegúrate de que la fecha y hora sean válidas y no se crucen con otra cita.',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Error de Conexión', 'No se pudo contactar con el servidor. Revisa tu internet.', 'error');
+                })
+                .finally(() => {
+                    btnSubmit.innerHTML = btnOriginalText;
+                    btnSubmit.disabled = false;
+                });
+            });
+        }
+
+        // ==========================================
+        // 5. INTERCEPTOR FINAL: VALIDACIÓN DE ENVÍO CLÍNICO
+        // ==========================================
+        if (formEvolucion) {
+            formEvolucion.addEventListener('submit', function(e) {
+                let formValido = true;
+
+                // Definimos los campos estrictamente obligatorios
+                const camposRequeridos = [
+                    'id_motivo_consulta', 'id_estado_animo', 'id_afecto_observado', 
+                    'id_nivel_energia', 'id_riesgo', 'id_descripcion_sesion', 'id_objetivo'
+                ];
+
+                camposRequeridos.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        if (el.value.trim() === '') {
+                            mostrarError(el, 'Campo clínico obligatorio.');
+                            formValido = false;
+                        } else if ((id === 'id_motivo_consulta' || id === 'id_descripcion_sesion' || id === 'id_objetivo') && el.value.trim().length < 15) {
+                            mostrarError(el, 'Descripción insuficiente. Detalle más su nota clínica.');
+                            formValido = false;
+                        } else {
+                            ocultarError(el);
+                        }
+                    }
+                });
+
+                if (!formValido) {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Nota Incompleta',
+                        text: 'Faltan campos clínicos requeridos o son muy cortos.',
+                        confirmButtonColor: '#2a1f45',
+                        toast: true,
+                        position: 'top-end',
+                        timer: 3000
+                    });
+                }
+            });
+        }
+
+    });
+
+    // ==========================================
+    // 6. MENTOR CLÍNICO Y BIENVENIDA (UX)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", function() {
+    
+    const MentorClinico = {
+        'tratamiento': {
+            titulo: 'Plan Terapéutico',
+            desc: 'Vincula esta sesión con el plan de trabajo a largo plazo.',
+            eval: '¿Estamos trabajando hoy en los objetivos pactados al inicio?',
+            ejemplo: 'Selecciona el plan que corresponda al diagnóstico principal actual.'
+        },
+        'estado_animo': {
+            titulo: 'Estado de Ánimo (Subjetivo)',
+            desc: 'Es el "clima" emocional que el paciente dice tener.',
+            eval: 'Pregunta: "¿Cómo ha estado tu humor la mayor parte del tiempo?"',
+            ejemplo: 'Paciente reporta sentirse "abrumado y con poca paciencia".'
+        },
+        'afecto_observado': {
+            titulo: 'Afecto (Objetivo)',
+            desc: 'Lo que tú ves en su cara, voz y cuerpo. Puede ser distinto a lo que dice.',
+            eval: 'Busca congruencia. ¿Se ve triste mientras dice que está bien?',
+            ejemplo: 'Afecto congruente con el relato, con momentos de embotamiento.'
+        },
+        'nivel_energia': {
+            titulo: 'Nivel de Energía',
+            desc: 'Capacidad de iniciativa y movimiento (Impulso vital).',
+            eval: '1-3: Muy bajo (depresivo). 4-7: Normal. 8-10: Exaltado (ansioso/maníaco).',
+            ejemplo: 'Nivel 4: Reporta fatiga constante pero logra cumplir tareas mínimas.'
+        },
+        'riesgo': {
+            titulo: 'Triage de Riesgo',
+            desc: 'Probabilidad de que ocurra un daño a sí mismo o a otros.',
+            eval: 'Evalúa la impulsividad y la falta de redes de apoyo.',
+            ejemplo: 'Riesgo Bajo: Presenta red de apoyo sólida y buen juicio de realidad.'
+        },
+        'sueno_alterado': {
+            titulo: 'Patrón de Sueño',
+            desc: 'Evaluación de la calidad y cantidad del descanso.',
+            eval: '¿Le cuesta dormirse, se despierta a mitad de noche o despierta muy temprano?',
+            ejemplo: 'Presenta insomnio de conciliación (tarda más de 1h en dormirse).'
+        },
+        'apetito_alterado': {
+            titulo: 'Conducta Alimentaria',
+            desc: 'Cambios notables en las ganas de comer por estrés o ánimo.',
+            eval: '¿Come por ansiedad o ha perdido el interés en la comida?',
+            ejemplo: 'Hiporexia (bajo apetito) asociada a sintomatología depresiva.'
+        },
+        'ideacion_suicida': {
+            titulo: 'Ideación Suicida (Crítico)',
+            desc: 'Pensamientos sobre el fin de la vida. Preguntar NO induce el acto.',
+            eval: '¿Hay plan? ¿Hay método? ¿Hay intención inmediata?',
+            ejemplo: 'Niega ideación suicida o planes de autolesión en la actualidad.'
+        },
+        'motivo_consulta': {
+            titulo: 'Motivo de Consulta',
+            desc: 'El tema específico que trae el paciente a esta sesión hoy.',
+            eval: '¿Qué evento disparó la necesidad de hablar hoy?',
+            ejemplo: 'Dificultades en la regulación emocional tras conflicto laboral.'
+        },
+        'estresores_recientes': {
+            titulo: 'Estresores Actuales',
+            desc: 'Hechos externos que están alterando la paz del paciente.',
+            eval: 'Pérdidas, mudanzas, deudas, conflictos de pareja o salud.',
+            ejemplo: 'Ruptura afectiva reciente (2 semanas) y sobrecarga académica.'
+        },
+        'descripcion_sesion': {
+            titulo: 'Desarrollo de Sesión',
+            desc: 'El corazón de la nota. Qué pasó y qué hiciste tú.',
+            eval: 'Usa: "Se aborda...", "Se aplica técnica de...", "Paciente logra...".',
+            ejemplo: 'Se realizó reestructuración cognitiva sobre creencias de desvalorización.'
+        },
+        'evidencia': {
+            titulo: 'Evidencia Clínica',
+            desc: 'Enlace (URL) de un test o imagen alojada en la nube.',
+            eval: 'Asegúrate de que el enlace sea público o tengas acceso.',
+            ejemplo: 'https://ejemplo.com/resultado-test-ansiedad.jpg'
+        },
+        'diagnostico_sesion': {
+            titulo: 'Impresión Diagnóstica',
+            desc: 'Tu conclusión técnica de hoy. Puede ser un código (DSM/CIE).',
+            eval: '¿Los síntomas de hoy encajan con el diagnóstico base?',
+            ejemplo: 'Sintomatología compatible con Episodio Depresivo Leve (F32.0).'
+        },
+        'objetivo': {
+            titulo: 'Objetivo Alcanzado',
+            desc: '¿Qué se logró en estos 45-60 minutos?',
+            eval: 'Debe ser concreto. No pongas "se sintió mejor".',
+            ejemplo: 'Se identificó el disparador de la crisis de pánico del lunes.'
+        },
+        'recomendaciones': {
+            titulo: 'Recomendaciones',
+            desc: 'Pautas que el paciente debe seguir afuera de la consulta.',
+            eval: 'Ejercicios de respiración, higiene de sueño o lectura.',
+            ejemplo: 'Practicar respiración diafragmática 5 min antes de dormir.'
+        },
+        'proximo_paso': {
+            titulo: 'Próximos Pasos (Tareas)',
+            desc: 'Lo que queda pendiente para la siguiente sesión.',
+            eval: 'Seguimiento de tareas o temas que no alcanzaron a tocarse.',
+            ejemplo: 'Traer registro escrito de pensamientos de la semana.'
+        }
+    };
+
+    const helper = document.createElement('div');
+    helper.id = 'neuroMentor';
+    helper.style = `
+        position: fixed; bottom: 25px; right: 25px; width: 340px;
+        background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px);
+        border-radius: 28px; padding: 25px; z-index: 10000;
+        box-shadow: 0 20px 50px rgba(42, 31, 69, 0.15);
+        border: 1px solid var(--purple-pastel);
+        transform: translateX(120%); transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    `;
+    
+    helper.innerHTML = `
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div style="background: var(--purple-brand); width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+                <h6 id="m-title" class="m-0 fw-bold text-dark">Mentor Clínico</h6>
+                <small class="text-success fw-bold" style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px;">Soporte para Profesionales</small>
+            </div>
+        </div>
+        <p id="m-desc" class="small text-muted mb-3" style="line-height: 1.4;"></p>
+        <div class="p-3 mb-3" style="background: rgba(176, 154, 222, 0.08); border-radius: 15px; border-left: 4px solid var(--purple-pastel);">
+            <small class="fw-bold d-block mb-1" style="font-size: 0.65rem; color: var(--purple-brand); text-transform: uppercase;">Cómo evaluar:</small>
+            <small id="m-eval" class="text-dark d-block" style="font-size: 0.75rem; line-height: 1.3;"></small>
+        </div>
+        <div class="p-3 mb-3" style="background: #f8fafc; border-radius: 15px; border: 1px dashed #cbd5e1; position: relative;">
+            <small class="fw-bold d-block mb-1" style="font-size: 0.65rem; color: #64748b; text-transform: uppercase;">Ejemplo Sugerido:</small>
+            <small id="m-ejemplo" class="text-primary d-block fw-medium" style="font-size: 0.75rem; font-style: italic;"></small>
+            <button id="btnCopyExample" class="btn btn-sm p-0 text-primary position-absolute top-0 end-0 mt-2 me-3" title="Usar este ejemplo">
+                <i class="fa-solid fa-copy"></i>
+            </button>
+        </div>
+    `;
+    document.body.appendChild(helper);
+
+    let activeInput = null;
+
+    function showMentor(fieldName) {
+        const data = MentorClinico[fieldName];
+        if (data) {
+            document.getElementById('m-title').innerText = data.titulo;
+            document.getElementById('m-desc').innerText = data.desc;
+            document.getElementById('m-eval').innerText = data.eval;
+            document.getElementById('m-ejemplo').innerText = data.ejemplo;
+            helper.style.transform = 'translateX(0)';
+            
+            const avatar = document.getElementById('neuroAvatar');
+            if(avatar) avatar.style.filter = 'drop-shadow(0 0 15px var(--dynamic-glow))';
+        }
+    }
+
+    function hideMentor() {
+        helper.style.transform = 'translateX(120%)';
+        const avatar = document.getElementById('neuroAvatar');
+        if(avatar) avatar.style.filter = 'none';
+    }
+
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+        el.addEventListener('focus', () => {
+            activeInput = el;
+            showMentor(el.name || el.id.replace('id_', ''));
+        });
+        
+        el.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (document.activeElement.id !== 'btnCopyExample') hideMentor();
+            }, 200);
+        });
+    });
+
+    document.getElementById('btnCopyExample').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (activeInput) {
+            const ejemplo = document.getElementById('m-ejemplo').innerText;
+            if (activeInput.tagName === 'TEXTAREA' || activeInput.tagName === 'INPUT') {
+                activeInput.value = ejemplo;
+                activeInput.dispatchEvent(new Event('input'));
+                activeInput.focus();
+                
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Ejemplo aplicado',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        }
+    });
+
+    if (!localStorage.getItem('guia_visto')) {
+        Swal.fire({
+            title: '¡Hola, Colega!',
+            text: 'He habilitado el "Mentor Clínico" para ayudarte con la terminología. Solo selecciona cualquier campo y aparecerá una guía a tu derecha.',
+            icon: 'info',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#2a1f45',
+            customClass: { popup: 'rounded-4' }
+        });
+        localStorage.setItem('guia_visto', 'true');
+    }
+});
+</script>
+{% endblock %}

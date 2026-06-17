@@ -1,0 +1,197 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Mis Citas - NeuroEsencia{% endblock %}
+
+{% block content %}
+<style>
+    /* --- VARIABLES LOCALES (Sistema Unificado) --- */
+    :root {
+        --card-bg: #ffffff;
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --purple-light: #4c3b73;
+        --purple-pastel: #b09ade;
+        --text-dark: #2b3674;
+        --text-gray: #a3aed1;
+        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+    }
+
+    /* --- ANIMACIONES --- */
+    .fade-in-up {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- BOTÓN PRINCIPAL --- */
+    .btn-main {
+        background: var(--purple-brand);
+        color: white;
+        border-radius: 50px;
+        padding: 12px 28px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+    .btn-main:hover {
+        background: var(--purple-light);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3);
+    }
+
+    /* --- TABLA PREMIUM --- */
+    .table-wrapper {
+        background: var(--card-bg);
+        border-radius: 24px;
+        padding: 10px; 
+        box-shadow: var(--shadow-soft);
+        border: 1px solid rgba(0,0,0,0.02);
+        overflow: hidden; 
+    }
+    
+    .table-premium { margin-bottom: 0; }
+    .table-premium thead { background-color: rgba(244, 247, 254, 0.6); }
+    .table-premium thead th {
+        color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        border: none; padding: 20px 24px; font-weight: 700;
+    }
+    .table-premium thead th:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+    .table-premium thead th:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+
+    .table-premium tbody td {
+        vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.02);
+        padding: 18px 24px; color: var(--text-dark); font-weight: 500;
+    }
+    .table-premium tbody tr { transition: all 0.2s ease; border-radius: 16px; }
+    .table-premium tbody tr:hover { background-color: rgba(176, 154, 222, 0.05); }
+    .table-premium tbody tr:last-child td { border-bottom: none; }
+
+    /* Componentes visuales de la tabla */
+    .specialist-avatar {
+        width: 42px; height: 42px; border-radius: 14px;
+        background: rgba(176, 154, 222, 0.15);
+        color: var(--purple-brand);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Etiquetas de Estado (Soft UI) */
+    .status-badge {
+        font-size: 0.75rem; font-weight: 700; padding: 8px 16px;
+        border-radius: 20px; display: inline-flex; align-items: center; letter-spacing: 0.5px;
+    }
+    .status-programada { background-color: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .status-asistida { background-color: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-cancelada { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .status-default { background-color: rgba(100, 116, 139, 0.1); color: #475569; border: 1px solid rgba(100, 116, 139, 0.2); }
+</style>
+
+<div class="container-fluid py-2">
+    
+    <div class="fade-in-up" style="animation-delay: 0.1s;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Historial de Citas</h3>
+                <p class="m-0 mt-1" style="color: var(--text-gray); font-weight: 500;">
+                    Revisa tus sesiones pasadas y próximas programadas.
+                </p>
+            </div>
+            <a href="{% url 'agendar_cita_paciente' %}" class="btn-main">
+                <i class="fa-solid fa-calendar-plus me-2"></i> Agendar Nueva
+            </a>
+        </div>
+    </div>
+
+    <div class="table-wrapper fade-in-up" style="animation-delay: 0.2s;">
+        <div class="table-responsive">
+            <table class="table table-premium table-borderless table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Especialista Asignado</th>
+                        <th style="width: 25%;">Fecha Programada</th>
+                        <th style="width: 15%;">Hora</th>
+                        <th class="text-end pe-4" style="width: 25%;">Estado de la Cita</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cita in citas %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="specialist-avatar shadow-sm">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div>
+                                    <span class="d-block fw-bold" style="color: var(--text-dark);">
+                                        Psic. {% firstof cita.psicologo.get_full_name cita.psicologo.nombre cita.psicologo %}
+                                    </span>
+                                    <small style="color: var(--text-gray); font-size: 0.75rem; font-weight: 600;">
+                                        NeuroEsencia Clínica
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="d-flex align-items-center gap-2 fw-semibold" style="color: var(--text-dark);">
+                                <i class="fa-regular fa-calendar" style="color: var(--purple-pastel);"></i>
+                                {{ cita.fecha_cita|date:"d M, Y" }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="fw-bold" style="color: var(--purple-brand);">
+                                <i class="fa-regular fa-clock me-1 text-muted"></i> {{ cita.hora_cita|time:"H:i" }}
+                            </div>
+                        </td>
+
+                        <td class="text-end pe-3">
+                            <span class="status-badge shadow-sm 
+                                {% if cita.estado_cita == 'Programada' %}status-programada
+                                {% elif cita.estado_cita == 'Asistida' %}status-asistida
+                                {% elif cita.estado_cita == 'Cancelada' or cita.estado_cita == 'No Asistió' %}status-cancelada
+                                {% else %}status-default{% endif %}">
+                                
+                                {% if cita.estado_cita == 'Programada' %}<i class="fa-solid fa-hourglass-half me-2"></i>
+                                {% elif cita.estado_cita == 'Asistida' %}<i class="fa-solid fa-check-double me-2"></i>
+                                {% elif cita.estado_cita == 'Cancelada' or cita.estado_cita == 'No Asistió' %}<i class="fa-solid fa-xmark me-2"></i>
+                                {% endif %}
+                                
+                                {{ cita.estado_cita }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="py-4">
+                                <div class="mx-auto mb-3" style="width: 70px; height: 70px; background: rgba(176, 154, 222, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--purple-brand);">
+                                    <i class="fa-regular fa-calendar-xmark" style="font-size: 2rem;"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark mb-1">No tienes citas registradas</h5>
+                                <p style="color: var(--text-gray); font-size: 0.95rem; max-width: 400px; margin: 0 auto;">
+                                    Tu historial está vacío. Comienza tu proceso agendando tu primera sesión con nuestros especialistas.
+                                </p>
+                                <a href="{% url 'agendar_cita_paciente' %}" class="btn-main mt-4">
+                                    <i class="fa-solid fa-plus me-2"></i> Agendar Primera Cita
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

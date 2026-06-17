@@ -1,0 +1,116 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Antecedentes - {{ paciente.nombre_completo }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Variables de color por si no están en tu base.html */
+    :root {
+        --purple-main: #7d5e9e;
+        --purple-light: #f3f0f7;
+    }
+
+    .history-card {
+        background: white;
+        border-radius: 25px;
+        border: none;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    }
+
+    /* Estilo para las cajas de texto de Django */
+    .history-card textarea.form-control {
+        border-radius: 15px;
+        border: 2px solid #e9ecef;
+        padding: 15px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        transition: all 0.3s ease;
+        background-color: #fafafa;
+    }
+
+    .history-card textarea.form-control:focus {
+        border-color: var(--purple-main);
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(125, 94, 158, 0.15);
+    }
+
+    .label-icon {
+        background: var(--purple-light);
+        color: var(--purple-main);
+        padding: 8px 12px;
+        border-radius: 10px;
+        margin-right: 10px;
+    }
+
+    .btn-guardar {
+        background: linear-gradient(135deg, var(--purple-main) 0%, #624a7b 100%);
+        box-shadow: 0 10px 20px rgba(125, 94, 158, 0.3);
+        transition: 0.3s;
+    }
+
+    .btn-guardar:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px rgba(125, 94, 158, 0.4);
+    }
+</style>
+
+<div class="container py-4 animate-item" style="max-width: 850px;">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-notes-medical text-primary me-2"></i>Historial Clínico
+            </h2>
+            <p class="text-muted mb-0 fs-5">Paciente: <span class="fw-bold" style="color: var(--purple-main);">{{ paciente.nombre_completo }}</span></p>
+        </div>
+        <a href="{% url 'ver_historial' paciente.id %}" class="btn btn-white fw-bold border shadow-sm rounded-pill px-4">
+            <i class="fa-solid fa-arrow-left me-2"></i>Volver
+        </a>
+    </div>
+
+    <div class="alert border-0 rounded-4 mb-4 d-flex align-items-center shadow-sm" style="background-color: #fff8e1; color: #856404;">
+        <i class="fa-solid fa-shield-halved fs-3 me-3"></i>
+        <div>
+            <h6 class="fw-bold mb-1">Aviso de Privacidad Ley 1090 de 2006</h6>
+            <small>La información registrada en este formulario es estrictamente confidencial y está protegida por el secreto profesional en psicología.</small>
+        </div>
+    </div>
+
+    <div class="card history-card">
+        <div class="card-body p-4 p-md-5">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="label-icon">
+                            <i class="fa-solid fa-user-injured"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">Antecedentes Personales</h5>
+                    </div>
+                    <p class="text-muted small mb-3 ms-2">Registro de historial médico, consumo de sustancias, hábitos de sueño, cirugías o traumas previos.</p>
+                    {{ form.antecedentes_personales }}
+                </div>
+
+                <hr class="border-light my-5">
+
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="label-icon">
+                            <i class="fa-solid fa-people-roof"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">Antecedentes Familiares</h5>
+                    </div>
+                    <p class="text-muted small mb-3 ms-2">Dinámica del hogar, historial de enfermedades mentales en la familia, relaciones significativas.</p>
+                    {{ form.antecedentes_familiares }}
+                </div>
+
+                <div class="d-grid mt-5 pt-3">
+                    <button type="submit" class="btn btn-guardar text-white fw-bold py-3" style="border-radius: 15px; font-size: 1.1rem;">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Actualizar Expediente Clínico
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

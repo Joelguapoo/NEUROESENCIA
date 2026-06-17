@@ -1,0 +1,163 @@
+{% extends 'usuarios/base.html' %}
+{% block content %}
+<div class="container py-4">
+    <div class="card border-0 shadow-lg p-4 p-md-5 mx-auto" style="border-radius: 25px; max-width: 600px;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold" style="color: #2a1f45;">Pagar Factura {{ factura.nro_factura|default:factura.id }}</h2>
+            <p class="text-muted">Paciente: <strong>{{ factura.paciente.nombre_completo }}</strong></p>
+            <div class="bg-light p-3 rounded-4 mt-3 d-inline-block px-5">
+                <h2 class="fw-bold text-dark mb-0">${{ factura.total }} <small class="fs-6 text-muted">COP</small></h2>
+            </div>
+        </div>
+
+        <form method="POST" action="{% url 'detalle_factura' factura.id %}" id="pagoForm">
+            {% csrf_token %}
+            
+            <h6 class="fw-bold mb-3" style="color: #2a1f45;">Selecciona el Método de Pago:</h6>
+            
+            <div class="row g-3 mb-4 justify-content-center">
+                
+                <div class="col-12 col-md-4">
+                    <input type="radio" class="btn-check" name="metodo_pago" id="btn-tarjeta" value="tarjeta" autocomplete="off" checked onchange="toggleCampos()">
+                    <label class="btn btn-outline-secondary w-100 py-3 rounded-4 fw-bold" for="btn-tarjeta">
+                        <i class="fa-solid fa-credit-card d-block mb-2 fs-4"></i> Tarjeta
+                    </label>
+                </div>
+                
+                <div class="col-12 col-md-4">
+                    <input type="radio" class="btn-check" name="metodo_pago" id="btn-banco" value="transferencia" autocomplete="off" onchange="toggleCampos()">
+                    <label class="btn btn-outline-secondary w-100 py-3 rounded-4 fw-bold" for="btn-banco">
+                        <i class="fa-solid fa-building-columns d-block mb-2 fs-4"></i> PSE / Nequi
+                    </label>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    {% if request.session.paciente_id %}
+                        <input type="radio" class="btn-check" name="metodo_pago" id="btn-clinica" value="clinica" autocomplete="off" onchange="toggleCampos()">
+                        <label class="btn btn-outline-secondary w-100 py-3 rounded-4 fw-bold" for="btn-clinica">
+                            <i class="fa-solid fa-house-medical d-block mb-2 fs-4"></i> En Clínica
+                        </label>
+                    {% else %}
+                        <input type="radio" class="btn-check" name="metodo_pago" id="btn-efectivo" value="efectivo" autocomplete="off" onchange="toggleCampos()">
+                        <label class="btn btn-outline-secondary w-100 py-3 rounded-4 fw-bold" for="btn-efectivo">
+                            <i class="fa-solid fa-money-bill-wave d-block mb-2 fs-4"></i> Efectivo
+                        </label>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div id="campos-tarjeta" class="payment-fields mb-4">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Nombre del Titular</label>
+                    <input type="text" class="form-control rounded-pill px-4" placeholder="Ej: {{ factura.paciente.nombre_completo }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Número de Tarjeta</label>
+                    <input type="text" class="form-control rounded-pill px-4" placeholder="0000 0000 0000 0000">
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">Vencimiento</label>
+                        <input type="text" class="form-control rounded-pill px-4" placeholder="MM/AA">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">CVV</label>
+                        <input type="text" class="form-control rounded-pill px-4" placeholder="123">
+                    </div>
+                </div>
+            </div>
+
+            <div id="campos-banco" class="payment-fields mb-4" style="display: none;">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Seleccionar Banco / Billetera</label>
+                    <select class="form-select rounded-pill px-4" name="banco_seleccionado">
+                        <option value="Nequi">Nequi</option>
+                        <option value="Daviplata">Daviplata</option>
+                        <option value="Bancolombia">Bancolombia</option>
+                        <option value="Davivienda">Banco Davivienda</option>
+                        <option value="Bogota">Banco de Bogotá</option>
+                        <option value="PSE">Otro Banco (PSE)</option>
+                    </select>
+                </div>
+                <div class="mb-3" id="campo-telefono">
+                    <label class="form-label small fw-bold text-muted">Número de Celular (Para Nequi/Daviplata)</label>
+                    <input type="text" class="form-control rounded-pill px-4" placeholder="300 000 0000">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Documento del Titular</label>
+                    <input type="text" class="form-control rounded-pill px-4" value="{{ factura.paciente.dni_paciente }}">
+                </div>
+            </div>
+
+            {% if not request.session.paciente_id %}
+            <div id="campos-efectivo" class="payment-fields mb-4" style="display: none;">
+                <div class="alert alert-success rounded-4 border-0 shadow-sm text-center">
+                    <i class="fa-solid fa-circle-check me-2"></i> Confirmarás la recepción del dinero físico en caja.
+                </div>
+            </div>
+            {% endif %}
+
+            {% if request.session.paciente_id %}
+            <div id="campos-clinica" class="payment-fields mb-4" style="display: none;">
+                <div class="alert alert-warning rounded-4 border-0 shadow-sm text-center" style="background-color: #fffbeb; color: #b45309;">
+                    <i class="fa-regular fa-clock mb-2" style="font-size: 2rem;"></i><br>
+                    Tu factura quedará en estado <strong>Pendiente</strong>.<br>
+                    Por favor acércate a la recepción el día de tu cita para realizar el pago físico.
+                </div>
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn w-100 fw-bold py-3 rounded-pill text-white shadow" style="background: #2a1f45;" id="btn-submit-pago">
+                Procesar Pago Seguramente <i class="fa-solid fa-lock ms-2"></i>
+            </button>
+            
+            <div class="text-center mt-3">
+                {% if request.session.paciente_id %}
+                    <a href="{% url 'mis_facturas' %}" class="text-decoration-none text-muted small fw-bold">Cancelar y Volver</a>
+                {% else %}
+                    <a href="{% url 'lista_facturas' %}" class="text-decoration-none text-muted small fw-bold">Cancelar y Volver a la Lista</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleCampos() {
+        // Ocultamos todos los paneles
+        document.querySelectorAll('.payment-fields').forEach(el => el.style.display = 'none');
+        
+        // Mostrar el botón de procesar pago por defecto
+        const submitBtn = document.getElementById('btn-submit-pago');
+        submitBtn.style.display = 'block'; 
+        
+        // Verificamos cuál está seleccionado
+        if (document.getElementById('btn-tarjeta').checked) {
+            document.getElementById('campos-tarjeta').style.display = 'block';
+        }
+        
+        if (document.getElementById('btn-banco').checked) {
+            document.getElementById('campos-banco').style.display = 'block';
+        }
+        
+        const btnEfectivo = document.getElementById('btn-efectivo');
+        if (btnEfectivo && btnEfectivo.checked) {
+            document.getElementById('campos-efectivo').style.display = 'block';
+        }
+        
+        const btnClinica = document.getElementById('btn-clinica');
+        if (btnClinica && btnClinica.checked) {
+            document.getElementById('campos-clinica').style.display = 'block';
+            
+            // MAGIA: Si el paciente selecciona "En Clínica", ocultamos el botón de "Procesar Pago" 
+            // ya que no va a pagar en este momento.
+            submitBtn.style.display = 'none'; 
+        }
+    }
+
+    // Ejecutar al cargar la página
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleCampos();
+    });
+</script>
+{% endblock %}

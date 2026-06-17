@@ -1,0 +1,326 @@
+{% extends 'usuarios/base.html' %}
+{% block title %}NeuroEsencia | Nuevo Tratamiento{% endblock %}
+
+{% block content %}
+<style>
+    /* === ESTILOS BASADOS EN TU REFERENCIA === */
+    .form-card-premium {
+        background: #ffffff;
+        border-radius: 35px;
+        padding: 60px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+        max-width: 850px;
+        margin: 0 auto;
+    }
+
+    /* Encabezado con Icono Boxed */
+    .form-header-box {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+    .icon-container {
+        width: 65px; height: 65px;
+        background-color: #f1f4f9;
+        border-radius: 18px;
+        display: flex; align-items: center; justify-content: center;
+        color: #2a1f45; font-size: 1.6rem;
+    }
+    .header-title { color: #2a1f45; font-weight: 800; font-size: 1.8rem; margin: 0; letter-spacing: -0.5px; }
+    .header-subtitle { color: #a3aed1; font-size: 0.95rem; margin: 0; }
+
+    /* Etiquetas Estilo Referencia */
+    .custom-label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: #a3aed1;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        display: block;
+    }
+    .custom-label span { color: #f87171; margin-left: 3px; } /* Asterisco rojo */
+
+    /* Inputs Estilo Referencia */
+    .custom-input, .custom-select {
+        background-color: #f4f7fe !important; /* Fondo azulado muy claro */
+        border: 2px solid transparent !important;
+        border-radius: 15px !important;
+        padding: 14px 20px !important;
+        color: #2b3674 !important;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    .custom-input:focus, .custom-select:focus {
+        background-color: #ffffff !important;
+        border-color: #b09ade !important;
+        box-shadow: 0 8px 20px rgba(176, 154, 222, 0.15) !important;
+        outline: none;
+    }
+    .custom-input::placeholder { color: #a3aed1; opacity: 0.6; }
+
+    /* Ayuda inferior */
+    .help-text { font-size: 0.75rem; color: #a3aed1; margin-top: 8px; font-weight: 500; }
+
+    /* Botones Estilo Referencia */
+    .btn-cancel {
+        border: 2px solid #a3aed1;
+        background: transparent;
+        color: #a3aed1;
+        border-radius: 15px;
+        padding: 12px 35px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+    .btn-cancel:hover { background: #f4f7fe; color: #2a1f45; border-color: #2a1f45; }
+
+    .btn-save {
+        background-color: #2a1f45;
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 12px 35px;
+        font-weight: 700;
+        display: flex; align-items: center; gap: 10px;
+        transition: 0.3s;
+    }
+    .btn-save:hover { background-color: #3d2b63; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(42, 31, 69, 0.2); }
+
+    /* Estilos para mensajes de error en validaciones JS */
+    .error-text {
+        color: #ef4444;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .error-text i { font-size: 0.9rem; }
+
+</style>
+
+<div class="container py-4">
+    <div class="form-card-premium fade-in-up">
+        
+        <div class="form-header-box">
+            <div class="icon-container">
+                <i class="fa-solid fa-file-medical"></i>
+            </div>
+            <div>
+                <h2 class="header-title">Registrar Tratamiento</h2>
+                <p class="header-subtitle">Apertura de plan terapéutico para seguimiento clínico.</p>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="row g-4">
+                <div class="col-12">
+                    <label class="custom-label">Historial del Paciente <span>*</span></label>
+                    <div class="select-wrapper">
+                        {{ form.historial }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="custom-label">Diagnóstico Principal <span>*</span></label>
+                    {{ form.diagnostico }}
+                    <p class="help-text">Ej: F32.1 Depresión moderada</p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="custom-label">Enfoque Terapéutico <span>*</span></label>
+                    {{ form.enfoque_terapeutico }}
+                    <p class="help-text">Ej: Cognitivo-Conductual</p>
+                </div>
+
+                <div class="col-12">
+                    <label class="custom-label">Objetivos del Tratamiento <span>*</span></label>
+                    {{ form.objetivos_tratamiento }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="custom-label">Fecha de Inicio <span>*</span></label>
+                    {{ form.fecha_inicio }}
+                </div>
+                <div class="col-md-6">
+                    <label class="custom-label">Fecha de Finalización</label>
+                    {{ form.fecha_fin }}
+                </div>
+
+                <div class="col-12">
+                    <label class="custom-label">Estado del Tratamiento <span>*</span></label>
+                    {{ form.estado_tratamiento }}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 mt-5 pt-4 border-top" style="border-color: #f1f4f9 !important;">
+                <a href="{% url 'lista_tratamientos' %}" class="btn btn-cancel">Cancelar</a>
+                <button type="submit" class="btn btn-save">
+                    <i class="fa-solid fa-notes-medical"></i> Guardar Tratamiento
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        const form = document.querySelector('form');
+        if (form) form.setAttribute('novalidate', 'true'); // Bloquea validación nativa del navegador
+
+        // ==========================================
+        // 1. INYECCIÓN DE CLASES DINÁMICAS (Lo que ya tenías)
+        // ==========================================
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(el => {
+            if (el.tagName === 'SELECT') el.classList.add('custom-select');
+            else el.classList.add('custom-input');
+            
+            if (el.tagName === 'TEXTAREA') {
+                el.style.minHeight = '120px';
+                el.placeholder = "Describe los objetivos a corto y largo plazo (Mínimo 15 caracteres)...";
+            }
+        });
+
+        // ==========================================
+        // 2. FUNCIONES DE APOYO PARA ERRORES
+        // ==========================================
+        function mostrarError(inputElement, mensaje) {
+            let errorSpan = inputElement.nextElementSibling;
+            if (!errorSpan || !errorSpan.classList.contains('error-text-js')) {
+                errorSpan = document.createElement('div');
+                errorSpan.className = 'error-text error-text-js fade-in-up';
+                // Evitamos que se rompa el diseño insertándolo después del help-text si existe
+                let referenceNode = inputElement.nextElementSibling && inputElement.nextElementSibling.classList.contains('help-text') 
+                                    ? inputElement.nextElementSibling : inputElement;
+                referenceNode.parentNode.insertBefore(errorSpan, referenceNode.nextSibling);
+            }
+            errorSpan.style.display = 'flex';
+            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${mensaje}`;
+            return errorSpan;
+        }
+
+        function ocultarError(inputElement) {
+            let errorSpan = inputElement.parentNode.querySelector('.error-text-js');
+            if (errorSpan) {
+                errorSpan.style.display = 'none';
+            }
+        }
+
+        // ==========================================
+        // 3. VALIDACIONES DE TEXTO (Longitud mínima)
+        // ==========================================
+        const diagnostico = document.getElementById('id_diagnostico');
+        if (diagnostico) {
+            diagnostico.setAttribute('minlength', '5');
+            diagnostico.addEventListener('input', function(e) {
+                if (e.target.value.trim().length > 0 && e.target.value.trim().length < 5) {
+                    diagnostico.setCustomValidity("Muy corto.");
+                    mostrarError(diagnostico, 'El diagnóstico debe ser más descriptivo (Mín. 5 caracteres).');
+                } else {
+                    diagnostico.setCustomValidity("");
+                    ocultarError(diagnostico);
+                }
+            });
+        }
+
+        const enfoque = document.getElementById('id_enfoque_terapeutico');
+        if (enfoque) {
+            enfoque.setAttribute('minlength', '5');
+            enfoque.addEventListener('input', function(e) {
+                // Forzamos a que no ponga números en el enfoque terapéutico
+                const numeros = /[0-9]/g;
+                if (numeros.test(e.target.value)) {
+                    mostrarError(enfoque, 'El enfoque terapéutico normalmente no lleva números.');
+                    e.target.value = e.target.value.replace(numeros, '');
+                    setTimeout(() => ocultarError(enfoque), 2500);
+                } else {
+                    ocultarError(enfoque);
+                }
+            });
+        }
+
+        const objetivos = document.getElementById('id_objetivos_tratamiento');
+        if (objetivos) {
+            objetivos.setAttribute('minlength', '15');
+            objetivos.addEventListener('input', function(e) {
+                if (e.target.value.trim().length > 0 && e.target.value.trim().length < 15) {
+                    objetivos.setCustomValidity("Muy corto.");
+                } else {
+                    objetivos.setCustomValidity("");
+                    ocultarError(objetivos);
+                }
+            });
+        }
+
+        // ==========================================
+        // 4. VALIDACIONES LÓGICAS DE FECHAS
+        // ==========================================
+        const fechaInicio = document.getElementById('id_fecha_inicio');
+        const fechaFin = document.getElementById('id_fecha_fin');
+
+        function validarFechas() {
+            if (!fechaInicio || !fechaFin) return;
+            
+            // Si ambas fechas tienen valor, comprobamos la lógica del tiempo
+            if (fechaInicio.value && fechaFin.value) {
+                if (fechaFin.value < fechaInicio.value) {
+                    mostrarError(fechaFin, 'Error temporal: La fecha de fin no puede ser anterior al inicio.');
+                    fechaFin.value = ''; // Resetea la fecha inválida
+                    setTimeout(() => ocultarError(fechaFin), 4000);
+                } else {
+                    ocultarError(fechaFin);
+                }
+            }
+        }
+
+        if (fechaInicio && fechaFin) {
+            fechaInicio.addEventListener('change', validarFechas);
+            fechaFin.addEventListener('change', validarFechas);
+        }
+
+        // ==========================================
+        // 5. INTERCEPTOR FINAL: PREVENIR ENVÍO CON ERRORES
+        // ==========================================
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let formValido = true;
+                
+                // Campos que son absolutamente obligatorios
+                const camposObligatorios = [
+                    'id_historial', 'id_diagnostico', 'id_enfoque_terapeutico', 
+                    'id_objetivos_tratamiento', 'id_fecha_inicio', 'id_estado_tratamiento'
+                ];
+
+                camposObligatorios.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        // Verifica si está vacío o si es un "Select" que se quedó en la opción por defecto (vacía)
+                        if (input.value.trim() === '') {
+                            mostrarError(input, 'Este campo es obligatorio.');
+                            formValido = false;
+                        } 
+                        // Verifica las validaciones de longitud mínima inyectadas (minlength)
+                        else if (!input.checkValidity()) {
+                            mostrarError(input, 'Completa este campo correctamente.');
+                            formValido = false;
+                        }
+                    }
+                });
+
+                if (!formValido) {
+                    e.preventDefault(); 
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); // Sube la pantalla para ver el error
+                }
+            });
+        }
+
+    });
+</script>
+{% endblock %}

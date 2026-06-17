@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* Configuración de impresión */
+        @page { size: letter; margin: 2.5cm; }
+        
+        /* Tipografía y colores base */
+        body { 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            color: #2C3E50; 
+            line-height: 1.5; 
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Encabezado */
+        .header { 
+            text-align: center; 
+            border-bottom: 2px solid #4A235A; /* Morado más sobrio */
+            padding-bottom: 15px; 
+            margin-bottom: 30px; 
+        }
+        .titulo { 
+            color: #4A235A; 
+            font-size: 24px; 
+            font-weight: bold; 
+            letter-spacing: 1px; 
+        }
+        .subtitulo { 
+            font-size: 11px; 
+            color: #7F8C8D; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            margin-top: 3px;
+        }
+        .tipo-doc { 
+            font-size: 13px; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            color: #2C3E50; 
+            background-color: #F4F6F7; 
+            padding: 6px 15px; 
+            display: inline-block; 
+            border-radius: 4px; 
+            letter-spacing: 0.5px;
+        }
+
+        /* Tabla de Información del Paciente */
+        .tabla-info { 
+            width: 100%; 
+            margin-bottom: 30px; 
+            border-collapse: collapse; 
+        }
+        .tabla-info td { 
+            padding: 8px 5px; 
+            font-size: 12px; 
+            border-bottom: 1px solid #ECF0F1; 
+        }
+        .label { 
+            font-weight: bold; 
+            color: #7F8C8D; 
+            width: 18%; 
+            text-transform: uppercase; 
+            font-size: 10px; 
+        }
+
+        /* Secciones Clínicas */
+        .seccion { 
+            margin-top: 20px; 
+            page-break-inside: avoid; /* Evita que la sección se corte a la mitad al imprimir */
+        }
+        .seccion-titulo { 
+            font-weight: bold; 
+            color: #4A235A; 
+            font-size: 13px; 
+            margin-bottom: 10px; 
+            text-transform: uppercase; 
+            border-bottom: 1px solid #BDC3C7; 
+            padding-bottom: 4px; 
+        }
+        .contenido { 
+            font-size: 12px; 
+            color: #34495E; 
+            background-color: #FAFAFA; 
+            padding: 12px 15px; 
+            border-radius: 4px; 
+            border-left: 4px solid #4A235A; 
+        }
+
+        /* Estructura de datos internos */
+        .fila-datos { 
+            display: table; 
+            width: 100%; 
+            margin-bottom: 8px; 
+        }
+        .col-dato { 
+            display: table-cell; 
+            width: 50%; 
+            padding-right: 15px; 
+        }
+        .alerta { 
+            color: #C0392B; 
+            font-weight: bold; 
+            background-color: #FDEDEC; 
+            padding: 2px 6px; 
+            border-radius: 3px; 
+        }
+
+        /* Indicadores visuales */
+        .indicadores {
+            margin-top: 12px; 
+            border-top: 1px dashed #BDC3C7; 
+            padding-top: 10px;
+            font-size: 11px;
+        }
+
+        /* Firma */
+        .firma-container { 
+            margin-top: 70px; 
+            text-align: center; 
+            page-break-inside: avoid; 
+        }
+        .linea-firma { 
+            border-top: 1px solid #2C3E50; 
+            width: 250px; 
+            margin: 0 auto 10px auto; 
+        }
+        .datos-firma { 
+            font-size: 12px; 
+            color: #2C3E50; 
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="titulo">NEUROESENCIA</div>
+        <div class="subtitulo">Centro de Especialidades Psicológicas</div>
+        <div class="tipo-doc">NOTA DE EVOLUCIÓN CLÍNICA</div>
+    </div>
+
+    <table class="tabla-info">
+        <tr>
+            <td class="label">Paciente:</td>
+            <td>{{ evolucion.cita.paciente.nombre_completo }}</td>
+            <td class="label">Fecha Sesión:</td>
+            <td>{{ evolucion.cita.fecha_cita|date:"d/m/Y" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Documento:</td>
+            <td>{{ evolucion.cita.paciente.dni_paciente }}</td>
+            <td class="label">Código Cita:</td>
+            <td>{{ evolucion.cita.codigo_cita }}</td>
+        </tr>
+    </table>
+
+    <div class="seccion">
+        <div class="seccion-titulo">1. Motivo de Consulta y Contexto</div>
+        <div class="contenido">
+            <div class="fila-datos">
+                <strong>Motivo de Consulta:</strong> {{ evolucion.motivo_consulta }}
+            </div>
+            <div class="fila-datos" style="margin-top: 5px;">
+                <strong>Estresores Recientes:</strong> {{ evolucion.estresores_recientes|default:"No reportados" }}
+            </div>
+        </div>
+    </div>
+
+    <div class="seccion">
+        <div class="seccion-titulo">2. Evaluación Clínica y Estado Mental</div>
+        <div class="contenido">
+            <div class="fila-datos">
+                <div class="col-dato"><strong>Estado de Ánimo:</strong> {{ evolucion.get_estado_animo_display|default:evolucion.estado_animo }}</div>
+                <div class="col-dato"><strong>Afecto Observado:</strong> {{ evolucion.get_afecto_observado_display|default:evolucion.afecto_observado }}</div>
+            </div>
+            <div class="fila-datos">
+                <div class="col-dato"><strong>Nivel de Energía:</strong> {{ evolucion.nivel_energia }}/10</div>
+                <div class="col-dato">
+                    <strong>Nivel de Riesgo:</strong> 
+                    <span class="{% if evolucion.riesgo == 'Alto' or evolucion.riesgo == 'Severo' %}alerta{% endif %}">
+                        {{ evolucion.get_riesgo_display|default:evolucion.riesgo }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="indicadores">
+                <strong>Indicadores Biológicos/Riesgo:</strong> &nbsp;
+                Sueño Alterado: {% if evolucion.sueno_alterado %}Sí{% else %}No{% endif %} &nbsp;|&nbsp; 
+                Apetito Alterado: {% if evolucion.apetito_alterado %}Sí{% else %}No{% endif %} &nbsp;|&nbsp; 
+                <span class="{% if evolucion.ideacion_suicida %}alerta{% endif %}">
+                    Ideación Suicida: {% if evolucion.ideacion_suicida %}SÍ{% else %}No{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="seccion">
+        <div class="seccion-titulo">3. Descripción del Proceso Terapéutico</div>
+        <div class="contenido">
+            <div style="margin-bottom: 12px; text-align: justify;">
+                {{ evolucion.descripcion_sesion|linebreaksbr }}
+            </div>
+            <div class="indicadores" style="border-top: none; padding-top: 0;">
+                <strong>Evidencia / Signos detectados:</strong> {{ evolucion.evidencia|default:"No registrada" }}
+            </div>
+        </div>
+    </div>
+
+    <div class="seccion">
+        <div class="seccion-titulo">4. Impresión Diagnóstica y Plan de Acción</div>
+        <div class="contenido">
+            <div class="fila-datos">
+                <div class="col-dato"><strong>Tratamiento:</strong> {{ evolucion.tratamiento|default:"No especificado" }}</div>
+                <div class="col-dato"><strong>Diagnóstico:</strong> {{ evolucion.diagnostico_sesion|default:"En evaluación" }}</div>
+            </div>
+            <div style="margin-top: 10px;">
+                <div style="margin-bottom: 5px;"><strong>Objetivo de la sesión:</strong> {{ evolucion.objetivo|default:"No especificado" }}</div>
+                <div style="margin-bottom: 5px;"><strong>Recomendaciones:</strong> {{ evolucion.recomendaciones|default:"Ninguna" }}</div>
+                <div><strong>Próximo Paso:</strong> {{ evolucion.proximo_paso|default:"Continuar plan de tratamiento" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="firma-container">
+        <div class="linea-firma"></div>
+        <div class="datos-firma">
+            <strong>Ps. {{ evolucion.cita.psicologo.nombre_completo }}</strong><br>
+            Firma del Profesional Tratante
+        </div>
+    </div>
+</body>
+</html>

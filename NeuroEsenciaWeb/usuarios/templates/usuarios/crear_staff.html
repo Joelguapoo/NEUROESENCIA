@@ -1,0 +1,548 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}
+    {% if editando %}Editar{% else %}Nuevo{% endif %} Colaborador - NeuroEsencia
+{% endblock %}
+
+{% block content %}
+<style>
+    /* --- VARIABLES LOCALES (Sistema Unificado) --- */
+    :root {
+        --card-bg: #ffffff;
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --purple-light: #4c3b73;
+        --purple-pastel: #b09ade;
+        --text-dark: #2b3674;
+        --text-gray: #a3aed1;
+        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+    }
+
+    /* --- ANIMACIONES --- */
+    .fade-in-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- TARJETA DEL FORMULARIO --- */
+    .form-card {
+        background: var(--card-bg);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .form-header-icon {
+        width: 60px; height: 60px;
+        background: rgba(176, 154, 222, 0.15);
+        color: var(--purple-brand);
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; margin-bottom: 20px;
+    }
+
+    /* --- ESTILOS DE INPUTS PREMIUM --- */
+    .form-label-custom {
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: var(--text-gray);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    /* Forzamos el estilo premium a todos los inputs (Django y HTML nativo) */
+    .form-card input, 
+    .form-card select, 
+    .form-control, 
+    .form-select {
+        width: 100%;
+        border-radius: 12px !important;
+        border: 2px solid transparent !important;
+        background-color: var(--page-bg) !important;
+        padding: 12px 18px !important;
+        font-weight: 500;
+        color: var(--text-dark);
+        transition: all 0.3s ease;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important;
+    }
+
+    /* Estado Focus */
+    .form-card input:focus, 
+    .form-card select:focus, 
+    .form-control:focus, 
+    .form-select:focus {
+        background-color: #ffffff !important;
+        border-color: var(--purple-pastel) !important;
+        box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15) !important;
+        outline: none !important;
+    }
+
+    /* Estado Deshabilitado / Solo Lectura (DNI al editar) */
+    .form-card input[readonly], 
+    .form-card select[disabled] {
+        background-color: rgba(163, 174, 209, 0.1) !important;
+        color: var(--text-gray);
+        cursor: not-allowed;
+    }
+
+    /* Pequeño ajuste para las ayudas de texto */
+    .help-text {
+        color: var(--text-gray);
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-top: 6px;
+        display: block;
+    }
+    .help-text.warning {
+        color: #d97706; /* Naranja ámbar suave */
+    }
+
+    /* --- ALERTAS PREMIUM --- */
+    .alert-premium {
+        border-radius: 12px;
+        border: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: var(--shadow-soft);
+    }
+    .alert-premium.danger { background: #fef2f2; color: #ef4444; border-left: 4px solid #ef4444; }
+    .alert-premium.success { background: #f0fdf4; color: #10b981; border-left: 4px solid #10b981; }
+
+    /* --- BOTONES --- */
+    .btn-cancelar {
+        background-color: transparent;
+        color: var(--text-gray);
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 12px 24px;
+        transition: all 0.3s;
+        border: 1px solid var(--text-gray);
+        text-align: center;
+    }
+    .btn-cancelar:hover { 
+        background-color: rgba(163, 174, 209, 0.1); 
+        color: var(--text-dark);
+        border-color: var(--text-dark);
+    }
+
+    .btn-guardar {
+        background-color: var(--purple-brand);
+        color: white;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 12px 30px;
+        transition: all 0.3s;
+        border: none;
+        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2);
+    }
+    .btn-guardar:hover {
+        background: var(--purple-light);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3);
+    }
+</style>
+
+<div class="container-fluid py-2">
+    <div class="mx-auto fade-in-up" style="max-width: 650px; animation-delay: 0.1s;">
+        
+        {% if messages %}
+            <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-premium {% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>{{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.7rem;"></button>
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-card">
+            
+            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom border-light">
+                <div class="form-header-icon">
+                    {% if editando %}
+                        <i class="fa-solid fa-user-pen"></i>
+                    {% else %}
+                        <i class="fa-solid fa-user-shield"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h4 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">
+                        {% if editando %}Actualizar Colaborador{% else %}Registrar Colaborador{% endif %}
+                    </h4>
+                    <p class="m-0 mt-1" style="color: var(--text-gray); font-size: 0.95rem;">
+                        {% if editando %}Modifica los accesos y datos de {{ empleado.nombre_completo }}.{% else %}Agrega un nuevo miembro a tu equipo clínico o administrativo.{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row g-4">
+                    
+                    <div class="col-12">
+                        <label class="form-label-custom">Rol en el Sistema <span class="text-danger">*</span></label>
+                        <select name="rol" class="form-select" required>
+                            <option value="" disabled {% if not empleado and not request.POST.rol %}selected{% endif %}>Seleccione los permisos para este usuario...</option>
+                            {% for rol in roles_disponibles %}
+                                <option value="{{ rol.pk }}" 
+                                    {% if empleado.rol.pk == rol.pk or request.POST.rol == rol.pk|stringformat:"s" %}selected{% endif %}>
+                                    {{ rol.nombre_rol }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label-custom">Nombre de Usuario <span class="text-danger">*</span></label>
+                        {{ form.username }}
+                        <span class="help-text">Ej: jdoe, admin_neuro</span>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label-custom">Email <span class="text-danger">*</span></label>
+                        {{ form.email }}
+                        <span class="help-text">Para notificaciones y recuperación.</span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label-custom">Tipo Doc. <span class="text-danger">*</span></label>
+                        <select name="tipo_documento" class="form-select" required {% if editando %}disabled{% endif %}>
+                            <option value="CC" {% if empleado.tipo_documento == 'CC' or request.POST.tipo_documento == 'CC' %}selected{% endif %}>C.C.</option>
+                            <option value="TI" {% if empleado.tipo_documento == 'TI' or request.POST.tipo_documento == 'TI' %}selected{% endif %}>T.I.</option>
+                            <option value="CE" {% if empleado.tipo_documento == 'CE' or request.POST.tipo_documento == 'CE' %}selected{% endif %}>C.E.</option>
+                            <option value="PPT" {% if empleado.tipo_documento == 'PPT' or request.POST.tipo_documento == 'PPT' %}selected{% endif %}>PPT</option>
+                            <option value="Pasaporte" {% if empleado.tipo_documento == 'Pasaporte' or request.POST.tipo_documento == 'Pasaporte' %}selected{% endif %}>Pasaporte</option>
+                        </select>
+                        {% if editando %}
+                        <input type="hidden" name="tipo_documento" value="{{ empleado.tipo_documento }}">
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <label class="form-label-custom">Número de Documento <span class="text-danger">*</span></label>
+                        <input type="text" name="dni_empleado" class="form-control" 
+                            required maxlength="15" placeholder="Ej: 1002345678"
+                            value="{% if empleado %}{{ empleado.dni_empleado }}{% else %}{{ request.POST.dni_empleado|default:'' }}{% endif %}"
+                            {% if editando %}readonly{% endif %}>
+                        {% if editando %}
+                        <span class="help-text"><i class="fa-solid fa-lock me-1"></i>Por seguridad, el documento no se puede alterar.</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-7">
+                        <label class="form-label-custom">Nombre Completo <span class="text-danger">*</span></label>
+                        <input type="text" name="nombre_completo" class="form-control" required maxlength="100" placeholder="Nombres y Apellidos"
+                            value="{% if empleado %}{{ empleado.nombre_completo }}{% else %}{{ request.POST.nombre_completo|default:'' }}{% endif %}">
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label-custom">Teléfono</label>
+                        <input type="text" name="telefono" class="form-control" maxlength="20" placeholder="Ej: 300 123 4567"
+                            value="{% if empleado %}{{ empleado.telefono }}{% else %}{{ request.POST.telefono|default:'' }}{% endif %}">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label-custom">
+                            {% if editando %}Nueva Contraseña{% else %}Contraseña Temporal <span class="text-danger">*</span>{% endif %}
+                        </label>
+                        {{ form.password }}
+                        {% if editando %}
+                            <span class="help-text warning"><i class="fa-solid fa-circle-info me-1"></i>Deje este campo en blanco si no desea cambiar la clave actual del colaborador.</span>
+                        {% else %}
+                            <span class="help-text">El colaborador usará esta clave para su primer ingreso.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mt-5 pt-4 border-top border-light d-flex justify-content-end gap-3 flex-wrap">
+                    <a href="{% url 'lista_staff' %}" class="btn-cancelar text-decoration-none">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn-guardar d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-user-check"></i>
+                        {% if editando %}Actualizar Datos{% else %}Guardar Colaborador{% endif %}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // Bloquear validación por defecto para usar nuestros tooltips
+        const form = document.querySelector('form');
+        if (form) form.setAttribute('novalidate', 'true');
+
+        // ==========================================
+        // FUNCIONES DE APOYO PARA MOSTRAR ERRORES
+        // ==========================================
+        function mostrarError(inputElement, mensaje) {
+            let errorSpan = inputElement.parentNode.querySelector('.error-text-js');
+            if (!errorSpan) {
+                errorSpan = document.createElement('div');
+                errorSpan.className = 'error-text error-text-js fade-in-up mt-1 text-danger fw-bold';
+                errorSpan.style.fontSize = '0.8rem';
+                // Insertamos el error al final del contenedor para no romper la maquetación de los help-texts
+                inputElement.parentNode.appendChild(errorSpan);
+            }
+            errorSpan.style.display = 'flex';
+            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation me-1"></i> ${mensaje}`;
+            return errorSpan;
+        }
+
+        function ocultarError(inputElement) {
+            let errorSpan = inputElement.parentNode.querySelector('.error-text-js');
+            if (errorSpan) {
+                errorSpan.style.display = 'none';
+                errorSpan.classList.remove('fade-in-up');
+            }
+        }
+
+        // ==========================================
+        // CASO 1: DNI DINÁMICO SEGÚN DOCUMENTO
+        // ==========================================
+        const tipoDocSelect = document.querySelector('select[name="tipo_documento"]');
+        const dniInput = document.querySelector('input[name="dni_empleado"]');
+
+        function actualizarReglasDni() {
+            if (!tipoDocSelect || !dniInput) return;
+            // Si el select está deshabilitado (editando), obtenemos el valor del input hidden
+            let tipoVal = tipoDocSelect.value;
+            if (tipoDocSelect.disabled) {
+                const hiddenInput = document.querySelector('input[type="hidden"][name="tipo_documento"]');
+                if (hiddenInput) tipoVal = hiddenInput.value;
+            }
+
+            let tipo = tipoVal.toLowerCase();
+            let esAlfanumerico = false;
+            let min = '2'; let max = '25';
+
+            if (tipo === 'cc' || tipo === 'c.c.') {
+                min = '8'; max = '10';
+            } else if (tipo === 'ti' || tipo === 't.i.') {
+                min = '10'; max = '11';
+            } else if (tipo === 'ce' || tipo === 'c.e.') {
+                min = '6'; max = '7';
+            } else if (tipo === 'pasaporte') {
+                min = '8'; max = '9';
+                esAlfanumerico = true;
+            } else if (tipo === 'ppt') {
+                min = '7'; max = '15';
+                esAlfanumerico = true;
+            } else {
+                esAlfanumerico = true;
+            }
+
+            dniInput.setAttribute('minlength', min);
+            dniInput.setAttribute('maxlength', max);
+            dniInput.dataset.alfanumerico = esAlfanumerico;
+            
+            if (dniInput.value.length > 0) validarDNI({ target: dniInput });
+        }
+
+        function validarDNI(e) {
+            if (!dniInput || dniInput.hasAttribute('readonly')) return; // No validar si está en solo lectura (editando)
+            
+            const esAlfa = dniInput.dataset.alfanumerico === 'true';
+            const caracteresInvalidos = esAlfa ? /[^a-zA-Z0-9]/g : /[^0-9]/g;
+            const min = parseInt(dniInput.getAttribute('minlength'));
+            
+            let valor = e.target.value;
+
+            if (caracteresInvalidos.test(valor)) {
+                mostrarError(dniInput, esAlfa ? 'Permite letras y números.' : 'Solo números para este documento.');
+                e.target.value = valor.replace(caracteresInvalidos, '');
+                setTimeout(() => ocultarError(dniInput), 3000);
+            }
+
+            if (e.target.value.length > 0 && e.target.value.length < min) {
+                dniInput.setCustomValidity(`Mín. ${min} caracteres.`);
+            } else {
+                dniInput.setCustomValidity("");
+                ocultarError(dniInput);
+            }
+        }
+
+        if (tipoDocSelect && dniInput) {
+            tipoDocSelect.addEventListener('change', actualizarReglasDni);
+            dniInput.addEventListener('input', validarDNI);
+            actualizarReglasDni();
+        }
+
+        // ==========================================
+        // CASO 2: NOMBRE COMPLETO (Sin números, Title Case, Min 5)
+        // ==========================================
+        const nombreInput = document.querySelector('input[name="nombre_completo"]');
+        if (nombreInput) {
+            nombreInput.setAttribute('minlength', '5');
+            nombreInput.addEventListener('input', function(e) {
+                const numeros = /[0-9]/g;
+                let valor = e.target.value;
+
+                if (numeros.test(valor)) {
+                    mostrarError(nombreInput, 'No se permiten números.');
+                    valor = valor.replace(numeros, '');
+                    setTimeout(() => ocultarError(nombreInput), 2500);
+                }
+                
+                // Capitalizar primera letra (Title Case)
+                e.target.value = valor.toLowerCase().replace(/(?:^|\s)\S/g, l => l.toUpperCase());
+                
+                if (e.target.value.trim().length > 0 && e.target.value.trim().length < 5) {
+                    nombreInput.setCustomValidity("Nombre muy corto.");
+                } else {
+                    nombreInput.setCustomValidity("");
+                    ocultarError(nombreInput);
+                }
+            });
+        }
+
+        // ==========================================
+        // CASO 3: TELÉFONO (Obligatorio, 10 exactos)
+        // ==========================================
+        const telefonoInput = document.querySelector('input[name="telefono"]');
+        if (telefonoInput) {
+            telefonoInput.setAttribute('required', 'true');
+            telefonoInput.setAttribute('minlength', '10');
+            telefonoInput.setAttribute('maxlength', '10');
+            
+            telefonoInput.addEventListener('input', function(e) {
+                const caracteresInvalidos = /[^0-9]/g;
+                let valor = e.target.value;
+                
+                if (caracteresInvalidos.test(valor)) {
+                    mostrarError(telefonoInput, 'Solo se permiten números.');
+                    valor = valor.replace(caracteresInvalidos, '');
+                    e.target.value = valor;
+                    setTimeout(() => ocultarError(telefonoInput), 2500);
+                }
+                
+                if (valor.length === 0) {
+                    telefonoInput.setCustomValidity("El teléfono es obligatorio.");
+                } else if (valor.length < 10) {
+                    telefonoInput.setCustomValidity("Debe tener exactamente 10 dígitos.");
+                } else {
+                    telefonoInput.setCustomValidity("");
+                    ocultarError(telefonoInput);
+                }
+            });
+        }
+
+        // ==========================================
+        // CASO 4: USERNAME (Sin espacios, min 4)
+        // ==========================================
+        const usernameInput = document.querySelector('input[name="username"]');
+        if (usernameInput) {
+            usernameInput.setAttribute('minlength', '4');
+            usernameInput.addEventListener('input', function(e) {
+                const espacios = /\s/g;
+                if (espacios.test(e.target.value)) {
+                    mostrarError(usernameInput, 'El usuario no puede contener espacios.');
+                    e.target.value = e.target.value.replace(espacios, '');
+                    setTimeout(() => ocultarError(usernameInput), 2500);
+                }
+                
+                if (e.target.value.length > 0 && e.target.value.length < 4) {
+                    usernameInput.setCustomValidity("Mínimo 4 caracteres.");
+                } else {
+                    usernameInput.setCustomValidity("");
+                    ocultarError(usernameInput);
+                }
+            });
+        }
+
+        // ==========================================
+        // CASO 5: EMAIL (Obligatorio, Formato válido)
+        // ==========================================
+        const emailInput = document.querySelector('input[name="email"]');
+        if (emailInput) {
+            emailInput.setAttribute('required', 'true');
+            emailInput.addEventListener('input', function(e) {
+                const valor = e.target.value.trim();
+                const formatoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
+                
+                if (valor.length === 0) {
+                    emailInput.setCustomValidity("El correo es obligatorio.");
+                } else if (!formatoValido) {
+                    emailInput.setCustomValidity("Formato de correo inválido.");
+                    mostrarError(emailInput, 'Ingresa un formato válido (Ej: usuario@dominio.com).');
+                } else {
+                    emailInput.setCustomValidity("");
+                    ocultarError(emailInput);
+                }
+            });
+        }
+
+        // ==========================================
+        // CASO 6: CONTRASEÑA (Seguridad, Min 8 si se llena)
+        // ==========================================
+        const passwordInput = document.querySelector('input[name="password"]');
+        if (passwordInput) {
+            // Evaluamos si es requerida por defecto (Usuario Nuevo) o no (Editando)
+            const isRequired = passwordInput.hasAttribute('required');
+            if (isRequired) passwordInput.setAttribute('minlength', '8');
+
+            passwordInput.addEventListener('input', function(e) {
+                const valor = e.target.value;
+                // Si está editando y escribe algo, forzamos mínimo 8. Si lo deja vacío, no pasa nada.
+                if (valor.length > 0 && valor.length < 8) {
+                    passwordInput.setCustomValidity("La contraseña debe tener al menos 8 caracteres.");
+                    mostrarError(passwordInput, 'Demasiado corta. Mínimo 8 caracteres.');
+                } else {
+                    passwordInput.setCustomValidity("");
+                    ocultarError(passwordInput);
+                }
+            });
+        }
+
+        // ==========================================
+        // INTERCEPTOR FINAL (Evitar Guardado Vacío)
+        // ==========================================
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let formValido = true;
+                
+                // Lista de campos que SÍ o SÍ deben estar llenos
+                // Ahora como les inyectamos 'required' dinámicamente al teléfono y correo, este query los captura automáticamente
+                const requiredInputs = form.querySelectorAll('input[required], select[required]');
+                
+                requiredInputs.forEach(input => {
+                    if (input.value.trim() === '') {
+                        mostrarError(input, 'Este campo es obligatorio.');
+                        formValido = false;
+                    } else if (!input.checkValidity()) {
+                        mostrarError(input, input.validationMessage || 'Formato incorrecto o incompleto.');
+                        formValido = false;
+                    }
+                });
+
+                // Validación especial para contraseña (si es requerida o si intentó llenarla a medias)
+                if (passwordInput && passwordInput.hasAttribute('required') && passwordInput.value.length === 0) {
+                     mostrarError(passwordInput, 'La contraseña es obligatoria para nuevos usuarios.');
+                     formValido = false;
+                }
+                if (passwordInput && passwordInput.value.length > 0 && passwordInput.value.length < 8) {
+                     formValido = false;
+                }
+
+                if (!formValido) {
+                    e.preventDefault(); 
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'usuarios/base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="card border-0 shadow-lg mx-auto" style="border-radius: 30px; max-width: 700px;">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <div class="mx-auto mb-3" style="width: 80px; height: 80px; background: rgba(176, 154, 222, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--purple-brand);">
+                    <i class="fa-solid fa-file-excel fa-3x"></i>
+                </div>
+                <h2 class="fw-bold">Importación Masiva</h2>
+                <p class="text-muted">Sube tu archivo Excel con la base de datos de pacientes.</p>
+            </div>
+
+            <div class="alert alert-info border-0 rounded-4 mb-4" style="background: #f0f7ff;">
+                <h6 class="fw-bold"><i class="fa-solid fa-circle-info me-2"></i>Formato del archivo:</h6>
+                <small>El Excel debe contener las siguientes columnas exactas:</small>
+                <div class="mt-2">
+                    <span class="badge bg-white text-dark border me-1">dni</span>
+                    <span class="badge bg-white text-dark border me-1">nombre_completo</span>
+                    <span class="badge bg-white text-dark border me-1">correo</span>
+                    <span class="badge bg-white text-dark border">telefono</span>
+                </div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                {% csrf_token %}
+                <div class="upload-container mb-4">
+                    <input type="file" name="archivo_excel" id="fileInput" class="d-none" accept=".xlsx, .xls">
+                    <label for="fileInput" class="w-100 p-5 text-center border-dashed rounded-4" style="border: 2px dashed #b09ade; cursor: pointer; transition: 0.3s;" id="dropZone">
+                        <i class="fa-solid fa-cloud-arrow-up fa-2x mb-3" style="color: #b09ade;"></i>
+                        <p class="mb-0 fw-bold" id="fileName">Haz clic para buscar o arrastra el archivo aquí</p>
+                        <p class="small text-muted">Solo archivos .xlsx o .xls</p>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn w-100 py-3 rounded-pill text-white fw-bold shadow-sm" style="background: var(--purple-brand);">
+                    Iniciar Procesamiento Masivo <i class="fa-solid fa-bolt ms-2"></i>
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'lista_pacientes' %}" class="text-decoration-none text-muted small">Volver al listado</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileName');
+    const dropZone = document.getElementById('dropZone');
+
+    fileInput.addEventListener('change', function() {
+        if(this.files.length > 0) {
+            fileNameDisplay.innerText = "Archivo listo: " + this.files[0].name;
+            dropZone.style.background = "#f8f4ff";
+            dropZone.style.borderColor = "var(--purple-brand)";
+        }
+    });
+
+    // Efecto visual al arrastrar
+    ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+            e.preventDefault();
+            if (eventName === 'dragover') dropZone.style.background = "#f8f4ff";
+            else dropZone.style.background = "transparent";
+        });
+    });
+</script>
+{% endblock %}

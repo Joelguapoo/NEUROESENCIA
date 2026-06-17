@@ -1,0 +1,261 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Pacientes - NeuroEsencia{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    :root {
+        --card-bg: #ffffff;
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --purple-light: #4c3b73;
+        --purple-pastel: #b09ade;
+        --text-dark: #2b3674;
+        --text-gray: #a3aed1;
+        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+        --shadow-hover: 0 15px 35px rgba(42, 31, 69, 0.08);
+    }
+    .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    .stat-card-single { background: linear-gradient(135deg, var(--purple-brand) 0%, var(--purple-light) 100%); border-radius: 24px; padding: 30px 40px; color: white; box-shadow: 0 15px 25px rgba(42, 31, 69, 0.15); display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; transition: transform 0.3s ease; }
+    .stat-card-single:hover { transform: translateY(-3px); }
+    .stat-card-single::after { content: ''; position: absolute; right: -20px; top: -50px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(176, 154, 222, 0.2) 0%, rgba(255,255,255,0) 70%); pointer-events: none; }
+    .stat-card-single .info { z-index: 1; }
+    .stat-card-single h3 { font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .stat-card-single p { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: 0.5px; opacity: 0.8; text-transform: uppercase; margin-bottom: 8px; }
+    .stat-icon-large { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); width: 85px; height: 85px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; color: var(--purple-pastel); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 1; }
+    .toolbar-container { background: var(--card-bg); border-radius: 20px; padding: 15px 20px; box-shadow: var(--shadow-soft); margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; border: 1px solid rgba(0,0,0,0.02); }
+    .search-input-container { position: relative; flex-grow: 1; max-width: 450px; }
+    .search-input-container .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-gray); font-size: 1.1rem; }
+    .search-input-container .form-control { padding-left: 55px; border-radius: 50px; height: 50px; border: 2px solid transparent; background: var(--page-bg); font-weight: 500; color: var(--text-dark); transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+    .search-input-container .form-control:focus { background: white; border-color: var(--purple-pastel); box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15); outline: none; }
+    .btn-clear-search { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #ff6b6b; text-decoration: none; transition: 0.2s; font-size: 1.2rem; }
+    .btn-clear-search:hover { transform: translateY(-50%) scale(1.1); color: #e53e3e; }
+    .btn-add-patient { background: var(--purple-brand); color: white !important; border: none; border-radius: 50px; padding: 0 24px; height: 50px; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2); transition: all 0.3s ease; }
+    .btn-add-patient:hover { background: var(--purple-light); transform: translateY(-2px); box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3); }
+    .table-wrapper { background: var(--card-bg); border-radius: 24px; padding: 10px; box-shadow: var(--shadow-soft); border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
+    .table-premium { margin-bottom: 0; }
+    .table-premium thead { background-color: rgba(244, 247, 254, 0.6); }
+    .table-premium thead th { color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; border: none; padding: 20px 24px; font-weight: 700; }
+    .table-premium thead th:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+    .table-premium thead th:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+    .table-premium tbody td { vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.02); padding: 20px 24px; color: var(--text-dark); font-weight: 500; }
+    .table-premium tbody tr { transition: all 0.2s ease; border-radius: 16px; }
+    .table-premium tbody tr:hover { background-color: rgba(176, 154, 222, 0.05); }
+    .table-premium tbody tr:last-child td { border-bottom: none; }
+    .patient-avatar { width: 45px; height: 45px; border-radius: 14px; background: rgba(176, 154, 222, 0.15); color: var(--purple-brand); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0; }
+    .btn-action { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; background: var(--page-bg); color: var(--text-gray); border: 1px solid transparent; }
+    .btn-action.view:hover { background: rgba(176, 154, 222, 0.1); color: var(--purple-brand); border-color: rgba(176, 154, 222, 0.3); transform: scale(1.05); }
+    .btn-action.edit:hover { background: #fff8e6; color: #f59e0b; border-color: #fde68a; transform: scale(1.05); }
+    .btn-action.delete:hover { background: #fee2e2; color: #dc2626; border-color: #fecaca; transform: scale(1.05); }
+    
+    .status-badge { font-weight: 700; padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; display: inline-block; letter-spacing: 0.5px; }
+    .status-badge.activo { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .status-badge.inactivo { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    
+    .btn-action.reactivar:hover { background: #d1fae5; color: #059669; border-color: #a7f3d0; transform: scale(1.05); }
+
+    .empty-state-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--page-bg); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+</style>
+
+<div class="mb-4 fade-in-up" style="animation-delay: 0.1s;">
+    <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Directorio de Pacientes</h3>
+    <p class="mt-1" style="color: var(--text-gray); font-weight: 500;">Gestiona la información y el historial clínico de forma segura.</p>
+</div>
+
+<div class="row mb-4 fade-in-up" style="animation-delay: 0.2s;">
+    <div class="col-12 col-md-8 col-xl-5">
+        <div class="stat-card-single">
+            <div class="info">
+                <p>Total Registrados</p>
+                <h3>{{ total_pacientes|default:0 }}</h3>
+            </div>
+            <div class="stat-icon-large">
+                <i class="fa-solid fa-users-viewfinder"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toolbar-container fade-in-up" style="animation-delay: 0.3s;">
+    <div class="d-flex gap-3 flex-grow-1 align-items-center flex-wrap w-100">
+        <form method="GET" class="search-input-container flex-grow-1" id="filterForm">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" name="search" class="form-control" placeholder="Buscar por nombre o documento..." value="{{ busqueda|default:'' }}">
+            <input type="hidden" name="estado" value="{{ filtro_estado }}">
+            
+            {% if busqueda %}
+                <a href="{% url 'lista_pacientes' %}?estado={{ filtro_estado }}" class="btn-clear-search" title="Limpiar búsqueda">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </a>
+            {% endif %}
+        </form>
+
+        <div class="btn-group shadow-sm" role="group">
+            <a href="?search={{ busqueda|default:'' }}&estado=todos" class="btn {% if filtro_estado == 'todos' %}btn-primary{% else %}btn-outline-primary{% endif %}" style="{% if filtro_estado == 'todos' %}background-color: var(--purple-brand); border-color: var(--purple-brand);{% else %}color: var(--purple-brand); border-color: var(--purple-pastel);{% endif %}">Todos</a>
+            <a href="?search={{ busqueda|default:'' }}&estado=activos" class="btn {% if filtro_estado == 'activos' %}btn-success{% else %}btn-outline-success{% endif %}">Activos</a>
+            <a href="?search={{ busqueda|default:'' }}&estado=inactivos" class="btn {% if filtro_estado == 'inactivos' %}btn-danger{% else %}btn-outline-danger{% endif %}">Inactivos</a>
+        </div>
+
+        {% if request.user.is_superuser or "Administrador" in request.user.groups.all.values_list|stringformat:"s" or "Psicologo" in request.user.groups.all.values_list|stringformat:"s" %}
+        <a href="{% url 'crear_paciente' %}" class="btn-add-patient text-nowrap text-decoration-none">
+            <i class="fa-solid fa-user-plus"></i> <span>Nuevo Paciente</span>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="table-wrapper fade-in-up" style="animation-delay: 0.4s;">
+    <div class="table-responsive">
+        <table class="table table-premium table-borderless table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Documento</th>
+                    <th>Contacto</th>
+                    <th class="text-center">Género</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-end pe-4">Acciones</th> 
+                </tr>
+            </thead>
+            <tbody>
+                {% for paciente in pacientes %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="patient-avatar">
+                                {{ paciente.nombre_completo|make_list|first|upper }}
+                            </div>
+                            <div>
+                                <span class="d-block fw-bold" style="color: var(--text-dark);">{{ paciente.nombre_completo }}</span>
+                                <small style="color: var(--text-gray); font-size: 0.8rem; font-weight: 600;">ID: #{{ paciente.id|stringformat:"04d" }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="d-block fw-bold text-dark">{{ paciente.dni_paciente }}</span>
+                        <small style="color: var(--text-gray); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">{{ paciente.tipo_documento }}</small>
+                    </td>
+                    <td>
+                        <span class="d-flex align-items-center gap-2 fw-medium">
+                            <i class="fa-solid fa-phone" style="color: var(--purple-pastel); font-size:0.85rem;"></i>
+                            {{ paciente.telefono|default:"No registrado" }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge border bg-transparent text-dark px-3 py-2 rounded-pill fw-semibold">{{ paciente.genero }}</span>
+                    </td>
+                    <td class="text-center">
+                        {% if paciente.estado_paciente == 'Activo' %}
+                            <span class="status-badge activo">Activo</span>
+                        {% else %}
+                            <span class="status-badge inactivo">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-3">
+                        {% if request.user.is_superuser or "Administrador" in request.user.groups.all.values_list|stringformat:"s" or "Psicologo" in request.user.groups.all.values_list|stringformat:"s" %}
+                            <a href="{% url 'ver_historial' paciente.id %}" class="btn-action view" data-bs-toggle="tooltip" title="Ver Historial">
+                                <i class="fa-solid fa-file-medical"></i>
+                            </a>
+                            <a href="{% url 'editar_paciente' paciente.id %}" class="btn-action edit ms-2" data-bs-toggle="tooltip" title="Editar Información">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            
+                            {% if paciente.estado_paciente == 'Activo' %}
+                                <button type="button" class="btn-action delete ms-2" data-bs-toggle="tooltip" title="Inactivar Paciente" onclick="confirmarCambioEstado({{ paciente.id }}, '{{ paciente.nombre_completo }}', 'inactivar')">
+                                    <i class="fa-solid fa-user-xmark"></i>
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn-action reactivar ms-2" data-bs-toggle="tooltip" title="Reactivar Paciente" onclick="confirmarCambioEstado({{ paciente.id }}, '{{ paciente.nombre_completo }}', 'reactivar')">
+                                    <i class="fa-solid fa-user-check"></i>
+                                </button>
+                            {% endif %}
+
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<form id="form-estado" method="POST" style="display: none;">
+    {% csrf_token %}
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+
+    function confirmarCambioEstado(pacienteId, nombre, accion) {
+        let titulo, texto, icono, colorConfirmar, textoConfirmar;
+
+        if (accion === 'inactivar') {
+            titulo = '¿Inactivar paciente?';
+            texto = `Estás a punto de inactivar a ${nombre}. No podrá iniciar sesión en el sistema.`;
+            icono = 'warning';
+            colorConfirmar = '#dc2626';
+            textoConfirmar = 'Sí, inactivar';
+        } else {
+            titulo = '¿Reactivar paciente?';
+            texto = `Estás a punto de darle acceso nuevamente a ${nombre}.`;
+            icono = 'info';
+            colorConfirmar = '#059669';
+            textoConfirmar = 'Sí, reactivar';
+        }
+
+        Swal.fire({
+            title: titulo,
+            text: texto,
+            icon: icono,
+            showCancelButton: true,
+            confirmButtonColor: colorConfirmar,
+            cancelButtonColor: '#a3aed1',
+            confirmButtonText: textoConfirmar,
+            cancelButtonText: 'Cancelar',
+            background: '#ffffff',
+            color: '#2b3674',
+            customClass: {
+                confirmButton: 'btn btn-lg rounded-pill px-4',
+                cancelButton: 'btn btn-lg rounded-pill px-4 ms-2'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('form-estado');
+                const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+                const url = `/pacientes/inactivar/${pacienteId}/`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            title: '¡Listo!',
+                            text: data.mensaje,
+                            icon: 'success',
+                            confirmButtonColor: '#2a1f45',
+                        }).then(() => {
+                            location.reload();
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

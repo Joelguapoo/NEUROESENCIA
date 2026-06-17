@@ -1,0 +1,225 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}Tratamientos - NeuroEsencia{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --card-bg: #ffffff;
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --purple-light: #4c3b73;
+        --purple-pastel: #b09ade;
+        --text-dark: #2b3674;
+        --text-gray: #a3aed1;
+        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+        --shadow-hover: 0 15px 35px rgba(42, 31, 69, 0.08);
+    }
+
+    /* Animaciones de entrada */
+    .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Card de Estadísticas Premium */
+    .stat-card-single { 
+        background: linear-gradient(135deg, var(--purple-brand) 0%, var(--purple-light) 100%); 
+        border-radius: 24px; padding: 30px 40px; color: white; 
+        box-shadow: 0 15px 25px rgba(42, 31, 69, 0.15); 
+        display: flex; align-items: center; justify-content: space-between; 
+        position: relative; overflow: hidden; transition: transform 0.3s ease; 
+    }
+    .stat-card-single:hover { transform: translateY(-3px); }
+    .stat-card-single::after { 
+        content: ''; position: absolute; right: -20px; top: -50px; width: 200px; height: 200px; 
+        border-radius: 50%; background: radial-gradient(circle, rgba(176, 154, 222, 0.2) 0%, rgba(255,255,255,0) 70%); 
+    }
+    .stat-card-single h3 { font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .stat-card-single p { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: 0.5px; opacity: 0.8; text-transform: uppercase; margin-bottom: 8px; }
+    
+    .stat-icon-large { 
+        background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); 
+        width: 85px; height: 85px; border-radius: 22px; 
+        display: flex; align-items: center; justify-content: center; 
+        font-size: 2.8rem; color: var(--purple-pastel); 
+        border: 1px solid rgba(255, 255, 255, 0.2); z-index: 1; 
+    }
+
+    /* Toolbar y Filtros */
+    .toolbar-container { 
+        background: var(--card-bg); border-radius: 20px; padding: 15px 20px; 
+        box-shadow: var(--shadow-soft); margin-bottom: 25px; 
+        display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; 
+        border: 1px solid rgba(0,0,0,0.02); 
+    }
+    .search-input-container { position: relative; flex-grow: 1; max-width: 450px; }
+    .search-input-container .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-gray); font-size: 1.1rem; }
+    .search-input-container .form-control { 
+        padding-left: 55px; border-radius: 50px; height: 50px; border: 2px solid transparent; 
+        background: var(--page-bg); font-weight: 500; color: var(--text-dark); transition: all 0.3s ease; 
+    }
+    .search-input-container .form-control:focus { background: white; border-color: var(--purple-pastel); box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15); outline: none; }
+
+    /* Botones de Filtro Estilizados */
+    .filter-pill-group { background: var(--page-bg); padding: 5px; border-radius: 50px; display: flex; gap: 5px; }
+    .filter-pill { 
+        border: none; background: transparent; padding: 8px 20px; border-radius: 50px; 
+        font-size: 0.85rem; font-weight: 700; color: var(--text-gray); transition: all 0.2s; 
+    }
+    .filter-pill.active { background: white; color: var(--purple-brand); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+    .btn-add-premium { 
+        background: var(--purple-brand); color: white !important; border: none; border-radius: 50px; 
+        padding: 0 24px; height: 50px; font-weight: 600; display: inline-flex; align-items: center; 
+        gap: 10px; box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2); transition: all 0.3s ease; text-decoration: none;
+    }
+    .btn-add-premium:hover { background: var(--purple-light); transform: translateY(-2px); box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3); }
+
+    /* Tabla Premium */
+    .table-wrapper { background: var(--card-bg); border-radius: 24px; padding: 10px; box-shadow: var(--shadow-soft); border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
+    .table-premium thead { background-color: rgba(244, 247, 254, 0.6); }
+    .table-premium thead th { color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; border: none; padding: 20px 24px; font-weight: 700; }
+    .table-premium tbody td { vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.02); padding: 20px 24px; color: var(--text-dark); font-weight: 500; }
+    .table-premium tbody tr:hover { background-color: rgba(176, 154, 222, 0.05); }
+
+    .patient-avatar { 
+        width: 45px; height: 45px; border-radius: 14px; 
+        background: rgba(176, 154, 222, 0.15); color: var(--purple-brand); 
+        display: flex; align-items: center; justify-content: center; 
+        font-weight: 700; font-size: 1.2rem; 
+    }
+    
+    .status-badge { font-weight: 700; padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; display: inline-block; }
+    .status-badge.activo { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .status-badge.finalizado { background: rgba(100, 116, 139, 0.1); color: #475569; }
+
+    .btn-action { 
+        width: 40px; height: 40px; border-radius: 12px; display: inline-flex; 
+        align-items: center; justify-content: center; transition: all 0.2s; 
+        background: var(--page-bg); color: var(--text-gray); border: none; 
+    }
+    .btn-action:hover { background: rgba(176, 154, 222, 0.2); color: var(--purple-brand); transform: scale(1.05); }
+</style>
+
+<div class="mb-4 fade-in-up" style="animation-delay: 0.1s;">
+    <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Planes de Tratamiento</h3>
+    <p class="mt-1" style="color: var(--text-gray); font-weight: 500;">Monitoreo terapéutico y evolución clínica centralizada.</p>
+</div>
+
+<div class="row mb-4 fade-in-up" style="animation-delay: 0.2s;">
+    <div class="col-12 col-md-8 col-xl-4">
+        <div class="stat-card-single">
+            <div class="info">
+                <p>Total Tratamientos</p>
+                <h3>{{ tratamientos|length|default:"0" }}</h3>
+            </div>
+            <div class="stat-icon-large">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toolbar-container fade-in-up" style="animation-delay: 0.3s;">
+    <div class="d-flex gap-3 flex-grow-1 align-items-center flex-wrap w-100">
+        <div class="search-input-container flex-grow-1">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="treatmentSearch" class="form-control" placeholder="Buscar por paciente o diagnóstico...">
+        </div>
+
+        <div class="filter-pill-group">
+            <button class="filter-pill active">Todos</button>
+            <button class="filter-pill">Activos</button>
+            <button class="filter-pill">Finalizados</button>
+        </div>
+
+        <a href="{% url 'crear_tratamiento' %}" class="btn-add-premium text-nowrap">
+            <i class="fa-solid fa-plus-circle"></i> <span>Nuevo Plan</span>
+        </a>
+    </div>
+</div>
+
+<div class="table-wrapper fade-in-up" style="animation-delay: 0.4s;">
+    <div class="table-responsive">
+        <table class="table table-premium table-borderless table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">Paciente</th>
+                    <th>Diagnóstico Principal</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Especialista a Cargo</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-end pe-4">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tratamientos %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="patient-avatar">
+                                {{ t.paciente.nombre_completo|make_list|first|upper }}
+                            </div>
+                            <div>
+                                <span class="d-block fw-bold" style="color: var(--text-dark);">{{ t.paciente.nombre_completo }}</span>
+                                <small style="color: var(--text-gray); font-size: 0.75rem; font-weight: 600;">ID Paciente: #{{ t.paciente.id|stringformat:"03d" }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="fw-bold text-dark">{{ t.diagnostico_principal|truncatechars:35 }}</span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-regular fa-calendar-check" style="color: var(--purple-pastel);"></i>
+                            <span class="text-muted small fw-bold">{{ t.fecha_inicio|date:"d M, Y" }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-user-md" style="color: var(--purple-pastel); font-size: 0.85rem;"></i>
+                            <span class="fw-medium">{{ t.especialista.user.get_full_name }}</span>
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        {% if t.activo %}
+                            <span class="status-badge activo">Activo</span>
+                        {% else %}
+                            <span class="status-badge finalizado">Finalizado</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'detalle_tratamiento' t.id %}" class="btn-action" title="Ver Detalles">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            <button class="btn-action" title="Más opciones">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <div class="py-4">
+                            <i class="fa-solid fa-folder-open fa-3x mb-3" style="opacity: 0.1; color: var(--purple-brand);"></i>
+                            <h5 class="text-muted fw-normal">No se encontraron planes de tratamiento.</h5>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Buscador en tiempo real
+    document.getElementById('treatmentSearch').addEventListener('keyup', function() {
+        let value = this.value.toLowerCase();
+        document.querySelectorAll(".table-premium tbody tr").forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}

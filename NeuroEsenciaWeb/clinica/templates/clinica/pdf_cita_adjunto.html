@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: letter;
+            margin: 1.5cm;
+        }
+        body { 
+            font-family: Helvetica, Arial, sans-serif; 
+            color: #000;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        /* --- ESTILOS DE TABLA TIPO FORMULARIO --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .border-box {
+            border: 1.5px solid #000;
+        }
+        td {
+            padding: 4px 8px;
+            border: 0.5px solid #ccc; /* Bordes internos suaves */
+        }
+        .label {
+            font-weight: bold;
+            font-size: 10px;
+            color: #333;
+            display: block;
+        }
+        .value {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: normal;
+        }
+
+        /* --- CABECERA --- */
+        .header-table td {
+            border: none;
+        }
+        .logo-text {
+            color: #2a1f45;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .nit-text {
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .doc-title {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: right;
+            text-transform: uppercase;
+        }
+
+        /* --- SECCIONES --- */
+        .section-header {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 5px;
+            border: 1.5px solid #000;
+            border-bottom: none;
+        }
+
+        /* --- FIRMA --- */
+        .signature-container {
+            margin-top: 30px;
+            width: 100%;
+        }
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 250px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <table class="header-table">
+        <tr>
+            <td width="30%">
+                <span class="logo-text">NeuroEsencia</span><br>
+                <small>Salud Mental Integral</small>
+            </td>
+            <td width="40%" style="text-align: center;">
+                <span class="nit-text">CENTRO CLÍNICO DE PSICOLOGÍA<br>NIT 900.123.456-1</span>
+            </td>
+            <td width="30%" class="doc-title">
+                Comprobante de<br>Agendamiento
+            </td>
+        </tr>
+    </table>
+
+    <div class="section-header">Información del Paciente</div>
+    <table class="border-box">
+        <tr>
+            <td width="50%">
+                <span class="label">Nombre del paciente:</span>
+                <span class="value">{{ cita.paciente.nombre_completo }}</span>
+            </td>
+            <td width="50%">
+                <span class="label">Número de documento:</span>
+                <span class="value">{{ cita.paciente.dni_paciente|default:"No registrado" }}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="label">Tipo de vinculación:</span>
+                <span class="value">Particular / Convenio</span>
+            </td>
+            <td>
+                <span class="label">Código de Reserva:</span>
+                <span class="value" style="font-weight: bold;">{{ cita.codigo_cita }}</span>
+            </td>
+        </tr>
+    </table>
+
+    <div class="section-header">Detalles de la Consulta</div>
+    <table class="border-box">
+        <tr>
+            <td width="33%">
+                <span class="label">Fecha de la cita:</span>
+                <span class="value">{{ fecha_formateada }}</span>
+            </td>
+            <td width="33%">
+                <span class="label">Hora de ingreso:</span>
+                <span class="value">{{ hora_formateada }}</span>
+            </td>
+            <td width="34%">
+                <span class="label">Modalidad:</span>
+                <span class="value">{{ cita.modalidad }}</span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <span class="label">Profesional asignado:</span>
+                <span class="value">{{ cita.psicologo.get_full_name|default:cita.psicologo.username }}</span>
+            </td>
+            <td>
+                <span class="label">Estado de la cita:</span>
+                <span class="value">{{ cita.estado_cita }}</span>
+            </td>
+        </tr>
+    </table>
+
+    <div class="section-header">Observaciones y Recomendaciones</div>
+    <table class="border-box">
+        <tr>
+            <td style="height: 80px; vertical-align: top;">
+                <p>Favor presentarse 10 minutos antes de la hora programada. En caso de modalidad virtual, asegúrese de contar con buena conexión a internet. La cancelación debe realizarse con un mínimo de 1 hora de antelación.</p>
+            </td>
+        </tr>
+    </table>
+
+    <table style="margin-top: 40px; border: none;">
+        <tr>
+            <td style="border: none;" width="60%">
+                <p><strong>Responsable:</strong> {{ cita.psicologo.get_full_name|default:cita.psicologo.username }}<br>
+                <strong>Cargo:</strong> Psicólogo Especialista<br>
+                <strong>NeuroEsencia S.A.S</strong></p>
+            </td>
+            <td style="border: none; text-align: center;" width="40%">
+                <div style="margin-top: 40px; border-top: 1px solid #000; width: 200px; margin-left: auto; margin-right: auto;"></div>
+                <p style="font-size: 9px;">Firma y Sello del Prestador</p>
+            </td>
+        </tr>
+    </table>
+
+    <div style="position: absolute; bottom: 0; width: 100%; text-align: center; font-size: 9px; color: #666; border-top: 0.5px solid #ccc; padding-top: 10px;">
+        Este documento es un comprobante de servicio generado por el sistema NeuroEsencia. <br>
+        Cualquier alteración anula la validez del mismo. Documento electrónico sin valor contable.
+    </div>
+
+</body>
+</html>

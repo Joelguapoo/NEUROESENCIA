@@ -1,0 +1,479 @@
+{% extends 'usuarios/base.html' %}
+
+{% block title %}
+    {% if editando %}Editar Paciente{% else %}Nuevo Paciente{% endif %} - NeuroEsencia
+{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --card-bg: #ffffff;
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --purple-light: #4c3b73;
+        --purple-pastel: #b09ade;
+        --text-dark: #2b3674;
+        --text-gray: #a3aed1;
+        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-card {
+        background: var(--card-bg);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .form-header-icon {
+        width: 60px; height: 60px;
+        background: rgba(176, 154, 222, 0.15);
+        color: var(--purple-brand);
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+        letter-spacing: 0.3px;
+    }
+
+    .form-card input, 
+    .form-card select, 
+    .form-card textarea,
+    .form-control, 
+    .form-select {
+        width: 100%;
+        border-radius: 12px !important;
+        border: 2px solid transparent !important;
+        background-color: var(--page-bg) !important;
+        padding: 12px 18px !important;
+        font-weight: 500;
+        color: var(--text-dark);
+        transition: all 0.3s ease;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important;
+    }
+
+    .form-card input:focus, 
+    .form-card select:focus, 
+    .form-card textarea:focus,
+    .form-control:focus, 
+    .form-select:focus {
+        background-color: #ffffff !important;
+        border-color: var(--purple-pastel) !important;
+        box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15) !important;
+        outline: none !important;
+    }
+
+    .error-text {
+        color: #ef4444;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-cancelar {
+        background-color: transparent;
+        color: var(--text-gray);
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 12px 24px;
+        transition: all 0.3s;
+        border: 1px solid var(--text-gray);
+    }
+    .btn-cancelar:hover { 
+        background-color: rgba(163, 174, 209, 0.1); 
+        color: var(--text-dark);
+        border-color: var(--text-dark);
+    }
+
+    .btn-guardar {
+        background-color: var(--purple-brand);
+        color: white;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 12px 30px;
+        transition: all 0.3s;
+        border: none;
+        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2);
+    }
+    .btn-guardar:hover {
+        background-color: var(--purple-light);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3);
+    }
+</style>
+
+<div class="container-fluid py-2">
+    <div class="mx-auto fade-in-up" style="max-width: 850px; animation-delay: 0.1s;">
+        
+        <div class="form-card">
+            
+            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom border-light">
+                <div class="form-header-icon">
+                    {% if editando %}
+                        <i class="fa-solid fa-user-pen"></i>
+                    {% else %}
+                        <i class="fa-solid fa-user-plus"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h4 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">
+                        {% if editando %}Editar Información{% else %}Registrar Nuevo Paciente{% endif %}
+                    </h4>
+                    <p class="m-0 mt-1" style="color: var(--text-gray); font-size: 0.95rem;">
+                        {% if editando %}Actualiza los datos personales de {{ paciente.nombre_completo }}.{% else %}Ingresa los datos personales para crear un nuevo expediente clínico.{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <form method="POST" novalidate>
+                {% csrf_token %} 
+                <div class="row g-4">
+                    {% for field in form %}
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ field.id_for_label }}">
+                            {{ field.label }} 
+                            {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                        </label>
+                        
+                        {{ field }}
+                        
+                        {% if field.errors %}
+                            <div class="error-text">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                {{ field.errors|striptags }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if field.help_text %}
+                            <small style="color: var(--text-gray); font-size: 0.8rem; margin-top: 4px; display: block;">
+                                {{ field.help_text }}
+                            </small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-5 pt-4 border-top border-light d-flex justify-content-end gap-3 flex-wrap">
+                    <a href="{% url 'lista_pacientes' %}" class="btn-cancelar text-decoration-none">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn-guardar">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>
+                        {% if editando %}Guardar Cambios{% else %}Confirmar Registro{% endif %}
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // ==========================================
+        // FUNCIONES DE APOYO PARA MOSTRAR ERRORES
+        // ==========================================
+        function mostrarError(inputElement, mensaje) {
+            let errorSpan = inputElement.nextElementSibling;
+            if (!errorSpan || !errorSpan.classList.contains('error-text-js')) {
+                errorSpan = document.createElement('div');
+                errorSpan.className = 'error-text error-text-js fade-in-up';
+                inputElement.parentNode.insertBefore(errorSpan, inputElement.nextSibling);
+            }
+            errorSpan.style.display = 'flex';
+            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${mensaje}`;
+            return errorSpan;
+        }
+
+        function ocultarError(inputElement) {
+            let errorSpan = inputElement.nextElementSibling;
+            if (errorSpan && errorSpan.classList.contains('error-text-js')) {
+                errorSpan.style.display = 'none';
+                errorSpan.classList.remove('fade-in-up');
+            }
+        }
+
+        // ==========================================
+        // CASO 2: DNI DINÁMICO (Depende del tipo de doc)
+        // ==========================================
+        const tipoDoc = document.getElementById('id_tipo_documento');
+        const dni = document.getElementById('id_dni_paciente');
+
+        function actualizarReglasDni() {
+            if (!tipoDoc || !dni) return;
+
+            // Obtenemos el texto de la opción elegida (Ej: "Cédula de ciudadanía")
+            let tipo = tipoDoc.options[tipoDoc.selectedIndex].text.toLowerCase();
+            let esAlfanumerico = false;
+            let min = '2';
+            let max = '25';
+
+            // Validaciones según el estándar oficial de documentos en Colombia
+            if (tipo.includes('ciudadanía') || tipo.includes('cc')) {
+                min = '8'; max = '10'; // CC tiene 8 o 10 dígitos 
+            } else if (tipo.includes('identidad') || tipo.includes('ti')) {
+                min = '10'; max = '11'; // TI tiene entre 10 y 11 dígitos
+            } else if (tipo.includes('extranjería') || tipo.includes('ce')) {
+                min = '6'; max = '7'; // CE tiene 6 o 7 dígitos
+            } else if (tipo.includes('pasaporte')) {
+                min = '8'; max = '9'; // Pasaportes: aprox 8-9 caracteres (letras y números)
+                esAlfanumerico = true;
+            } else if (tipo.includes('ppt') || tipo.includes('pep') || tipo.includes('permiso')) {
+                min = '7'; max = '15'; // Permiso por Protección Temporal y PEP (7 a 15)
+                esAlfanumerico = true;
+            } else {
+                esAlfanumerico = true; // Fallback por si hay otro documento
+            }
+
+            dni.setAttribute('minlength', min);
+            dni.setAttribute('maxlength', max);
+            dni.dataset.alfanumerico = esAlfanumerico;
+            
+            // Re-validar por si ya tenía algo escrito y luego cambió el tipo en el select
+            if (dni.value.length > 0) {
+                validarDNI({ target: dni });
+            }
+        }
+
+        function validarDNI(e) {
+            if (!dni) return;
+            const esAlfa = dni.dataset.alfanumerico === 'true';
+            const caracteresInvalidos = esAlfa ? /[^a-zA-Z0-9]/g : /[^0-9]/g;
+            const min = parseInt(dni.getAttribute('minlength'));
+            
+            let valor = e.target.value;
+
+            // 1. Evitar que escriba letras en documentos solo numéricos (CC, TI)
+            if (caracteresInvalidos.test(valor)) {
+                mostrarError(dni, esAlfa ? 'Este documento permite letras y números.' : 'Este documento solo permite números.');
+                e.target.value = valor.replace(caracteresInvalidos, '');
+                setTimeout(() => ocultarError(dni), 3500);
+            }
+
+            // 2. Control de longitud en tiempo real (limpieza visual de error si cumple)
+            if (e.target.value.length > 0 && e.target.value.length < min) {
+                dni.setCustomValidity(`Mínimo ${min} caracteres.`);
+            } else {
+                dni.setCustomValidity("");
+                ocultarError(dni);
+            }
+        }
+
+        if (tipoDoc && dni) {
+            tipoDoc.addEventListener('change', actualizarReglasDni);
+            dni.addEventListener('input', validarDNI);
+            actualizarReglasDni(); // Inicializar reglas al cargar la página
+        }
+
+        // ==========================================
+        // CASO 4: CORREO (Obligatorio, Formato, Letras y Números)
+        // ==========================================
+        const correo = document.getElementById('id_correo');
+        if (correo) {
+            correo.setAttribute('required', 'true');
+            correo.setAttribute('minlength', '7');
+            correo.setAttribute('maxlength', '50'); // Máximo recomendado
+
+            correo.addEventListener('input', function(e) {
+                const valor = e.target.value.trim();
+                const tieneLetras = /[a-zA-Z]/.test(valor);
+                const tieneNumeros = /[0-9]/.test(valor);
+                const formatoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
+
+                if (valor.length === 0) {
+                    correo.setCustomValidity("El correo es obligatorio.");
+                } else if (!formatoValido) {
+                    correo.setCustomValidity("Formato de correo inválido.");
+                    mostrarError(correo, 'Ingresa un formato válido (Ej: usuario1@dominio.com).');
+                } else if (!tieneLetras || !tieneNumeros) {
+                    correo.setCustomValidity("Debe contener letras y números.");
+                    mostrarError(correo, 'El correo debe contener al menos una letra y un número.');
+                } else {
+                    correo.setCustomValidity("");
+                    ocultarError(correo);
+                }
+            });
+        }
+
+        // ==========================================
+        // CASO 5: DIRECCIÓN (Min 2, Letras y Números, NO Nula)
+        // ==========================================
+        const direccion = document.getElementById('id_direccion');
+        if (direccion) {
+            direccion.setAttribute('required', 'true'); // Forzamos que sea requerida
+            direccion.setAttribute('minlength', '2');
+            direccion.setAttribute('maxlength', '50');
+
+            direccion.addEventListener('input', function(e) {
+                const valor = e.target.value.trim();
+                const tieneLetras = /[a-zA-Z]/.test(valor);
+                const tieneNumeros = /[0-9]/.test(valor);
+
+                if (valor.length === 0) {
+                    direccion.setCustomValidity("La dirección es obligatoria.");
+                } else if (!tieneLetras || !tieneNumeros) {
+                    direccion.setCustomValidity("Debe contener letras y números.");
+                    mostrarError(direccion, 'Formato inválido (Ej: Calle 123 #45-67).');
+                } else {
+                    direccion.setCustomValidity("");
+                    ocultarError(direccion);
+                }
+            });
+        }
+
+        // ==========================================
+        // INTERCEPTOR FINAL: PREVENIR ENVÍO (Validación de botón Guardar)
+        // ==========================================
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let formValido = true;
+
+                // 1. Chequeo de DNI incompleto antes de enviar
+                if (dni && dni.value.length < parseInt(dni.getAttribute('minlength'))) {
+                    mostrarError(dni, `Documento incompleto. Debe tener al menos ${dni.getAttribute('minlength')} caracteres para este tipo.`);
+                    formValido = false;
+                }
+
+                // 2. Chequeo de Dirección nula/vacía
+                if (direccion && direccion.value.trim() === '') {
+                    mostrarError(direccion, 'Este campo es obligatorio y no puede estar vacío.');
+                    formValido = false;
+                }
+
+                // 3. Chequeo de Correo nulo/vacío
+                if (correo && correo.value.trim() === '') {
+                    mostrarError(correo, 'El correo es obligatorio y no puede estar vacío.');
+                    formValido = false;
+                }
+
+                // 4. Chequeo global para evitar saltos del 'novalidate'
+                const todosLosInputs = form.querySelectorAll('input, select, textarea');
+                todosLosInputs.forEach(input => {
+                    if (!input.checkValidity()) {
+                        mostrarError(input, 'Este campo es obligatorio o tiene errores.');
+                        formValido = false;
+                    }
+                });
+
+                // Si hay errores, cancelamos el evento y no recargamos la página
+                if (!formValido) {
+                    e.preventDefault(); 
+                    // Hace scroll suave hacia arriba para que el usuario vea los errores
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+
+        // ==========================================
+        // CASO 3: NOMBRE COMPLETO (Title Case, Min 2, sin números)
+        // ==========================================
+        const nombre = document.getElementById('id_nombre_completo');
+        if (nombre) {
+            nombre.setAttribute('minlength', '2');
+            nombre.setAttribute('maxlength', '50');
+
+            nombre.addEventListener('input', function(e) {
+                const numeros = /[0-9]/g;
+                let valor = e.target.value;
+
+                if (numeros.test(valor)) {
+                    mostrarError(nombre, 'No se permiten números en el nombre.');
+                    valor = valor.replace(numeros, '');
+                    setTimeout(() => ocultarError(nombre), 2500);
+                }
+                
+                // Capitalizar primera letra de cada palabra
+                e.target.value = valor.toLowerCase().replace(/(?:^|\s)\S/g, letra => letra.toUpperCase());
+            });
+        }
+
+        // ==========================================
+        // CASO 6: TELÉFONO (10 dígitos exactos)
+        // ==========================================
+        const telefono = document.getElementById('id_telefono');
+        if (telefono) {
+            telefono.setAttribute('minlength', '10');
+            telefono.setAttribute('maxlength', '10');
+
+            telefono.addEventListener('input', function(e) {
+                const caracteresInvalidos = /[^0-9]/g;
+                if (caracteresInvalidos.test(e.target.value)) {
+                    mostrarError(telefono, 'Solo se permiten números.');
+                    e.target.value = e.target.value.replace(caracteresInvalidos, '');
+                    setTimeout(() => ocultarError(telefono), 2500);
+                }
+                if (e.target.value.length > 0 && e.target.value.length < 10) {
+                    telefono.setCustomValidity("Faltan dígitos.");
+                } else {
+                    telefono.setCustomValidity("");
+                }
+            });
+        }
+
+        // ==========================================
+        // CASO 7: FECHA DE NACIMIENTO (No futuras)
+        // ==========================================
+        const fechaNacimiento = document.getElementById('id_fecha_nacimiento');
+        if (fechaNacimiento) {
+            const hoy = new Date();
+            const yyyy = hoy.getFullYear();
+            const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dd = String(hoy.getDate()).padStart(2, '0');
+            const fechaMaxima = `${yyyy}-${mm}-${dd}`;
+            
+            fechaNacimiento.setAttribute('max', fechaMaxima);
+
+            fechaNacimiento.addEventListener('change', function(e) {
+                if (e.target.value > fechaMaxima) {
+                    mostrarError(fechaNacimiento, 'La fecha no puede ser en el futuro.');
+                    e.target.value = '';
+                    setTimeout(() => ocultarError(fechaNacimiento), 3000);
+                }
+            });
+        }
+
+        // ==========================================
+        // CASO 12: OTROS CAMPOS DE TEXTO (Sin números)
+        // ==========================================
+        const otrosCamposTexto = ['id_ocupacion', 'id_lugar_origen', 'id_residencia'];
+        otrosCamposTexto.forEach(function(id) {
+            const input = document.getElementById(id);
+            if (input) {
+                // Si es residencia o lugar, le ponemos minlength 15 como pidió el tester
+                if(id !== 'id_ocupacion'){
+                    input.setAttribute('minlength', '15');
+                }
+
+                input.addEventListener('input', function(e) {
+                    const numeros = /[0-9]/g;
+                    if (numeros.test(e.target.value)) {
+                        mostrarError(input, 'No se permiten números.');
+                        e.target.value = e.target.value.replace(numeros, '');
+                        setTimeout(() => ocultarError(input), 2500);
+                    }
+                });
+            }
+        });
+
+    });
+</script>
+{% endblock %}

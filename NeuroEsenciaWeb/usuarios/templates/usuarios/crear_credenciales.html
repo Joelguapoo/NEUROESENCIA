@@ -1,0 +1,199 @@
+{% extends 'usuarios/base.html' %}
+
+{% block content %}
+<style>
+    /* --- VARIABLES LOCALES (Sistema Unificado) --- */
+    :root {
+        --card-bg: #ffffff;
+        --page-bg: #f4f7fe;
+        --purple-brand: #2a1f45;
+        --purple-light: #4c3b73;
+        --purple-pastel: #b09ade;
+        --text-dark: #2b3674;
+        --text-gray: #a3aed1;
+        --shadow-soft: 0 15px 40px rgba(42, 31, 69, 0.08);
+    }
+
+    /* --- ANIMACIONES --- */
+    .fade-in-up {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    @keyframes fadeInUp {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- TARJETA DE ACTIVACIÓN --- */
+    .activation-card {
+        background: var(--card-bg);
+        border-radius: 24px;
+        border: 1px solid rgba(0,0,0,0.02);
+        box-shadow: var(--shadow-soft);
+        transition: transform 0.3s ease;
+        padding: 40px;
+    }
+    .activation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(42, 31, 69, 0.12);
+    }
+
+    /* Ícono Superior (Estilo Seguridad) */
+    .security-icon-wrapper {
+        width: 80px; 
+        height: 80px;
+        background: rgba(16, 185, 129, 0.1); /* Verde esmeralda suave para denotar "Éxito/Seguridad" */
+        color: #10b981;
+        border-radius: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 25px;
+        transition: 0.3s;
+        box-shadow: inset 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+    .activation-card:hover .security-icon-wrapper {
+        background: #10b981;
+        color: white;
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    /* --- INPUTS PREMIUM --- */
+    .form-label-custom {
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: var(--text-gray);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: block;
+        margin-left: 4px;
+    }
+
+    .input-custom {
+        border-radius: 14px !important;
+        border: 2px solid transparent !important;
+        background-color: var(--page-bg) !important;
+        padding: 14px 15px 14px 50px !important; /* Espacio izquierdo para el ícono */
+        font-weight: 500;
+        color: var(--text-dark) !important;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important;
+    }
+    .input-custom:focus {
+        background-color: #ffffff !important;
+        border-color: var(--purple-pastel) !important;
+        box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15) !important;
+        outline: none !important;
+    }
+
+    /* Íconos dentro del Input */
+    .custom-icon {
+        position: absolute;
+        z-index: 10;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 18px;
+        color: var(--text-gray);
+        transition: 0.3s;
+    }
+    .input-wrapper:focus-within .custom-icon {
+        color: var(--purple-brand);
+    }
+
+    /* Botón de Ojo de Contraseña */
+    .password-toggle {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        cursor: pointer;
+        color: var(--text-gray);
+        transition: color 0.3s ease;
+    }
+    .password-toggle:hover { color: var(--purple-brand); }
+
+    /* --- BOTÓN PRINCIPAL --- */
+    .btn-activate {
+        background: var(--purple-brand);
+        color: white;
+        border-radius: 14px;
+        padding: 16px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2);
+        font-size: 1.05rem;
+    }
+    .btn-activate:hover {
+        background: var(--purple-light);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3);
+    }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 85vh;">
+    <div class="activation-card fade-in-up" style="max-width: 480px; width: 100%;">
+        
+        <div class="text-center mb-4">
+            <div class="security-icon-wrapper">
+                <i class="fa-solid fa-shield-check fa-2x"></i>
+            </div>
+            <h3 class="fw-bold mb-2" style="color: var(--text-dark); letter-spacing: -0.5px;">Activa tu cuenta</h3>
+            <p class="m-0" style="color: var(--text-gray); font-weight: 500; font-size: 0.95rem;">
+                Hola <span style="color: var(--purple-brand); font-weight: 700;">{{ paciente.nombre_completo }}</span>, define tus credenciales de acceso seguro.
+            </p>
+        </div>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="form-label-custom">Nombre de Usuario</label>
+                <div class="position-relative input-wrapper">
+                    <span class="custom-icon"><i class="fa-regular fa-id-badge"></i></span>
+                    <input type="text" name="usuario" class="form-control input-custom" placeholder="Ej: juan_perez" required autocomplete="off">
+                </div>
+            </div>
+            
+            <div class="mb-5">
+                <label class="form-label-custom">Contraseña Segura</label>
+                <div class="position-relative input-wrapper">
+                    <span class="custom-icon"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" name="password" id="passwordInput" class="form-control input-custom" style="padding-right: 50px !important;" placeholder="••••••••" required autocomplete="new-password">
+                    <span class="password-toggle" id="togglePassword"><i class="fa-regular fa-eye"></i></span>
+                </div>
+                <small class="d-block mt-2" style="color: var(--text-gray); font-size: 0.75rem; font-weight: 500;">
+                    <i class="fa-solid fa-circle-info me-1"></i> Usa al menos 8 caracteres para mayor seguridad.
+                </small>
+            </div>
+            
+            <button type="submit" class="btn btn-activate w-100 d-flex justify-content-center align-items-center gap-2">
+                Activar mi cuenta <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </button>
+        </form>
+        
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Lógica del Ojo de Contraseña
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('passwordInput');
+
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function () {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                this.innerHTML = type === 'password' ? '<i class="fa-regular fa-eye"></i>' : '<i class="fa-regular fa-eye-slash"></i>';
+            });
+        }
+    });
+</script>
+{% endblock %}
