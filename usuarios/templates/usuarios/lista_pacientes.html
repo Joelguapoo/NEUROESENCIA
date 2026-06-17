@@ -7,180 +7,286 @@
 
 <style>
     :root {
-        --card-bg: #ffffff;
-        --page-bg: #f4f7fe;
-        --purple-brand: #2a1f45;
-        --purple-light: #4c3b73;
-        --purple-pastel: #b09ade;
-        --text-dark: #2b3674;
-        --text-gray: #a3aed1;
-        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
-        --shadow-hover: 0 15px 35px rgba(42, 31, 69, 0.08);
+        --purple-brand: #7C3AED; 
+        --purple-glow: rgba(124, 58, 237, 0.4);
+        --dark-bg: #0D0B14; /* Mismo de tu barra lateral */
+        --page-bg: #F4F7FE; /* Un gris/azulado súper claro y elegante */
+        --text-main: #111827;
+        --text-muted: #6B7280;
+        --card-bg: #FFFFFF;
+        
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+        --shadow-hover: 0 12px 30px rgba(124, 58, 237, 0.08);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     }
-    .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
-    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-    .stat-card-single { background: linear-gradient(135deg, var(--purple-brand) 0%, var(--purple-light) 100%); border-radius: 24px; padding: 30px 40px; color: white; box-shadow: 0 15px 25px rgba(42, 31, 69, 0.15); display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; transition: transform 0.3s ease; }
-    .stat-card-single:hover { transform: translateY(-3px); }
-    .stat-card-single::after { content: ''; position: absolute; right: -20px; top: -50px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(176, 154, 222, 0.2) 0%, rgba(255,255,255,0) 70%); pointer-events: none; }
-    .stat-card-single .info { z-index: 1; }
-    .stat-card-single h3 { font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-    .stat-card-single p { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: 0.5px; opacity: 0.8; text-transform: uppercase; margin-bottom: 8px; }
-    .stat-icon-large { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); width: 85px; height: 85px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; color: var(--purple-pastel); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 1; }
-    .toolbar-container { background: var(--card-bg); border-radius: 20px; padding: 15px 20px; box-shadow: var(--shadow-soft); margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; border: 1px solid rgba(0,0,0,0.02); }
-    .search-input-container { position: relative; flex-grow: 1; max-width: 450px; }
-    .search-input-container .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-gray); font-size: 1.1rem; }
-    .search-input-container .form-control { padding-left: 55px; border-radius: 50px; height: 50px; border: 2px solid transparent; background: var(--page-bg); font-weight: 500; color: var(--text-dark); transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-    .search-input-container .form-control:focus { background: white; border-color: var(--purple-pastel); box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15); outline: none; }
-    .btn-clear-search { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #ff6b6b; text-decoration: none; transition: 0.2s; font-size: 1.2rem; }
-    .btn-clear-search:hover { transform: translateY(-50%) scale(1.1); color: #e53e3e; }
-    .btn-add-patient { background: var(--purple-brand); color: white !important; border: none; border-radius: 50px; padding: 0 24px; height: 50px; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2); transition: all 0.3s ease; }
-    .btn-add-patient:hover { background: var(--purple-light); transform: translateY(-2px); box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3); }
-    .table-wrapper { background: var(--card-bg); border-radius: 24px; padding: 10px; box-shadow: var(--shadow-soft); border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
-    .table-premium { margin-bottom: 0; }
-    .table-premium thead { background-color: rgba(244, 247, 254, 0.6); }
-    .table-premium thead th { color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; border: none; padding: 20px 24px; font-weight: 700; }
-    .table-premium thead th:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
-    .table-premium thead th:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
-    .table-premium tbody td { vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.02); padding: 20px 24px; color: var(--text-dark); font-weight: 500; }
-    .table-premium tbody tr { transition: all 0.2s ease; border-radius: 16px; }
-    .table-premium tbody tr:hover { background-color: rgba(176, 154, 222, 0.05); }
-    .table-premium tbody tr:last-child td { border-bottom: none; }
-    .patient-avatar { width: 45px; height: 45px; border-radius: 14px; background: rgba(176, 154, 222, 0.15); color: var(--purple-brand); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0; }
-    .btn-action { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; background: var(--page-bg); color: var(--text-gray); border: 1px solid transparent; }
-    .btn-action.view:hover { background: rgba(176, 154, 222, 0.1); color: var(--purple-brand); border-color: rgba(176, 154, 222, 0.3); transform: scale(1.05); }
-    .btn-action.edit:hover { background: #fff8e6; color: #f59e0b; border-color: #fde68a; transform: scale(1.05); }
-    .btn-action.delete:hover { background: #fee2e2; color: #dc2626; border-color: #fecaca; transform: scale(1.05); }
-    
-    .status-badge { font-weight: 700; padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; display: inline-block; letter-spacing: 0.5px; }
-    .status-badge.activo { background: rgba(16, 185, 129, 0.1); color: #059669; }
-    .status-badge.inactivo { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
-    
-    .btn-action.reactivar:hover { background: #d1fae5; color: #059669; border-color: #a7f3d0; transform: scale(1.05); }
 
-    .empty-state-icon { width: 80px; height: 80px; border-radius: 50%; background: var(--page-bg); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+    /* Fondo general sutil */
+    body { background-color: var(--page-bg); }
+
+    /* Animaciones de Cascada */
+    .stagger-1 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    .stagger-2 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.1s; opacity: 0; transform: translateY(20px); }
+    .stagger-3 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.2s; opacity: 0; transform: translateY(20px); }
+    
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Título con Gradiente Premium */
+    .title-gradient {
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--purple-brand) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+
+    /* 1. Tarjeta Dark Glass (Conecta con el Sidebar) */
+    .premium-stat-card {
+        background: linear-gradient(145deg, var(--dark-bg), #1a1525);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 20px 40px rgba(13, 11, 20, 0.15);
+    }
+    /* Brillo Neón Interno */
+    .premium-stat-card::before {
+        content: ''; position: absolute; top: -50%; right: -20%; width: 250px; height: 250px;
+        background: radial-gradient(circle, var(--purple-brand) 0%, transparent 70%);
+        opacity: 0.3; filter: blur(40px); pointer-events: none;
+    }
+    .premium-stat-card h3 { font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1; }
+    .premium-stat-card p { color: #9CA3AF; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    
+    .stat-icon-glass {
+        background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        width: 65px; height: 65px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; color: #C4B5FD; border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* 2. Toolbar Flotante Súper Limpia */
+    .glass-toolbar {
+        background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-radius: 16px; padding: 12px; box-shadow: var(--shadow-soft); margin-bottom: 30px;
+        display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .search-box { position: relative; flex-grow: 1; min-width: 280px; max-width: 400px; }
+    .search-box i.fa-magnifying-glass { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .search-box input {
+        width: 100%; padding: 12px 20px 12px 45px; border-radius: 12px; border: none;
+        background: white; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); color: var(--text-main);
+        font-weight: 500; transition: all 0.3s;
+    }
+    .search-box input:focus { outline: none; box-shadow: 0 0 0 2px var(--purple-brand), 0 4px 15px var(--purple-glow); }
+
+    /* Segmented Control iOS Premium */
+    .filter-pills { background: white; padding: 5px; border-radius: 12px; display: flex; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+    .filter-pill {
+        padding: 8px 20px; border-radius: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.85rem;
+        text-decoration: none; transition: all 0.3s; cursor: pointer;
+    }
+    .filter-pill:hover { color: var(--text-main); }
+    .filter-pill.active { background: var(--dark-bg); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+    .btn-premium {
+        background: var(--purple-brand); color: white !important; border: none; border-radius: 12px;
+        padding: 0 24px; height: 44px; font-weight: 600; font-size: 0.9rem; display: inline-flex;
+        align-items: center; gap: 10px; transition: var(--transition-spring); box-shadow: 0 8px 20px var(--purple-glow);
+        margin-left: auto;
+    }
+    .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 12px 25px var(--purple-glow); }
+
+    /* 3. Magia: Tabla de Filas Flotantes (Floating Rows) */
+    .table-floating-container { margin-top: -10px; }
+    .table-floating { width: 100%; border-collapse: separate; border-spacing: 0 14px; }
+    
+    .table-floating th {
+        color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        font-weight: 700; padding: 0 24px 5px 24px; border: none;
+    }
+    
+    .table-floating tbody tr {
+        background: var(--card-bg); box-shadow: var(--shadow-soft); transition: var(--transition-spring);
+    }
+    .table-floating tbody tr:hover {
+        transform: translateY(-4px) scale(1.005); box-shadow: var(--shadow-hover);
+    }
+    
+    /* Bordes redondeados perfectos para las filas */
+    .table-floating td { padding: 20px 24px; vertical-align: middle; border-top: 1px solid transparent; border-bottom: 1px solid transparent; }
+    .table-floating td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; border-left: 1px solid transparent; }
+    .table-floating td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; border-right: 1px solid transparent; }
+
+    /* Avatar con overlap */
+    .avatar-premium {
+        width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #F3E8FF, #E0E7FF);
+        color: var(--purple-brand); display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.2rem; flex-shrink: 0; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* Badges de Estado Mejorados */
+    .badge-dot {
+        padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.5px;
+    }
+    .badge-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+    .badge-dot.activo { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .badge-dot.activo::before { background: #10B981; }
+    .badge-dot.inactivo { background: rgba(239, 68, 68, 0.1); color: #DC2626; }
+    .badge-dot.inactivo::before { background: #EF4444; }
+
+    /* Botones de Acción de la Tabla */
+    .action-glass {
+        width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
+        background: var(--page-bg); color: var(--text-muted); transition: var(--transition-spring);
+        border: none; cursor: pointer; text-decoration: none;
+    }
+    .action-glass:hover { transform: scale(1.1); }
+    .action-glass.view:hover { background: #F3E8FF; color: var(--purple-brand); }
+    .action-glass.edit:hover { background: #FEF3C7; color: #D97706; }
+    .action-glass.delete:hover { background: #FEE2E2; color: #DC2626; }
+    .action-glass.reactivate:hover { background: #D1FAE5; color: #059669; }
+
 </style>
 
-<div class="mb-4 fade-in-up" style="animation-delay: 0.1s;">
-    <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Directorio de Pacientes</h3>
-    <p class="mt-1" style="color: var(--text-gray); font-weight: 500;">Gestiona la información y el historial clínico de forma segura.</p>
+<div class="stagger-1 mb-4">
+    <h2 class="title-gradient m-0">Directorio de Pacientes</h2>
+    <p class="text-muted fw-medium mt-1">Tu base de datos clínica. Segura, rápida y elegante.</p>
 </div>
 
-<div class="row mb-4 fade-in-up" style="animation-delay: 0.2s;">
-    <div class="col-12 col-md-8 col-xl-5">
-        <div class="stat-card-single">
-            <div class="info">
-                <p>Total Registrados</p>
-                <h3>{{ total_pacientes|default:0 }}</h3>
-            </div>
-            <div class="stat-icon-large">
-                <i class="fa-solid fa-users-viewfinder"></i>
+<div class="row mb-4 stagger-2">
+    <div class="col-12 col-md-7 col-xl-4">
+        <!-- Tarjeta que hace juego con el Sidebar -->
+        <div class="premium-stat-card">
+            <div class="d-flex justify-content-between align-items-center position-relative z-1">
+                <div>
+                    <p>Total Registrados</p>
+                    <h3>{{ total_pacientes|default:0 }}</h3>
+                </div>
+                <div class="stat-icon-glass">
+                    <i class="fa-solid fa-users-viewfinder"></i>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="toolbar-container fade-in-up" style="animation-delay: 0.3s;">
-    <div class="d-flex gap-3 flex-grow-1 align-items-center flex-wrap w-100">
-        <form method="GET" class="search-input-container flex-grow-1" id="filterForm">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" name="search" class="form-control" placeholder="Buscar por nombre o documento..." value="{{ busqueda|default:'' }}">
-            <input type="hidden" name="estado" value="{{ filtro_estado }}">
-            
-            {% if busqueda %}
-                <a href="{% url 'lista_pacientes' %}?estado={{ filtro_estado }}" class="btn-clear-search" title="Limpiar búsqueda">
-                    <i class="fa-solid fa-circle-xmark"></i>
-                </a>
-            {% endif %}
-        </form>
-
-        <div class="btn-group shadow-sm" role="group">
-            <a href="?search={{ busqueda|default:'' }}&estado=todos" class="btn {% if filtro_estado == 'todos' %}btn-primary{% else %}btn-outline-primary{% endif %}" style="{% if filtro_estado == 'todos' %}background-color: var(--purple-brand); border-color: var(--purple-brand);{% else %}color: var(--purple-brand); border-color: var(--purple-pastel);{% endif %}">Todos</a>
-            <a href="?search={{ busqueda|default:'' }}&estado=activos" class="btn {% if filtro_estado == 'activos' %}btn-success{% else %}btn-outline-success{% endif %}">Activos</a>
-            <a href="?search={{ busqueda|default:'' }}&estado=inactivos" class="btn {% if filtro_estado == 'inactivos' %}btn-danger{% else %}btn-outline-danger{% endif %}">Inactivos</a>
-        </div>
-
-        {% if request.user.is_superuser or "Administrador" in request.user.groups.all.values_list|stringformat:"s" or "Psicologo" in request.user.groups.all.values_list|stringformat:"s" %}
-        <a href="{% url 'crear_paciente' %}" class="btn-add-patient text-nowrap text-decoration-none">
-            <i class="fa-solid fa-user-plus"></i> <span>Nuevo Paciente</span>
-        </a>
+<div class="glass-toolbar stagger-3">
+    <form method="GET" id="filterForm" class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" name="search" placeholder="Buscar por nombre o documento..." value="{{ busqueda|default:'' }}">
+        <input type="hidden" name="estado" value="{{ filtro_estado }}">
+        {% if busqueda %}
+            <a href="{% url 'lista_pacientes' %}?estado={{ filtro_estado }}" class="position-absolute text-danger" style="right: 15px; top: 50%; transform: translateY(-50%); opacity: 0.8;">
+                <i class="fa-solid fa-xmark fs-5"></i>
+            </a>
         {% endif %}
+    </form>
+
+    <div class="filter-pills d-none d-md-flex">
+        <a href="?search={{ busqueda|default:'' }}&estado=todos" class="filter-pill {% if filtro_estado == 'todos' %}active{% endif %}">Todos</a>
+        <a href="?search={{ busqueda|default:'' }}&estado=activos" class="filter-pill {% if filtro_estado == 'activos' %}active{% endif %}">Activos</a>
+        <a href="?search={{ busqueda|default:'' }}&estado=inactivos" class="filter-pill {% if filtro_estado == 'inactivos' %}active{% endif %}">Inactivos</a>
     </div>
+
+    {% if request.user.is_superuser or "Administrador" in request.user.groups.all.values_list|stringformat:"s" or "Psicologo" in request.user.groups.all.values_list|stringformat:"s" %}
+    <a href="{% url 'crear_paciente' %}" class="btn-premium">
+        <i class="fa-solid fa-plus"></i> <span>Añadir Paciente</span>
+    </a>
+    {% endif %}
 </div>
 
-<div class="table-wrapper fade-in-up" style="animation-delay: 0.4s;">
-    <div class="table-responsive">
-        <table class="table table-premium table-borderless table-hover align-middle">
-            <thead>
-                <tr>
-                    <th>Paciente</th>
-                    <th>Documento</th>
-                    <th>Contacto</th>
-                    <th class="text-center">Género</th>
-                    <th class="text-center">Estado</th>
-                    <th class="text-end pe-4">Acciones</th> 
-                </tr>
-            </thead>
-            <tbody>
-                {% for paciente in pacientes %}
-                <tr>
-                    <td>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="patient-avatar">
-                                {{ paciente.nombre_completo|make_list|first|upper }}
-                            </div>
-                            <div>
-                                <span class="d-block fw-bold" style="color: var(--text-dark);">{{ paciente.nombre_completo }}</span>
-                                <small style="color: var(--text-gray); font-size: 0.8rem; font-weight: 600;">ID: #{{ paciente.id|stringformat:"04d" }}</small>
-                            </div>
+<div class="table-responsive table-floating-container stagger-3">
+    <table class="table-floating">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Identificación</th>
+                <th>Contacto</th>
+                <th class="text-center">Género</th>
+                <th class="text-center">Estado</th>
+                <th class="text-end pe-4">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paciente in pacientes %}
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-premium">
+                            {{ paciente.nombre_completo|make_list|first|upper }}
                         </div>
-                    </td>
-                    <td>
-                        <span class="d-block fw-bold text-dark">{{ paciente.dni_paciente }}</span>
-                        <small style="color: var(--text-gray); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">{{ paciente.tipo_documento }}</small>
-                    </td>
-                    <td>
-                        <span class="d-flex align-items-center gap-2 fw-medium">
-                            <i class="fa-solid fa-phone" style="color: var(--purple-pastel); font-size:0.85rem;"></i>
-                            {{ paciente.telefono|default:"No registrado" }}
-                        </span>
-                    </td>
-                    <td class="text-center">
-                        <span class="badge border bg-transparent text-dark px-3 py-2 rounded-pill fw-semibold">{{ paciente.genero }}</span>
-                    </td>
-                    <td class="text-center">
-                        {% if paciente.estado_paciente == 'Activo' %}
-                            <span class="status-badge activo">Activo</span>
-                        {% else %}
-                            <span class="status-badge inactivo">Inactivo</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-end pe-3">
+                        <div>
+                            <span class="d-block fw-bold text-dark" style="font-size: 1rem;">{{ paciente.nombre_completo }}</span>
+                            <small class="text-muted fw-semibold">ID: #{{ paciente.id|stringformat:"04d" }}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="d-block fw-bold text-dark" style="font-size: 0.95rem;">{{ paciente.dni_paciente }}</span>
+                    <small class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">{{ paciente.tipo_documento }}</small>
+                </td>
+                <td>
+                    <span class="d-flex align-items-center gap-2 fw-semibold text-dark">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                            <i class="fa-solid fa-phone text-muted" style="font-size: 0.7rem;"></i>
+                        </div>
+                        {{ paciente.telefono|default:"No registrado" }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-semibold shadow-sm">{{ paciente.genero }}</span>
+                </td>
+                <td class="text-center">
+                    {% if paciente.estado_paciente == 'Activo' %}
+                        <span class="badge-dot activo">ACTIVO</span>
+                    {% else %}
+                        <span class="badge-dot inactivo">INACTIVO</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <div class="d-flex justify-content-end gap-2">
                         {% if request.user.is_superuser or "Administrador" in request.user.groups.all.values_list|stringformat:"s" or "Psicologo" in request.user.groups.all.values_list|stringformat:"s" %}
-                            <a href="{% url 'ver_historial' paciente.id %}" class="btn-action view" data-bs-toggle="tooltip" title="Ver Historial">
-                                <i class="fa-solid fa-file-medical"></i>
+                            <a href="{% url 'ver_historial' paciente.id %}" class="action-glass view" data-bs-toggle="tooltip" title="Historial">
+                                <i class="fa-solid fa-notes-medical"></i>
                             </a>
-                            <a href="{% url 'editar_paciente' paciente.id %}" class="btn-action edit ms-2" data-bs-toggle="tooltip" title="Editar Información">
-                                <i class="fa-solid fa-pen"></i>
+                            <a href="{% url 'editar_paciente' paciente.id %}" class="action-glass edit" data-bs-toggle="tooltip" title="Editar">
+                                <i class="fa-solid fa-pen-to-square"></i>
                             </a>
                             
                             {% if paciente.estado_paciente == 'Activo' %}
-                                <button type="button" class="btn-action delete ms-2" data-bs-toggle="tooltip" title="Inactivar Paciente" onclick="confirmarCambioEstado({{ paciente.id }}, '{{ paciente.nombre_completo }}', 'inactivar')">
-                                    <i class="fa-solid fa-user-xmark"></i>
+                                <button type="button" class="action-glass delete" data-bs-toggle="tooltip" title="Inactivar" onclick="confirmarCambioEstado({{ paciente.id }}, '{{ paciente.nombre_completo }}', 'inactivar')">
+                                    <i class="fa-solid fa-user-lock"></i>
                                 </button>
                             {% else %}
-                                <button type="button" class="btn-action reactivar ms-2" data-bs-toggle="tooltip" title="Reactivar Paciente" onclick="confirmarCambioEstado({{ paciente.id }}, '{{ paciente.nombre_completo }}', 'reactivar')">
+                                <button type="button" class="action-glass reactivate" data-bs-toggle="tooltip" title="Reactivar" onclick="confirmarCambioEstado({{ paciente.id }}, '{{ paciente.nombre_completo }}', 'reactivar')">
                                     <i class="fa-solid fa-user-check"></i>
                                 </button>
                             {% endif %}
-
                         {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-5 bg-white" style="border-radius: 20px; box-shadow: var(--shadow-soft);">
+                    <div class="py-4">
+                        <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: rgba(124, 58, 237, 0.05); border-radius: 24px; color: var(--purple-brand); font-size: 2rem;">
+                            <i class="fa-solid fa-ghost"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark">Todo muy tranquilo por aquí</h5>
+                        <p class="text-muted mb-4">No encontramos pacientes. Comienza añadiendo el primero.</p>
+                        <a href="{% url 'crear_paciente' %}" class="btn-premium mx-auto">
+                            <i class="fa-solid fa-plus"></i> Registrar Paciente
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 <form id="form-estado" method="POST" style="display: none;">
@@ -192,66 +298,53 @@
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
+        });
     });
 
     function confirmarCambioEstado(pacienteId, nombre, accion) {
-        let titulo, texto, icono, colorConfirmar, textoConfirmar;
+        let titulo, texto, icono, colorConfirmar;
 
         if (accion === 'inactivar') {
-            titulo = '¿Inactivar paciente?';
-            texto = `Estás a punto de inactivar a ${nombre}. No podrá iniciar sesión en el sistema.`;
+            titulo = '¿Suspender acceso?';
+            texto = `Se inactivará la cuenta de ${nombre}.`;
             icono = 'warning';
-            colorConfirmar = '#dc2626';
-            textoConfirmar = 'Sí, inactivar';
+            colorConfirmar = '#0D0B14'; // Dark premium para botones destructivos
         } else {
             titulo = '¿Reactivar paciente?';
-            texto = `Estás a punto de darle acceso nuevamente a ${nombre}.`;
+            texto = `Se restaurará el acceso de ${nombre}.`;
             icono = 'info';
-            colorConfirmar = '#059669';
-            textoConfirmar = 'Sí, reactivar';
+            colorConfirmar = '#7C3AED'; // Purple premium
         }
 
         Swal.fire({
-            title: titulo,
-            text: texto,
+            title: `<span style="font-family: 'Poppins', sans-serif; font-weight: 800; color: #111827;">${titulo}</span>`,
+            html: `<span style="font-family: 'Poppins', sans-serif; color: #6B7280; font-weight: 500;">${texto}</span>`,
             icon: icono,
             showCancelButton: true,
             confirmButtonColor: colorConfirmar,
-            cancelButtonColor: '#a3aed1',
-            confirmButtonText: textoConfirmar,
-            cancelButtonText: 'Cancelar',
+            cancelButtonColor: '#F3F4F6',
+            confirmButtonText: 'Confirmar Acción',
+            cancelButtonText: '<span style="color:#4B5563; font-weight: 600;">Cancelar</span>',
             background: '#ffffff',
-            color: '#2b3674',
             customClass: {
-                confirmButton: 'btn btn-lg rounded-pill px-4',
-                cancelButton: 'btn btn-lg rounded-pill px-4 ms-2'
+                popup: 'rounded-4 shadow-lg border-0',
+                confirmButton: 'btn rounded-3 px-4 py-2 fw-bold shadow-sm',
+                cancelButton: 'btn rounded-3 px-4 py-2 ms-2 fw-bold border'
             },
             buttonsStyling: false
         }).then((result) => {
             if (result.isConfirmed) {
                 const form = document.getElementById('form-estado');
                 const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
-                const url = `/pacientes/inactivar/${pacienteId}/`;
-
-                fetch(url, {
+                
+                fetch(`/pacientes/inactivar/${pacienteId}/`, {
                     method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' }
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        Swal.fire({
-                            title: '¡Listo!',
-                            text: data.mensaje,
-                            icon: 'success',
-                            confirmButtonColor: '#2a1f45',
-                        }).then(() => {
-                            location.reload();
-                        });
+                        location.reload();
                     }
                 });
             }

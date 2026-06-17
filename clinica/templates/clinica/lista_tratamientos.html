@@ -5,220 +5,327 @@
 {% block content %}
 <style>
     :root {
-        --card-bg: #ffffff;
-        --page-bg: #f4f7fe;
-        --purple-brand: #2a1f45;
-        --purple-light: #4c3b73;
-        --purple-pastel: #b09ade;
-        --text-dark: #2b3674;
-        --text-gray: #a3aed1;
-        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
-        --shadow-hover: 0 15px 35px rgba(42, 31, 69, 0.08);
+        --purple-brand: #7C3AED; 
+        --purple-glow: rgba(124, 58, 237, 0.4);
+        --dark-bg: #0D0B14; 
+        --page-bg: #F4F7FE; 
+        --text-main: #111827;
+        --text-muted: #6B7280;
+        --card-bg: #FFFFFF;
+        
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+        --shadow-hover: 0 12px 30px rgba(124, 58, 237, 0.08);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     }
 
-    /* Animaciones de entrada */
-    .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
-    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    body { background-color: var(--page-bg); }
 
-    /* Card de Estadísticas Premium */
-    .stat-card-single { 
-        background: linear-gradient(135deg, var(--purple-brand) 0%, var(--purple-light) 100%); 
-        border-radius: 24px; padding: 30px 40px; color: white; 
-        box-shadow: 0 15px 25px rgba(42, 31, 69, 0.15); 
-        display: flex; align-items: center; justify-content: space-between; 
-        position: relative; overflow: hidden; transition: transform 0.3s ease; 
-    }
-    .stat-card-single:hover { transform: translateY(-3px); }
-    .stat-card-single::after { 
-        content: ''; position: absolute; right: -20px; top: -50px; width: 200px; height: 200px; 
-        border-radius: 50%; background: radial-gradient(circle, rgba(176, 154, 222, 0.2) 0%, rgba(255,255,255,0) 70%); 
-    }
-    .stat-card-single h3 { font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-    .stat-card-single p { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: 0.5px; opacity: 0.8; text-transform: uppercase; margin-bottom: 8px; }
+    /* Animaciones de Cascada */
+    .stagger-1 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    .stagger-2 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.1s; opacity: 0; transform: translateY(20px); }
+    .stagger-3 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.2s; opacity: 0; transform: translateY(20px); }
     
-    .stat-icon-large { 
-        background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); 
-        width: 85px; height: 85px; border-radius: 22px; 
-        display: flex; align-items: center; justify-content: center; 
-        font-size: 2.8rem; color: var(--purple-pastel); 
-        border: 1px solid rgba(255, 255, 255, 0.2); z-index: 1; 
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Título Gradiente */
+    .title-gradient {
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--purple-brand) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        letter-spacing: -0.03em;
     }
 
-    /* Toolbar y Filtros */
-    .toolbar-container { 
-        background: var(--card-bg); border-radius: 20px; padding: 15px 20px; 
-        box-shadow: var(--shadow-soft); margin-bottom: 25px; 
-        display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; 
-        border: 1px solid rgba(0,0,0,0.02); 
+    /* Tarjeta Dark Glass */
+    .premium-stat-card {
+        background: linear-gradient(145deg, var(--dark-bg), #1a1525);
+        border-radius: 20px; padding: 30px; color: white;
+        position: relative; overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 20px 40px rgba(13, 11, 20, 0.15);
     }
-    .search-input-container { position: relative; flex-grow: 1; max-width: 450px; }
-    .search-input-container .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-gray); font-size: 1.1rem; }
-    .search-input-container .form-control { 
-        padding-left: 55px; border-radius: 50px; height: 50px; border: 2px solid transparent; 
-        background: var(--page-bg); font-weight: 500; color: var(--text-dark); transition: all 0.3s ease; 
+    .premium-stat-card::before {
+        content: ''; position: absolute; top: -50%; right: -20%; width: 250px; height: 250px;
+        background: radial-gradient(circle, var(--purple-brand) 0%, transparent 70%);
+        opacity: 0.3; filter: blur(40px); pointer-events: none;
     }
-    .search-input-container .form-control:focus { background: white; border-color: var(--purple-pastel); box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15); outline: none; }
-
-    /* Botones de Filtro Estilizados */
-    .filter-pill-group { background: var(--page-bg); padding: 5px; border-radius: 50px; display: flex; gap: 5px; }
-    .filter-pill { 
-        border: none; background: transparent; padding: 8px 20px; border-radius: 50px; 
-        font-size: 0.85rem; font-weight: 700; color: var(--text-gray); transition: all 0.2s; 
+    .premium-stat-card h3 { font-size: 3.5rem; font-weight: 800; margin: 0; line-height: 1; }
+    .premium-stat-card p { color: #9CA3AF; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    
+    .stat-icon-glass {
+        background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        width: 65px; height: 65px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; color: #C4B5FD; border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .filter-pill.active { background: white; color: var(--purple-brand); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
-    .btn-add-premium { 
-        background: var(--purple-brand); color: white !important; border: none; border-radius: 50px; 
-        padding: 0 24px; height: 50px; font-weight: 600; display: inline-flex; align-items: center; 
-        gap: 10px; box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2); transition: all 0.3s ease; text-decoration: none;
+    /* Toolbar Flotante Súper Limpia */
+    .glass-toolbar {
+        background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-radius: 16px; padding: 12px; box-shadow: var(--shadow-soft); margin-bottom: 30px;
+        display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border: 1px solid rgba(255, 255, 255, 0.5);
     }
-    .btn-add-premium:hover { background: var(--purple-light); transform: translateY(-2px); box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3); }
 
-    /* Tabla Premium */
-    .table-wrapper { background: var(--card-bg); border-radius: 24px; padding: 10px; box-shadow: var(--shadow-soft); border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
-    .table-premium thead { background-color: rgba(244, 247, 254, 0.6); }
-    .table-premium thead th { color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; border: none; padding: 20px 24px; font-weight: 700; }
-    .table-premium tbody td { vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.02); padding: 20px 24px; color: var(--text-dark); font-weight: 500; }
-    .table-premium tbody tr:hover { background-color: rgba(176, 154, 222, 0.05); }
+    .search-box { position: relative; flex-grow: 1; min-width: 280px; max-width: 400px; }
+    .search-box i.fa-magnifying-glass { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .search-box input {
+        width: 100%; padding: 12px 20px 12px 45px; border-radius: 12px; border: none;
+        background: white; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); color: var(--text-main);
+        font-weight: 500; transition: all 0.3s;
+    }
+    .search-box input:focus { outline: none; box-shadow: 0 0 0 2px var(--purple-brand), 0 4px 15px var(--purple-glow); }
 
-    .patient-avatar { 
-        width: 45px; height: 45px; border-radius: 14px; 
-        background: rgba(176, 154, 222, 0.15); color: var(--purple-brand); 
-        display: flex; align-items: center; justify-content: center; 
-        font-weight: 700; font-size: 1.2rem; 
+    /* Segmented Control iOS Premium */
+    .filter-pills { background: white; padding: 5px; border-radius: 12px; display: flex; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+    .filter-pill {
+        padding: 8px 20px; border-radius: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.85rem;
+        text-decoration: none; transition: all 0.3s; cursor: pointer; border: none; background: transparent;
+    }
+    .filter-pill:hover { color: var(--text-main); }
+    .filter-pill.active { background: var(--dark-bg); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+    .btn-premium {
+        background: var(--purple-brand); color: white !important; border: none; border-radius: 12px;
+        padding: 0 24px; height: 44px; font-weight: 600; font-size: 0.9rem; display: inline-flex;
+        align-items: center; gap: 10px; transition: var(--transition-spring); box-shadow: 0 8px 20px var(--purple-glow);
+        margin-left: auto; text-decoration: none;
+    }
+    .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 12px 25px var(--purple-glow); }
+
+    /* Tabla de Filas Flotantes */
+    .table-floating-container { margin-top: -10px; }
+    .table-floating { width: 100%; border-collapse: separate; border-spacing: 0 14px; }
+    
+    .table-floating th {
+        color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        font-weight: 700; padding: 0 24px 5px 24px; border: none;
     }
     
-    .status-badge { font-weight: 700; padding: 6px 16px; border-radius: 50px; font-size: 0.75rem; display: inline-block; }
-    .status-badge.activo { background: rgba(16, 185, 129, 0.1); color: #059669; }
-    .status-badge.finalizado { background: rgba(100, 116, 139, 0.1); color: #475569; }
-
-    .btn-action { 
-        width: 40px; height: 40px; border-radius: 12px; display: inline-flex; 
-        align-items: center; justify-content: center; transition: all 0.2s; 
-        background: var(--page-bg); color: var(--text-gray); border: none; 
+    .table-floating tbody tr {
+        background: var(--card-bg); box-shadow: var(--shadow-soft); transition: var(--transition-spring);
     }
-    .btn-action:hover { background: rgba(176, 154, 222, 0.2); color: var(--purple-brand); transform: scale(1.05); }
+    .table-floating tbody tr:hover {
+        transform: translateY(-4px) scale(1.005); box-shadow: var(--shadow-hover);
+    }
+    
+    .table-floating td { padding: 20px 24px; vertical-align: middle; border-top: 1px solid transparent; border-bottom: 1px solid transparent; }
+    .table-floating td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; border-left: 1px solid transparent; }
+    .table-floating td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; border-right: 1px solid transparent; }
+
+    /* Avatar con overlap */
+    .avatar-premium {
+        width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #F3E8FF, #E0E7FF);
+        color: var(--purple-brand); display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.2rem; flex-shrink: 0; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* Badges de Estado */
+    .badge-dot {
+        padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.5px;
+    }
+    .badge-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+    .badge-dot.activo { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .badge-dot.activo::before { background: #10B981; }
+    .badge-dot.finalizado { background: rgba(100, 116, 139, 0.1); color: #475569; }
+    .badge-dot.finalizado::before { background: #64748B; }
+
+    /* Botones de Acción de la Tabla */
+    .action-glass {
+        width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
+        background: var(--page-bg); color: var(--text-muted); transition: var(--transition-spring);
+        border: none; cursor: pointer; text-decoration: none;
+    }
+    .action-glass:hover { transform: scale(1.1); }
+    .action-glass.view:hover { background: #F3E8FF; color: var(--purple-brand); }
+    .action-glass.more:hover { background: #F1F5F9; color: var(--text-dark); }
 </style>
 
-<div class="mb-4 fade-in-up" style="animation-delay: 0.1s;">
-    <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Planes de Tratamiento</h3>
-    <p class="mt-1" style="color: var(--text-gray); font-weight: 500;">Monitoreo terapéutico y evolución clínica centralizada.</p>
+<div class="stagger-1 mb-4">
+    <h2 class="title-gradient m-0">Planes de Tratamiento</h2>
+    <p class="text-muted fw-medium mt-1">Monitoreo terapéutico y evolución clínica centralizada.</p>
 </div>
 
-<div class="row mb-4 fade-in-up" style="animation-delay: 0.2s;">
-    <div class="col-12 col-md-8 col-xl-4">
-        <div class="stat-card-single">
-            <div class="info">
-                <p>Total Tratamientos</p>
-                <h3>{{ tratamientos|length|default:"0" }}</h3>
+<div class="row mb-4 stagger-2">
+    <div class="col-12 col-md-7 col-xl-4">
+        <!-- Tarjeta Dark Glass -->
+        <div class="premium-stat-card">
+            <div class="d-flex justify-content-between align-items-center position-relative z-1">
+                <div>
+                    <p>Total Tratamientos</p>
+                    <h3>{{ tratamientos|length|default:"0" }}</h3>
+                </div>
+                <div class="stat-icon-glass">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
             </div>
-            <div class="stat-icon-large">
-                <i class="fa-solid fa-layer-group"></i>
-            </div>
         </div>
     </div>
 </div>
 
-<div class="toolbar-container fade-in-up" style="animation-delay: 0.3s;">
-    <div class="d-flex gap-3 flex-grow-1 align-items-center flex-wrap w-100">
-        <div class="search-input-container flex-grow-1">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="treatmentSearch" class="form-control" placeholder="Buscar por paciente o diagnóstico...">
-        </div>
-
-        <div class="filter-pill-group">
-            <button class="filter-pill active">Todos</button>
-            <button class="filter-pill">Activos</button>
-            <button class="filter-pill">Finalizados</button>
-        </div>
-
-        <a href="{% url 'crear_tratamiento' %}" class="btn-add-premium text-nowrap">
-            <i class="fa-solid fa-plus-circle"></i> <span>Nuevo Plan</span>
-        </a>
+<div class="glass-toolbar stagger-3">
+    <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="treatmentSearch" placeholder="Buscar por paciente o diagnóstico...">
     </div>
+
+    <div class="filter-pills d-none d-md-flex" id="treatmentFilters">
+        <button class="filter-pill active" data-filter="todos">Todos</button>
+        <button class="filter-pill" data-filter="activos">Activos</button>
+        <button class="filter-pill" data-filter="finalizados">Finalizados</button>
+    </div>
+
+    <a href="{% url 'crear_tratamiento' %}" class="btn-premium">
+        <i class="fa-solid fa-plus"></i> <span>Nuevo Plan</span>
+    </a>
 </div>
 
-<div class="table-wrapper fade-in-up" style="animation-delay: 0.4s;">
-    <div class="table-responsive">
-        <table class="table table-premium table-borderless table-hover align-middle mb-0">
-            <thead>
-                <tr>
-                    <th class="ps-4">Paciente</th>
-                    <th>Diagnóstico Principal</th>
-                    <th>Fecha de Inicio</th>
-                    <th>Especialista a Cargo</th>
-                    <th class="text-center">Estado</th>
-                    <th class="text-end pe-4">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for t in tratamientos %}
-                <tr>
-                    <td class="ps-4">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="patient-avatar">
-                                {{ t.paciente.nombre_completo|make_list|first|upper }}
-                            </div>
-                            <div>
-                                <span class="d-block fw-bold" style="color: var(--text-dark);">{{ t.paciente.nombre_completo }}</span>
-                                <small style="color: var(--text-gray); font-size: 0.75rem; font-weight: 600;">ID Paciente: #{{ t.paciente.id|stringformat:"03d" }}</small>
-                            </div>
+<div class="table-responsive table-floating-container stagger-3">
+    <table class="table-floating" id="treatmentsTable">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Diagnóstico Principal</th>
+                <th>Fecha de Inicio</th>
+                <th>Especialista a Cargo</th>
+                <th class="text-center">Estado</th>
+                <th class="text-end pe-4">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in tratamientos %}
+            <tr class="treatment-row" data-status="{% if t.activo %}activos{% else %}finalizados{% endif %}">
+                <td>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-premium">
+                            {{ t.paciente.nombre_completo|make_list|first|upper }}
                         </div>
-                    </td>
-                    <td>
-                        <span class="fw-bold text-dark">{{ t.diagnostico_principal|truncatechars:35 }}</span>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-regular fa-calendar-check" style="color: var(--purple-pastel);"></i>
-                            <span class="text-muted small fw-bold">{{ t.fecha_inicio|date:"d M, Y" }}</span>
+                        <div>
+                            <span class="d-block fw-bold text-dark" style="font-size: 1rem;">{{ t.paciente.nombre_completo }}</span>
+                            <small class="text-muted fw-semibold">ID Paciente: #{{ t.paciente.id|stringformat:"03d" }}</small>
                         </div>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-user-md" style="color: var(--purple-pastel); font-size: 0.85rem;"></i>
-                            <span class="fw-medium">{{ t.especialista.user.get_full_name }}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="d-block fw-bold text-dark" style="font-size: 0.95rem;">{{ t.diagnostico_principal|truncatechars:35 }}</span>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                            <i class="fa-regular fa-calendar-check text-muted" style="font-size: 0.7rem;"></i>
                         </div>
-                    </td>
-                    <td class="text-center">
-                        {% if t.activo %}
-                            <span class="status-badge activo">Activo</span>
-                        {% else %}
-                            <span class="status-badge finalizado">Finalizado</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-end pe-4">
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'detalle_tratamiento' t.id %}" class="btn-action" title="Ver Detalles">
-                                <i class="fa-solid fa-eye"></i>
-                            </a>
-                            <button class="btn-action" title="Más opciones">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
+                        <span class="fw-semibold text-dark" style="font-size: 0.9rem;">{{ t.fecha_inicio|date:"d M, Y" }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-user-md text-muted" style="font-size: 0.85rem;"></i>
+                        <span class="fw-semibold text-dark">{{ t.especialista.user.get_full_name }}</span>
+                    </div>
+                </td>
+                <td class="text-center">
+                    {% if t.activo %}
+                        <span class="badge-dot activo">ACTIVO</span>
+                    {% else %}
+                        <span class="badge-dot finalizado">FINALIZADO</span>
+                    {% endif %}
+                </td>
+                <td class="text-end pe-4">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'detalle_tratamiento' t.id %}" class="action-glass view" data-bs-toggle="tooltip" title="Ver Detalles">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <button class="action-glass more" data-bs-toggle="tooltip" title="Más opciones">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr id="emptyStateRow">
+                <td colspan="6" class="text-center py-5 bg-white" style="border-radius: 20px; box-shadow: var(--shadow-soft);">
+                    <div class="py-4">
+                        <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: rgba(124, 58, 237, 0.05); border-radius: 24px; color: var(--purple-brand); font-size: 2rem;">
+                            <i class="fa-solid fa-notes-medical"></i>
                         </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center py-5">
-                        <div class="py-4">
-                            <i class="fa-solid fa-folder-open fa-3x mb-3" style="opacity: 0.1; color: var(--purple-brand);"></i>
-                            <h5 class="text-muted fw-normal">No se encontraron planes de tratamiento.</h5>
+                        <h5 class="fw-bold text-dark">Sin tratamientos aún</h5>
+                        <p class="text-muted mb-4">Comienza creando un plan terapéutico para tus pacientes.</p>
+                        <a href="{% url 'crear_tratamiento' %}" class="btn-premium mx-auto">
+                            <i class="fa-solid fa-plus"></i> Nuevo Plan
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            <tr id="noResultsRow" style="display: none;">
+                <td colspan="6" class="text-center py-5 bg-white" style="border-radius: 20px; box-shadow: var(--shadow-soft);">
+                    <div class="py-4">
+                        <div class="mb-3 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: rgba(107, 114, 128, 0.05); border-radius: 24px; color: var(--text-muted); font-size: 2rem;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
                         </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        <h5 class="fw-bold text-dark">No hay coincidencias</h5>
+                        <p class="text-muted mb-0">No encontramos tratamientos que coincidan con tu búsqueda o filtro actual.</p>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 
 <script>
-    // Buscador en tiempo real
-    document.getElementById('treatmentSearch').addEventListener('keyup', function() {
-        let value = this.value.toLowerCase();
-        document.querySelectorAll(".table-premium tbody tr").forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+    document.addEventListener("DOMContentLoaded", function() {
+        // Tooltips de Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Lógica de Filtro combinado (Búsqueda + Píldoras iOS)
+        const searchInput = document.getElementById('treatmentSearch');
+        const filterBtns = document.querySelectorAll('#treatmentFilters .filter-pill');
+        const rows = document.querySelectorAll('.treatment-row');
+        const noResultsRow = document.getElementById('noResultsRow');
+        let currentFilter = 'todos';
+
+        function applyFilters() {
+            let searchTerm = searchInput.value.toLowerCase();
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                let textContent = row.innerText.toLowerCase();
+                let status = row.getAttribute('data-status');
+                
+                let matchesSearch = textContent.includes(searchTerm);
+                let matchesFilter = (currentFilter === 'todos') || (status === currentFilter);
+
+                if (matchesSearch && matchesFilter) {
+                    row.style.display = "";
+                    visibleCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Mostrar el estado vacío de búsqueda si no hay resultados y existen datos
+            if (rows.length > 0) {
+                noResultsRow.style.display = (visibleCount === 0) ? "" : "none";
+            }
+        }
+
+        // Evento de búsqueda
+        searchInput.addEventListener('keyup', applyFilters);
+
+        // Evento de botones de estado
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Quitar clase activa a todos
+                filterBtns.forEach(b => b.classList.remove('active'));
+                // Agregar clase activa al clickeado
+                this.classList.add('active');
+                
+                currentFilter = this.getAttribute('data-filter');
+                applyFilters();
+            });
         });
     });
 </script>

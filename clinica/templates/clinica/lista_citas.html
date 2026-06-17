@@ -3,309 +3,344 @@
 {% block title %}Agenda de Citas - NeuroEsencia{% endblock %}
 
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
-    /* --- VARIABLES LOCALES --- */
+    /* --- VARIABLES PREMIUM --- */
     :root {
-        --card-bg: #ffffff;
-        --page-bg: #f4f7fe;
-        --purple-brand: #2a1f45;
-        --purple-light: #4c3b73;
-        --purple-pastel: #b09ade;
-        --text-dark: #2b3674;
-        --text-gray: #a3aed1;
-        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+        --purple-brand: #7C3AED; 
+        --purple-glow: rgba(124, 58, 237, 0.4);
+        --dark-bg: #0D0B14; 
+        --page-bg: #F4F7FE; 
+        --text-main: #111827;
+        --text-muted: #6B7280;
+        --card-bg: #FFFFFF;
+        
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+        --shadow-hover: 0 12px 30px rgba(124, 58, 237, 0.08);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     }
 
-    /* --- ANIMACIONES --- */
-    .fade-in-up {
-        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    @keyframes fadeInUp {
-        to { opacity: 1; transform: translateY(0); }
+    body { background-color: var(--page-bg); }
+
+    /* Animaciones en Cascada */
+    .stagger-1 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    .stagger-2 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.1s; opacity: 0; transform: translateY(20px); }
+    .stagger-3 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.2s; opacity: 0; transform: translateY(20px); }
+    
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Título Gradiente */
+    .title-gradient {
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--purple-brand) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        letter-spacing: -0.03em;
     }
 
-    /* Botón Principal */
-    .btn-add-appointment {
-        background: var(--purple-brand);
-        color: white !important; border: none; border-radius: 50px;
-        padding: 0 24px; height: 48px; font-weight: 600;
-        display: inline-flex; align-items: center; gap: 10px;
-        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2); transition: all 0.3s ease;
-    }
-    .btn-add-appointment:hover { 
-        background: var(--purple-light); 
-        transform: translateY(-2px); 
-        box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3); 
+    /* Toolbar y Filtros iOS Style */
+    .glass-toolbar {
+        background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-radius: 16px; padding: 12px; box-shadow: var(--shadow-soft); margin-bottom: 30px;
+        display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border: 1px solid rgba(255, 255, 255, 0.5);
     }
 
-    /* Filtros - Estilo Control Segmentado */
-    .segmented-control {
-        background-color: white;
-        padding: 6px;
-        border-radius: 16px;
-        display: inline-flex;
-        gap: 5px;
-        box-shadow: var(--shadow-soft);
-        border: 1px solid rgba(0,0,0,0.02);
+    .filter-pills { background: white; padding: 5px; border-radius: 12px; display: flex; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+    .filter-pill {
+        padding: 8px 20px; border-radius: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.85rem;
+        text-decoration: none; transition: all 0.3s; cursor: pointer; border: none; background: transparent;
     }
-    .segmented-control .btn-filtro {
-        border: none;
-        background: transparent;
-        color: var(--text-gray);
-        font-weight: 600;
-        font-size: 0.85rem;
-        padding: 0.6rem 1.5rem;
-        border-radius: 12px;
+    .filter-pill:hover { color: var(--text-main); }
+    .filter-pill.active { background: var(--dark-bg); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+    .btn-premium {
+        background: var(--purple-brand); color: white !important; border: none; border-radius: 12px;
+        padding: 0 24px; height: 44px; font-weight: 600; font-size: 0.9rem; display: inline-flex;
+        align-items: center; gap: 10px; transition: var(--transition-spring); box-shadow: 0 8px 20px var(--purple-glow);
+    }
+    .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 12px 25px var(--purple-glow); }
+
+    /* --- TABLA DE FILAS FLOTANTES --- */
+    .table-floating-container { margin-top: -10px; }
+    .table-floating { width: 100%; border-collapse: separate; border-spacing: 0 14px; }
+    
+    .table-floating th {
+        color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        font-weight: 700; padding: 0 24px 5px 24px; border: none;
+    }
+    
+    .table-floating tbody tr {
+        background: var(--card-bg); box-shadow: var(--shadow-soft); transition: var(--transition-spring);
+    }
+    .table-floating tbody tr:hover { transform: translateY(-4px) scale(1.005); box-shadow: var(--shadow-hover); }
+    
+    .table-floating td { padding: 20px 24px; vertical-align: middle; border-top: 1px solid transparent; border-bottom: 1px solid transparent; }
+    .table-floating td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; border-left: 1px solid transparent; }
+    .table-floating td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; border-right: 1px solid transparent; }
+
+    /* Avatares y Etiquetas */
+    .avatar-premium {
+        width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #F3E8FF, #E0E7FF);
+        color: var(--purple-brand); display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.2rem; flex-shrink: 0; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05);
+    }
+
+    .badge-mod {
+        font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 50px; 
+        display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.5px;
+    }
+    .badge-mod.virtual { background: rgba(56, 189, 248, 0.1); color: #0284c7; }
+    .badge-mod.presencial { background: rgba(148, 163, 184, 0.1); color: #475569; }
+
+    /* Select de Estado (Glassmorphism) */
+    .select-invisible {
+        background-color: #FFFBEB; color: #D97706; border: 1px solid #FDE68A;
+        border-radius: 50px; padding: 6px 30px 6px 14px; font-size: 0.75rem; font-weight: 700;
+        cursor: pointer; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d97706' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 10px center; background-size: 12px;
         transition: all 0.3s ease;
     }
-    .segmented-control .btn-filtro.active {
-        background-color: var(--page-bg);
-        color: var(--purple-brand);
-        box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
-    }
+    .select-invisible:hover { background-color: #FEF3C7; transform: scale(1.05); }
 
-    /* --- TABLA PREMIUM --- */
-    .table-wrapper {
-        background: var(--card-bg);
-        border-radius: 24px;
-        padding: 10px; 
-        box-shadow: var(--shadow-soft);
-        border: 1px solid rgba(0,0,0,0.02);
-        overflow: hidden; 
-    }
-    
-    .table-premium thead { background-color: rgba(244, 247, 254, 0.6); }
-    .table-premium thead th {
-        color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
-        border: none; padding: 20px 24px; font-weight: 700;
-    }
+    .status-badge-static { font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 50px; display: inline-flex; align-items: center; gap: 6px; }
 
-    .table-premium tbody td {
-        vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.02);
-        padding: 20px 24px; color: var(--text-dark); font-weight: 500;
+    /* Botones de Acción */
+    .action-glass {
+        width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
+        background: var(--page-bg); color: var(--text-muted); transition: var(--transition-spring);
+        border: none; cursor: pointer; text-decoration: none;
     }
-    .table-premium tbody tr:hover { background-color: rgba(176, 154, 222, 0.05); }
-
-    /* Elementos Visuales */
-    .avatar-circle {
-        width: 42px; height: 42px; border-radius: 14px;
-        background: rgba(176, 154, 222, 0.15);
-        color: var(--purple-brand);
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
-    }
-    
-    .badge-modalidad {
-        font-size: 0.75rem; font-weight: 600; padding: 6px 14px;
-        border-radius: 20px; display: inline-flex; align-items: center;
-    }
-    .modalidad-virtual { background-color: rgba(56, 189, 248, 0.1); color: #0284c7; border: 1px solid rgba(56, 189, 248, 0.2); }
-    .modalidad-presencial { background-color: rgba(148, 163, 184, 0.1); color: #475569; border: 1px solid rgba(148, 163, 184, 0.2); }
-    
-    /* Selector de Estado Discreto */
-    .select-invisible {
-        background-color: rgba(245, 158, 11, 0.1);
-        color: #d97706;
-        border: 1px solid rgba(245, 158, 11, 0.2);
-        border-radius: 20px;
-        padding: 0.35rem 2rem 0.35rem 1rem;
-        font-size: 0.8rem;
-        font-weight: 700;
-        cursor: pointer;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d97706' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 0.6rem center;
-        background-size: 1em;
-    }
-
-    .status-badge-static { font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 20px; display: inline-block; }
-
-    /* BOTONES DE ACCIÓN (Nuevos) */
-    .btn-action {
-        width: 38px; height: 38px; border-radius: 12px;
-        display: inline-flex; align-items: center; justify-content: center;
-        transition: all 0.2s; background: var(--page-bg);
-        color: var(--text-gray); border: 1px solid transparent; text-decoration: none;
-    }
-    .btn-action.edit:hover { background: #fff8e6; color: #f59e0b; border-color: #fde68a; transform: scale(1.05); }
+    .action-glass:hover { transform: scale(1.1); }
+    .action-glass.edit:hover { background: #F3E8FF; color: var(--purple-brand); }
 
     .btn-action-attend {
-        color: var(--purple-brand);
-        background-color: rgba(176, 154, 222, 0.15);
-        border: none; border-radius: 12px;
-        padding: 0.5rem 1rem; font-weight: 700; font-size: 0.85rem;
-        transition: all 0.2s; text-decoration: none;
-        display: inline-flex; align-items: center;
+        background: rgba(124, 58, 237, 0.1); color: var(--purple-brand);
+        border: none; border-radius: 10px; padding: 0 16px; height: 38px;
+        font-weight: 700; font-size: 0.85rem; transition: var(--transition-spring);
+        text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
     }
-    .btn-action-attend:hover { background-color: var(--purple-brand); color: white; transform: scale(1.05); }
+    .btn-action-attend:hover { background: var(--purple-brand); color: white; transform: scale(1.05); }
 </style>
 
-<div class="fade-in-up" style="animation-delay: 0.1s;">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+<div class="stagger-1 mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Agenda Clínica</h3>
-            <p class="mt-1 m-0" style="color: var(--text-gray); font-weight: 500;">Administra y atiende tus citas programadas.</p>
+            <h2 class="title-gradient m-0">Agenda Clínica</h2>
+            <p class="text-muted fw-medium mt-1 mb-0">Administra y atiende tus citas programadas.</p>
         </div>
-        <a href="{% url 'agendar_cita' %}" class="btn-add-appointment text-decoration-none">
-            <i class="fa-solid fa-plus"></i> Nueva Cita
+        <a href="{% url 'agendar_cita' %}" class="btn-premium text-decoration-none">
+            <i class="fa-solid fa-plus"></i> <span>Nueva Cita</span>
         </a>
     </div>
 </div>
 
-<div class="mb-4 fade-in-up" style="animation-delay: 0.2s;">
-    <div class="segmented-control">
-        <button class="btn-filtro active" onclick="filtrarCitas('todas', this)">Todas las citas</button>
-        <button class="btn-filtro" onclick="filtrarCitas('hoy', this)">Para hoy</button>
-        <button class="btn-filtro" onclick="filtrarCitas('programadas', this)">Pendientes</button>
+<div class="glass-toolbar stagger-2">
+    <div class="filter-pills" id="agendaFilters">
+        <button class="filter-pill active" onclick="filtrarCitas('todas', this)">Todas las citas</button>
+        <button class="filter-pill" onclick="filtrarCitas('hoy', this)">Para hoy</button>
+        <button class="filter-pill" onclick="filtrarCitas('programadas', this)">Pendientes</button>
     </div>
 </div>
 
-<div class="table-wrapper fade-in-up" style="animation-delay: 0.3s;">
-    <div class="table-responsive">
-        <table class="table table-premium table-borderless table-hover align-middle" id="tablaCitas">
-            <thead>
-                <tr>
-                    <th style="width: 10%;">Código</th>
-                    <th style="width: 25%;">Paciente</th>
-                    <th style="width: 20%;">Profesional</th>
-                    <th style="width: 15%;">Fecha y Hora</th>
-                    <th class="text-center" style="width: 10%;">Modalidad</th>
-                    <th class="text-center" style="width: 12%;">Estado</th>
-                    <th class="text-end pe-4" style="width: 8%;">Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cita in citas %}
-                <tr class="cita-row" data-estado="{{ cita.estado_cita }}" data-fecha="{{ cita.fecha_cita|date:'Y-m-d' }}">
-                    <td>
-                        <span class="badge bg-light text-secondary border px-2 py-1">#{{ cita.codigo_cita }}</span>
-                    </td>
-                    
-                    <td>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="avatar-circle">
-                                {{ cita.paciente.nombre_completo|slice:":1"|upper }}
-                            </div>
-                            <div>
-                                <div class="fw-bold" style="color: var(--text-dark);">{{ cita.paciente.nombre_completo }}</div>
-                                <div style="color: var(--text-gray); font-size: 0.75rem; font-weight: 600;">Doc: {{ cita.paciente.dni_paciente|default:"N/A" }}</div>
-                            </div>
+<div class="table-responsive table-floating-container stagger-3">
+    <table class="table-floating" id="tablaCitas">
+        <thead>
+            <tr>
+                <th style="width: 8%;">Código</th>
+                <th style="width: 25%;">Paciente</th>
+                <th style="width: 20%;">Profesional</th>
+                <th style="width: 15%;">Fecha y Hora</th>
+                <th class="text-center" style="width: 12%;">Modalidad</th>
+                <th class="text-center" style="width: 10%;">Estado</th>
+                <th class="text-end pe-4" style="width: 10%;">Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cita in citas %}
+            <tr class="cita-row" data-estado="{{ cita.estado_cita }}" data-fecha="{{ cita.fecha_cita|date:'Y-m-d' }}">
+                <td>
+                    <span class="badge bg-light text-secondary border px-2 py-1 rounded-3">#{{ cita.codigo_cita }}</span>
+                </td>
+                
+                <td>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-premium">
+                            {{ cita.paciente.nombre_completo|slice:":1"|upper }}
                         </div>
-                    </td>
-
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-user-doctor" style="color: var(--purple-pastel);"></i>
-                            <span class="fw-semibold">{{ cita.psicologo.nombre_completo|default:cita.psicologo.username }}</span>
+                        <div>
+                            <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ cita.paciente.nombre_completo }}</div>
+                            <div class="text-muted fw-semibold" style="font-size: 0.75rem;">Doc: {{ cita.paciente.dni_paciente|default:"N/A" }}</div>
                         </div>
-                    </td>
+                    </div>
+                </td>
 
-                    <td>
-                        <div class="fw-bold" style="color: var(--text-dark);">{{ cita.fecha_cita|date:"d M, Y" }}</div>
-                        <div class="mt-1 fw-semibold" style="color: var(--text-gray); font-size: 0.85rem;">
-                            <i class="fa-regular fa-clock me-1" style="color: var(--purple-pastel);"></i>{{ cita.hora_cita|time:"H:i" }}
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                            <i class="fa-solid fa-user-doctor text-muted" style="font-size: 0.75rem;"></i>
                         </div>
-                    </td>
+                        <span class="fw-semibold text-dark" style="font-size: 0.9rem;">{{ cita.psicologo.nombre_completo|default:cita.psicologo.username }}</span>
+                    </div>
+                </td>
 
-                    <td class="text-center">
-                        <span class="badge-modalidad {% if cita.modalidad == 'Virtual' %}modalidad-virtual{% else %}modalidad-presencial{% endif %}">
-                            {% if cita.modalidad == 'Virtual' %}
-                                <i class="fa-solid fa-video me-2"></i>
-                            {% else %}
-                                <i class="fa-solid fa-building me-2"></i>
-                            {% endif %}
-                            {{ cita.modalidad }}
-                        </span>
-                    </td>
-                    
-                    <td class="text-center">
-                        {% if cita.estado_cita == 'Programada' %}
-                            <form action="{% url 'actualizar_estado_cita' cita.id %}" method="POST" class="m-0">
-                                {% csrf_token %}
-                                <select name="nuevo_estado" class="select-invisible shadow-sm" onchange="confirmarCambioEstado(this)">
-                                    <option value="Programada" selected>Programada</option>
-                                    <option value="Cancelada">Cancelar Cita</option>
-                                    <option value="No Asistió">No Asistió</option>
-                                </select>
-                            </form>
+                <td>
+                    <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ cita.fecha_cita|date:"d M, Y" }}</div>
+                    <div class="mt-1 fw-semibold text-muted d-flex align-items-center gap-1" style="font-size: 0.8rem;">
+                        <i class="fa-regular fa-clock"></i> {{ cita.hora_cita|time:"H:i" }}
+                    </div>
+                </td>
+
+                <td class="text-center">
+                    <span class="badge-mod {% if cita.modalidad == 'Virtual' %}virtual{% else %}presencial{% endif %}">
+                        {% if cita.modalidad == 'Virtual' %}
+                            <i class="fa-solid fa-video"></i>
                         {% else %}
-                            <span class="status-badge-static border shadow-sm
-                                {% if cita.estado_cita == 'Asistida' %}bg-success bg-opacity-10 text-success border-success border-opacity-25
-                                {% elif cita.estado_cita == 'Cancelada' %}bg-danger bg-opacity-10 text-danger border-danger border-opacity-25
-                                {% else %}bg-secondary bg-opacity-10 text-secondary border-secondary border-opacity-25{% endif %}">
-                                {{ cita.estado_cita }}
+                            <i class="fa-solid fa-building"></i>
+                        {% endif %}
+                        {{ cita.modalidad|upper }}
+                    </span>
+                </td>
+                
+                <td class="text-center">
+                    {% if cita.estado_cita == 'Programada' %}
+                        <form action="{% url 'actualizar_estado_cita' cita.id %}" method="POST" class="m-0" id="form-estado-{{ cita.id }}">
+                            {% csrf_token %}
+                            <select name="nuevo_estado" class="select-invisible" onchange="confirmarCambioEstado(this, '{{ cita.paciente.nombre_completo }}')">
+                                <option value="Programada" selected>PENDIENTE</option>
+                                <option value="Cancelada">CANCELAR</option>
+                                <option value="No Asistió">NO ASISTIÓ</option>
+                            </select>
+                        </form>
+                    {% else %}
+                        <span class="status-badge-static border shadow-sm
+                            {% if cita.estado_cita == 'Asistida' %}bg-success bg-opacity-10 text-success border-success border-opacity-25
+                            {% elif cita.estado_cita == 'Cancelada' %}bg-danger bg-opacity-10 text-danger border-danger border-opacity-25
+                            {% else %}bg-secondary bg-opacity-10 text-secondary border-secondary border-opacity-25{% endif %}">
+                            
+                            {% if cita.estado_cita == 'Asistida' %}<i class="fa-solid fa-check"></i>
+                            {% elif cita.estado_cita == 'Cancelada' %}<i class="fa-solid fa-xmark"></i>
+                            {% else %}<i class="fa-solid fa-minus"></i>{% endif %}
+                            
+                            {{ cita.estado_cita|upper }}
+                        </span>
+                    {% endif %}
+                </td>
+
+                <td class="text-end pe-3">
+                    <div class="d-flex justify-content-end align-items-center gap-2">
+                        {% if cita.estado_cita == 'Programada' %}
+                            <a href="{% url 'editar_cita' cita.id %}" class="action-glass edit" data-bs-toggle="tooltip" title="Editar / Reprogramar">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+
+                            <a href="{% url 'registrar_evolucion' cita.id %}" class="btn-action-attend">
+                                Atender <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        {% else %}
+                            <span style="color: var(--text-gray); font-size: 1rem; opacity: 0.4; margin-right: 15px;" data-bs-toggle="tooltip" title="Cita finalizada">
+                                <i class="fa-solid fa-lock"></i>
                             </span>
                         {% endif %}
-                    </td>
-
-                    <td class="text-end pe-3">
-                        <div class="d-flex justify-content-end align-items-center gap-2">
-                            {% if cita.estado_cita == 'Programada' %}
-                                <a href="{% url 'editar_cita' cita.id %}" class="btn-action edit" data-bs-toggle="tooltip" title="Editar/Reprogramar">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </a>
-
-                                <a href="{% url 'registrar_evolucion' cita.id %}" class="btn-action-attend">
-                                    Atender <i class="fa-solid fa-arrow-right ms-2" style="font-size: 0.75rem;"></i>
-                                </a>
-                            {% else %}
-                                <span style="color: var(--text-gray); font-size: 1rem; opacity: 0.5; margin-right: 15px;">
-                                    <i class="fa-solid fa-lock"></i>
-                                </span>
-                            {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr id="emptyInitialRow">
+                <td colspan="7" class="text-center py-5 bg-white" style="border-radius: 20px; box-shadow: var(--shadow-soft);">
+                    <div class="py-4">
+                        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: rgba(124, 58, 237, 0.05); border-radius: 24px; color: var(--purple-brand); font-size: 2.2rem;">
+                            <i class="fa-regular fa-calendar-xmark"></i>
                         </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center py-5">
-                        <div class="py-4">
-                            <div class="mx-auto mb-3" style="width: 70px; height: 70px; background: rgba(176, 154, 222, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--purple-brand);">
-                                <i class="fa-regular fa-calendar-xmark" style="font-size: 2rem;"></i>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-1">Tu agenda está vacía</h5>
-                            <p class="text-muted small">No hay citas registradas que coincidan con los criterios actuales.</p>
+                        <h5 class="fw-bold text-dark mb-1">Tu agenda está vacía</h5>
+                        <p class="text-muted mb-4">No tienes citas programadas actualmente. Puedes tomarte un café ☕</p>
+                        <a href="{% url 'agendar_cita' %}" class="btn-premium mx-auto text-decoration-none">
+                            <i class="fa-solid fa-plus"></i> Nueva Cita
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+
+            <!-- Fila oculta para cuando el filtro no arroja resultados -->
+            <tr id="noResultsRow" style="display: none;">
+                <td colspan="7" class="text-center py-5 bg-white" style="border-radius: 20px; box-shadow: var(--shadow-soft);">
+                    <div class="py-4">
+                        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: rgba(107, 114, 128, 0.05); border-radius: 24px; color: var(--text-muted); font-size: 2.2rem;">
+                            <i class="fa-solid fa-filter-circle-xmark"></i>
                         </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        <h5 class="fw-bold text-dark mb-1">Sin coincidencias</h5>
+                        <p class="text-muted mb-0">No hay citas que coincidan con el filtro seleccionado.</p>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 
 <script>
-    // Inicializar Tooltips
     document.addEventListener("DOMContentLoaded", function(){
+        // Inicializar Tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
+        });
     });
 
-    function confirmarCambioEstado(selectElement) {
+    // Reemplazo de Alert nativo por SweetAlert2
+    function confirmarCambioEstado(selectElement, nombrePaciente) {
         const estadoSeleccionado = selectElement.value;
         const form = selectElement.closest('form');
         
         if (estadoSeleccionado !== 'Programada') {
-            if (confirm(`¿Estás seguro de marcar la cita como "${estadoSeleccionado}"?`)) {
-                form.submit();
-            } else {
-                selectElement.value = 'Programada';
-            }
+            let accionTexto = estadoSeleccionado === 'Cancelada' ? 'cancelar' : 'marcar como no asistida';
+            let iconType = estadoSeleccionado === 'Cancelada' ? 'warning' : 'info';
+            let confirmColor = estadoSeleccionado === 'Cancelada' ? '#EF4444' : '#F59E0B';
+
+            Swal.fire({
+                title: `<span style="font-family: 'Poppins', sans-serif; font-weight: 800; color: #111827;">¿Modificar Cita?</span>`,
+                html: `<span style="font-family: 'Poppins', sans-serif; color: #6B7280; font-weight: 500;">Vas a ${accionTexto} la cita de <b>${nombrePaciente}</b>. Esta acción no se puede deshacer.</span>`,
+                icon: iconType,
+                showCancelButton: true,
+                confirmButtonColor: confirmColor,
+                cancelButtonColor: '#F3F4F6',
+                confirmButtonText: 'Sí, continuar',
+                cancelButtonText: '<span style="color:#4B5563; font-weight: 600;">Regresar</span>',
+                background: '#ffffff',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg border-0',
+                    confirmButton: 'btn rounded-3 px-4 py-2 fw-bold shadow-sm',
+                    cancelButton: 'btn rounded-3 px-4 py-2 ms-2 fw-bold border'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                } else {
+                    // Revertir selección visualmente si cancela
+                    selectElement.value = 'Programada';
+                }
+            });
         }
     }
 
+    // Lógica de Filtros JS
     function filtrarCitas(filtro, botonClicado) {
-        document.querySelectorAll('.btn-filtro').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.filter-pill').forEach(btn => btn.classList.remove('active'));
         botonClicado.classList.add('active');
 
         const filas = document.querySelectorAll('.cita-row');
+        const noResultsRow = document.getElementById('noResultsRow');
+        const emptyInitialRow = document.getElementById('emptyInitialRow');
+        
         const hoy = new Date();
-        const hoyFormateado = hoy.toISOString().split('T')[0];
+        // Ajuste horario local simple para comparar YYYY-MM-DD
+        const offset = hoy.getTimezoneOffset()
+        const hoyLocal = new Date(hoy.getTime() - (offset*60*1000))
+        const hoyFormateado = hoyLocal.toISOString().split('T')[0];
+
+        let visibles = 0;
 
         filas.forEach(fila => {
             const estadoCita = fila.getAttribute('data-estado');
@@ -317,7 +352,15 @@
             else if (filtro === 'programadas' && estadoCita === 'Programada') mostrar = true;
 
             fila.style.display = mostrar ? '' : 'none';
+            if(mostrar) visibles++;
         });
+
+        // Manejo de Estados Vacíos
+        if (emptyInitialRow && emptyInitialRow.style.display !== 'none' && filas.length === 0) {
+            // Ya está mostrando que no hay citas en la BD, no hacemos nada
+        } else if (filas.length > 0) {
+            noResultsRow.style.display = (visibles === 0) ? '' : 'none';
+        }
     }
 </script>
 {% endblock %}

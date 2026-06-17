@@ -4,412 +4,434 @@
 
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
 <style>
-    /* Paleta y Variables Mejoradas */
+    /* 1. Paleta y Variables Estilo Apple */
     :root {
         --purple-pastel: #b09ade;
         --purple-light: #d6cbf0;
-        --purple-dark: #7c5cbf;
-        --purple-accent: #9a7cdc;
-        --dark-bg: #2d3748;
-        --bg-color: #f8f9fa;
-        --card-shadow: 0 10px 30px rgba(124, 92, 191, 0.08);
-        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --purple-dark: #5e4396;
+        --purple-accent: #8b68d4;
+        --dark-bg: #1d1d1f;
+        --bg-color: #f5f5f7; 
+        
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 20px -5px rgba(94, 67, 150, 0.08);
+        --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 20px 30px -10px rgba(94, 67, 150, 0.15);
+        
+        --transition-spring: all 0.5s cubic-bezier(0.25, 1, 0.3, 1);
+        --transition-fast: all 0.2s ease-in-out;
     }
 
-    body { background-color: var(--bg-color); }
+    body { 
+        background-color: var(--bg-color); 
+        font-family: "Poppins", sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
 
-    .dashboard-title { font-weight: 800; color: #1f2937; letter-spacing: -0.5px; }
-    .badge-purple { background: linear-gradient(135deg, var(--purple-dark), var(--purple-accent)); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; vertical-align: middle; box-shadow: 0 4px 10px rgba(124, 92, 191, 0.3); }
+    /* 2. Tipografía y Encabezados */
+    .dashboard-title { 
+        font-weight: 800; 
+        color: #1d1d1f; 
+        letter-spacing: -0.02em; 
+        font-size: clamp(1.5rem, 4vw, 2rem);
+    }
+    .badge-purple { 
+        background: linear-gradient(135deg, var(--purple-accent), var(--purple-dark)); 
+        color: white; 
+        padding: 4px 10px; 
+        border-radius: 20px; 
+        font-size: 0.75rem; 
+        box-shadow: 0 4px 10px rgba(139, 104, 212, 0.3); 
+    }
     
-    /* Widget Base */
-    .widget {
-        border-radius: 24px; padding: 25px;
-        border: 1px solid rgba(255,255,255,0.5);
-        transition: var(--transition); position: relative;
-        background: white; box-shadow: var(--card-shadow);
-        height: 100%; display: flex; flex-direction: column;
+    /* 3. Widget Base - Estilo Glassmorphism / Superficies iOS */
+    .widget-wrapper {
+        animation: fadeInUp 0.6s cubic-bezier(0.25, 1, 0.3, 1) backwards;
+        transition: flex 0.4s cubic-bezier(0.25, 1, 0.3, 1), max-width 0.4s cubic-bezier(0.25, 1, 0.3, 1);
     }
 
-    .widget-hidden { display: none !important; }
+    .widget {
+        border-radius: 24px; 
+        padding: 24px;
+        background: rgba(255, 255, 255, 0.85); 
+        backdrop-filter: blur(20px); 
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: var(--card-shadow);
+        transition: var(--transition-spring); 
+        position: relative;
+        height: 100%; 
+        display: flex; 
+        flex-direction: column;
+        overflow: hidden;
+    }
 
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 4. Modo Edición (Jiggle de iOS y Resize) */
     body.edit-mode .widget {
         cursor: grab;
-        animation: jiggle 2s infinite ease-in-out;
-        box-shadow: 0 0 0 2px var(--purple-accent);
+        animation: jiggle 0.3s infinite alternate ease-in-out;
+        box-shadow: 0 0 0 3px rgba(139, 104, 212, 0.5);
     }
-    body.edit-mode .widget:active { cursor: grabbing; }
+    body.edit-mode .widget:active { cursor: grabbing; scale: 0.98; }
     
     @keyframes jiggle {
-        0% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } 100% { transform: rotate(-1deg); }
+        0% { transform: rotate(-0.5deg) scale(0.99); } 
+        100% { transform: rotate(0.5deg) scale(1.01); }
     }
 
-    /* Folder Cards Mejoradas */
-    .folder-card { color: white; justify-content: space-between; text-decoration: none; overflow: hidden; }
-    .folder-card:hover { transform: translateY(-5px) scale(1.02); color: white; box-shadow: 0 15px 35px rgba(124, 92, 191, 0.2); }
+    /* Botón de Resize (Solo visible en edición) */
+    .widget-resize-btn {
+        display: none;
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(0,0,0,0.1);
+        backdrop-filter: blur(5px);
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        color: var(--dark-bg);
+        z-index: 10;
+        cursor: pointer;
+        transition: var(--transition-fast);
+    }
+    body.edit-mode .widget-resize-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .widget-resize-btn:hover { background: rgba(0,0,0,0.2); transform: scale(1.1); }
+
+    .handle {
+        padding: 10px; margin: -10px; border-radius: 50%; transition: var(--transition-fast);
+    }
+
+    /* 5. Tarjetas de métricas */
+    .folder-card { 
+        color: white; 
+        justify-content: space-between; 
+        text-decoration: none; 
+        padding: 20px; 
+        min-height: 160px; /* Altura perfecta fija para evitar deformación */
+        display: flex;
+        flex-direction: column;
+    }
+    .folder-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: var(--card-shadow-hover); color: white; }
     
-    .card-add { border: 2px dashed var(--purple-pastel); background: rgba(176, 154, 222, 0.1); color: var(--purple-dark); align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-    .card-add:hover { background: var(--purple-light); border-color: var(--purple-dark); color: var(--purple-dark); }
+    .card-add { border: 2px dashed rgba(176, 154, 222, 0.5); background: rgba(255, 255, 255, 0.4); color: var(--purple-dark); align-items: center; justify-content: center; }
+    .card-add:hover { background: rgba(255, 255, 255, 0.8); border-color: var(--purple-accent); }
     
     .card-pastel { background: linear-gradient(135deg, var(--purple-pastel), #c2b0e6); }
-    .card-dark { background: linear-gradient(135deg, var(--purple-dark), #6649a3); }
-    .card-gallery { background: linear-gradient(135deg, #4c3b73 0%, #2a1f45 100%); }
-    .card-info { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); } /* Azul para nuevos widgets */
+    .card-dark { background: linear-gradient(135deg, var(--purple-dark), #4a3375); }
+    .card-gallery { background: linear-gradient(135deg, #403261 0%, #1e1633 100%); }
     
-    .folder-card::before { content: ''; position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
-    .folder-card::after { content: ''; position: absolute; bottom: 10px; left: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); transform: rotate(45deg); }
-
-    .folder-icon { font-size: 2.2rem; margin-bottom: 15px; opacity: 0.9; }
+    .folder-card::before { 
+        content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 100%; 
+        background: radial-gradient(circle at top right, rgba(255,255,255,0.2) 0%, transparent 60%); 
+        pointer-events: none;
+    }
+    .folder-icon { font-size: 2rem; margin-bottom: 12px; opacity: 0.9; }
     
-    /* Listas y Botones */
+    /* 6. Listas e Iconos */
     .file-list { list-style: none; padding: 0; margin: 0; }
-    .file-item { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(0,0,0,0.04); transition: var(--transition); }
-    .file-item:hover { background-color: rgba(0,0,0,0.01); border-radius: 12px; padding-left: 10px; }
-    .file-item:last-child { border-bottom: none; }
+    .file-item { display: flex; align-items: center; padding: 12px 10px; border-radius: 16px; transition: var(--transition-fast); margin-bottom: 4px; }
+    .file-item:hover { background-color: rgba(0,0,0,0.03); transform: translateX(4px); }
     
-    .file-icon-box { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: white; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .file-icon-box { 
+        width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; 
+        margin-right: 15px; color: white; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    }
     .bg-icon-1 { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); } 
     .bg-icon-2 { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); } 
     .bg-icon-3 { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); } 
-    .bg-icon-4 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); } /* Azul claro */
 
+    /* 7. Gráficos */
     .chart-container { position: relative; height: 200px; width: 100%; display: flex; justify-content: center; }
-    .chart-center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 800; font-size: 1.8rem; color: var(--purple-dark); text-shadow: 0 2px 5px rgba(0,0,0,0.05);}
-    
-    .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    
-    .btn-upgrade { background: var(--purple-dark); color: white; border-radius: 50px; padding: 10px 24px; border: none; font-weight: 600; transition: var(--transition); box-shadow: 0 4px 15px rgba(124, 92, 191, 0.4); display: inline-flex; align-items: center; }
-    .btn-upgrade:hover { background: var(--purple-accent); color: white; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124, 92, 191, 0.6); }
-    
-    .btn-edit { background: white; color: var(--purple-dark); border-radius: 50px; padding: 10px 24px; border: 1px solid var(--purple-light); font-weight: 600; transition: var(--transition); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); cursor: pointer; }
-    .btn-edit:hover { background: var(--purple-light); color: var(--purple-dark); }
+    .chart-center-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 800; font-size: 2rem; color: var(--dark-bg); }
 
-    .sortable-ghost { opacity: 0.3; background-color: var(--purple-light); border: 2px dashed var(--purple-dark); border-radius: 24px; }
-    
-    /* Progress Bars Custom */
-    .progress-custom { height: 10px; border-radius: 10px; background-color: #f1f5f9; overflow: hidden; margin-top: 8px; }
-    .progress-bar-virtual { background: var(--purple-accent); }
-    .progress-bar-presencial { background: var(--dark-bg); }
-    .clock-widget { 
-    text-align: center; 
-    justify-content: center; 
-    background: linear-gradient(135deg, var(--bg-sidebar), var(--sidebar-accent)); 
-    color: white; 
-}
-#clock-time { font-size: 2.5rem; font-weight: 800; line-height: 1; }
-#clock-date { font-size: 0.85rem; opacity: 0.8; text-transform: uppercase; }
+    /* 8. Botones y Toggles iOS */
+    .btn-upgrade, .btn-edit {
+        border-radius: 40px; padding: 10px 20px; font-weight: 600; font-size: 0.9rem;
+        transition: var(--transition-spring); display: inline-flex; align-items: center;
+    }
+    .btn-upgrade { background: var(--dark-bg); color: white; border: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+    .btn-upgrade:hover { background: #000; color: white; transform: scale(1.02); }
+    .btn-edit { background: rgba(255,255,255,0.8); color: var(--dark-bg); border: 1px solid rgba(0,0,0,0.1); backdrop-filter: blur(10px); }
+    .btn-edit:hover { background: white; transform: scale(1.02); }
 
-/* Widget Pizarrón */
-.board-widget { 
-    background: #2c3e50; /* Color pizarra */
-    border: 8px solid #34495e; 
-    border-radius: 15px; 
-    font-family: 'Caveat', cursive; 
-}
-.board-textarea { 
-    background: transparent; 
-    border: none; 
-    color: #f1c40f; /* Color tiza amarilla */
-    font-size: 1.4rem; 
-    width: 100%; 
-    height: 120px; 
-    resize: none; 
-    outline: none; 
-}
+    /* Interruptores iOS */
+    .ios-switch {
+        appearance: none; width: 50px; height: 28px; background: #e5e5ea; border-radius: 30px;
+        position: relative; cursor: pointer; outline: none; transition: background 0.3s ease;
+    }
+    .ios-switch::after {
+        content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px;
+        background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.3, 1);
+    }
+    .ios-switch:checked { background: var(--purple-accent); }
+    .ios-switch:checked::after { transform: translateX(22px); }
+
+    .sortable-ghost { opacity: 0.4; background-color: var(--purple-light); border-radius: 24px; transform: scale(0.95); }
+    
+    /* 9. Reloj y Pizarrón */
+    .clock-widget { background: linear-gradient(135deg, #1d1d1f, #434345); color: white; justify-content: center; align-items: center; }
+    #clock-time { font-size: clamp(2rem, 5vw, 2.5rem); font-weight: 800; letter-spacing: -1px; }
+    #clock-date { font-size: 0.85rem; font-weight: 500; opacity: 0.7; }
+    .board-widget { background: #2c3e50; border: 6px solid #1a252f; border-radius: 20px; font-family: 'Caveat', cursive; }
+    .board-textarea { background: transparent; border: none; color: #f1c40f; font-size: 1.5rem; width: 100%; height: 100%; resize: none; outline: none; line-height: 1.2; }
+
+    /* OPTIMIZACIÓN MÓVIL */
+    @media (max-width: 768px) {
+        .widget { padding: 18px; border-radius: 20px; }
+        .dashboard-title { font-size: 1.4rem; }
+        .btn-upgrade, .btn-edit { padding: 8px 14px; font-size: 0.85rem; }
+    }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <div class="d-flex align-items-center">
-        <h3 class="dashboard-title m-0 me-3">Mi Espacio <span class="badge-purple"><i class="fa-solid fa-bolt me-1"></i></span></h3>
+        <h3 class="dashboard-title m-0 me-2">Mi Espacio</h3>
+        <span class="badge-purple"><i class="fa-solid fa-bolt"></i></span>
     </div>
     
-    <div class="d-flex align-items-center gap-3">
-        <button id="toggleEditBtn" class="btn-edit text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#widgetMenu" aria-controls="widgetMenu">
-            <i class="fa-solid fa-sliders me-2"></i> Personalizar
+    <div class="d-flex align-items-center gap-2">
+        <button id="toggleEditBtn" class="btn-edit text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#widgetMenu">
+            <i class="fa-solid fa-sliders me-2"></i> Ajustar
         </button>
-        <a href="{% url 'agendar_cita' %}" class="btn-upgrade text-decoration-none"><i class="fa-solid fa-plus me-2"></i> Nueva Cita</a>
     </div>
 </div>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="widgetMenu" aria-labelledby="widgetMenuLabel">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title fw-bold" id="widgetMenuLabel"><i class="fa-solid fa-shapes text-muted me-2"></i> Mis Widgets</h5>
+<div class="offcanvas offcanvas-end border-0 shadow-lg" tabindex="-1" id="widgetMenu" data-bs-scroll="true" data-bs-backdrop="false" style="border-radius: 24px 0 0 24px; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);">
+    <div class="offcanvas-header border-bottom border-light px-4 py-4">
+        <h5 class="offcanvas-title fw-bold text-dark"><i class="fa-solid fa-layer-group text-muted me-2"></i> Personalizar</h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body">
-        <p class="text-muted small mb-4">Activa o desactiva las tarjetas que deseas ver en tu pantalla principal. Arrastra las tarjetas en el tablero para reordenarlas.</p>
-        
-        <div class="list-group list-group-flush" id="widget-toggles">
-            </div>
-
+    <div class="offcanvas-body px-4">
+        <p class="text-muted small mb-4">Activa o desactiva las tarjetas. Toca el ícono de expansión en cada widget para ajustar su tamaño.</p>
+        <div class="list-group list-group-flush bg-transparent" id="widget-toggles"></div>
         <div class="mt-5 text-center">
-            <button class="btn btn-outline-danger btn-sm rounded-pill px-4" onclick="resetWidgets()">
-                <i class="fa-solid fa-rotate-left me-1"></i> Restaurar diseño original
+            <button class="btn btn-light text-danger btn-sm rounded-pill px-4 fw-medium border shadow-sm" onclick="resetWidgets()">
+                <i class="fa-solid fa-rotate-left me-1"></i> Restaurar diseño
             </button>
         </div>
     </div>
 </div>
 
-<div class="row g-4 mb-4" id="dashboard-grid">
+<div class="row g-3 g-md-4 mb-4 align-items-start" id="dashboard-grid">
 
-    <div class="col-6 col-md-3 col-xl-2 widget-wrapper d-none" data-widget="reloj" data-title="Reloj Digital">
-        <div class="widget clock-widget shadow-lg">
-            <i class="fa-solid fa-grip-vertical position-absolute top-0 end-0 m-3 opacity-25 handle" style="cursor: grab;"></i>
-            <div id="clock-time">00:00</div>
-            <div id="clock-date">...</div>
+    <div class="col-12 widget-wrapper" data-widget="bienvenida" data-title="Mensaje de Bienvenida" data-sizes="col-12" style="animation-delay: 0.1s;">
+        <div class="widget bg-transparent shadow-none border-0 px-1 py-2">
+            <h4 class="fw-bold mb-1" style="color: var(--dark-bg); letter-spacing: -0.03em;">{{ saludo }}, <span style="color: var(--purple-accent);">{{ nombre }}</span></h4>
+            <p class="text-muted m-0" style="font-size: 0.95rem;">Aquí tienes un resumen de tu actividad de hoy.</p>
         </div>
     </div>
 
-    <div class="col-12 col-md-6 col-xl-4 widget-wrapper d-none" data-widget="pizarron" data-title="Pizarrón de Notas">
-        <div class="widget board-widget">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="small fw-bold text-uppercase opacity-50 text-white"><i class="fa-solid fa-chalkboard me-2"></i>Notas</span>
-                <i class="fa-solid fa-grip-vertical handle opacity-25 text-white" style="cursor: grab;"></i>
-            </div>
-            <textarea id="pizarron-notas" class="board-textarea" placeholder="Escribe un recordatorio aquí..."></textarea>
-        </div>
-    </div>
-    
-    <div class="col-md-12 col-xl-4 widget-wrapper" data-widget="bienvenida" data-title="Mensaje de Bienvenida">
-        <div class="widget bg-transparent shadow-none border-0 px-0">
-            <h4 class="fw-bold mb-2">{{ saludo }},<br><span style="color: var(--purple-dark);">{{ nombre }}</span></h4>
-            <p class="text-muted">Accede rápidamente a tus módulos principales y organiza tu información arrastrando las tarjetas.</p>
-        </div>
-    </div>
-
-    <div class="col-6 col-md-3 col-xl-2 widget-wrapper" data-widget="agregar_widget" data-title="Acceso: Gestor de Widgets">
-        <a href="#" class="widget folder-card card-add text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#widgetMenu" title="Añadir más widgets">
-            <i class="fa-solid fa-shapes fs-2 mb-3"></i>
-            <span class="small fw-bold text-center">Nuevo<br>Widget</span>
-        </a>
-    </div>
-    
-    <div class="col-6 col-md-3 col-xl-2 widget-wrapper" data-widget="pacientes" data-title="Métrica: Pacientes">
+    <div class="col-12 col-md-6 col-xl-3 widget-wrapper" data-widget="pacientes" data-title="Pacientes" data-sizes="col-12 col-md-6 col-xl-3, col-12 col-md-12 col-xl-6" style="animation-delay: 0.2s;">
         <a href="{% url 'lista_pacientes' %}" class="widget folder-card card-pastel">
             <div class="d-flex justify-content-between align-items-start">
                 <i class="fa-solid fa-users folder-icon"></i>
-                <i class="fa-solid fa-grip-vertical text-white-50 ms-auto handle" style="cursor: grab;" title="Arrastrar"></i>
+                <i class="fa-solid fa-grip-lines text-white-50 ms-auto handle" style="cursor: grab;"></i>
             </div>
             <div class="mt-auto">
                 <h6 class="mb-0 fw-bold">Pacientes</h6>
-                <small class="text-white-50">Total: {{ total_pacientes }}</small>
+                <small class="text-white opacity-75 fw-medium">{{ total_pacientes }} en total</small>
             </div>
+            <button class="widget-resize-btn text-white" onclick="event.preventDefault(); cycleSize(this)"><i class="fa-solid fa-expand"></i></button>
         </a>
     </div>
     
-    <div class="col-6 col-md-3 col-xl-2 widget-wrapper" data-widget="agenda" data-title="Métrica: Agenda Pendiente">
+    <div class="col-12 col-md-6 col-xl-3 widget-wrapper" data-widget="agenda" data-title="Agenda Pendiente" data-sizes="col-12 col-md-6 col-xl-3, col-12 col-md-12 col-xl-6" style="animation-delay: 0.3s;">
         <a href="{% url 'lista_citas' %}" class="widget folder-card card-dark">
             <div class="d-flex justify-content-between align-items-start">
                 <i class="fa-regular fa-calendar-check folder-icon"></i>
-                <i class="fa-solid fa-grip-vertical text-white-50 ms-auto handle" style="cursor: grab;"></i>
+                <i class="fa-solid fa-grip-lines text-white-50 ms-auto handle" style="cursor: grab;"></i>
             </div>
             <div class="mt-auto">
                 <h6 class="mb-0 fw-bold">Agenda</h6>
-                <small class="text-white-50">Pendientes: {{ citas_pendientes }}</small>
+                <small class="text-white opacity-75 fw-medium">{{ citas_pendientes }} pendientes</small>
             </div>
+            <button class="widget-resize-btn text-white" onclick="event.preventDefault(); cycleSize(this)"><i class="fa-solid fa-expand"></i></button>
         </a>
     </div>
     
-    <div class="col-6 col-md-3 col-xl-2 widget-wrapper" data-widget="atendidas" data-title="Métrica: Citas Atendidas">
+    <div class="col-12 col-md-6 col-xl-3 widget-wrapper" data-widget="atendidas" data-title="Citas Atendidas" data-sizes="col-12 col-md-6 col-xl-3, col-12 col-md-12 col-xl-6" style="animation-delay: 0.4s;">
         <a href="{% url 'lista_citas' %}" class="widget folder-card card-gallery">
-            <div class="d-flex justify-content-between align-items-start" style="position: relative; z-index: 2;">
+            <div class="d-flex justify-content-between align-items-start">
                 <i class="fa-solid fa-check-double folder-icon"></i>
-                <i class="fa-solid fa-grip-vertical text-white-50 ms-auto handle" style="cursor: grab;"></i>
+                <i class="fa-solid fa-grip-lines text-white-50 ms-auto handle" style="cursor: grab;"></i>
             </div>
-            <div class="mt-auto" style="position: relative; z-index: 2;">
+            <div class="mt-auto">
                 <h6 class="mb-0 fw-bold">Atendidas</h6>
-                <small class="text-white-50">Completadas: {{ citas_asistidas }}</small>
+                <small class="text-white opacity-75 fw-medium">{{ citas_asistidas }} completadas</small>
             </div>
+            <button class="widget-resize-btn text-white" onclick="event.preventDefault(); cycleSize(this)"><i class="fa-solid fa-expand"></i></button>
         </a>
     </div>
 
-    <div class="col-12 col-xl-5 widget-wrapper" data-widget="grafico" data-title="Gráfico: Estado de Citas">
+    <div class="col-12 col-xl-5 widget-wrapper" data-widget="grafico" data-title="Estado de Citas" data-sizes="col-12 col-xl-5, col-12 col-xl-7, col-12" style="animation-delay: 0.6s;">
         <div class="widget">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold m-0 text-dark">Estado de Citas</h5>
-                <i class="fa-solid fa-grip-vertical text-muted ms-auto handle fs-5" style="cursor: grab;"></i>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold m-0 text-dark">Estado de Citas</h6>
+                <i class="fa-solid fa-ellipsis text-muted ms-auto handle fs-5 p-2" style="cursor: grab;"></i>
             </div>
-            
-            <div class="chart-container mb-4">
+            <div class="chart-container mb-3">
                 <canvas id="storageChart"></canvas>
                 <div class="chart-center-text" id="totalCitasText">0</div>
             </div>
-            
-            <div class="row text-center mt-3 g-2">
-                <div class="col-6 text-start">
-                    <span class="legend-dot" style="background-color: #b09ade;"></span> <span class="fw-bold small">Pendientes</span>
-                    <div class="text-muted small ms-3">{{ citas_pendientes }}</div>
+            <div class="d-flex justify-content-center gap-4 mt-2">
+                <div class="text-center">
+                    <div class="d-flex align-items-center gap-2"><span style="width: 10px; height: 10px; border-radius: 50%; background: #b09ade;"></span><span class="fw-medium small text-muted">Pendientes</span></div>
+                    <div class="fw-bold text-dark mt-1">{{ citas_pendientes }}</div>
                 </div>
-                <div class="col-6 text-start">
-                    <span class="legend-dot" style="background-color: #7c5cbf;"></span> <span class="fw-bold small">Asistidas</span>
-                    <div class="text-muted small ms-3">{{ citas_asistidas }}</div>
+                <div class="text-center">
+                    <div class="d-flex align-items-center gap-2"><span style="width: 10px; height: 10px; border-radius: 50%; background: #5e4396;"></span><span class="fw-medium small text-muted">Asistidas</span></div>
+                    <div class="fw-bold text-dark mt-1">{{ citas_asistidas }}</div>
                 </div>
             </div>
+            <button class="widget-resize-btn" onclick="cycleSize(this)"><i class="fa-solid fa-expand"></i></button>
         </div>
     </div>
 
-    <div class="col-12 col-xl-7 widget-wrapper" data-widget="actividad" data-title="Lista: Actividad Reciente">
+    <div class="col-12 col-xl-7 widget-wrapper" data-widget="actividad" data-title="Actividad Reciente" data-sizes="col-12 col-xl-7, col-12 col-xl-12" style="animation-delay: 0.7s;">
         <div class="widget">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h5 class="fw-bold m-0 text-dark">Actividad Reciente</h5>
-                    <span class="text-muted small">Últimos movimientos del sistema</span>
-                </div>
-                <i class="fa-solid fa-grip-vertical text-muted ms-auto handle fs-5" style="cursor: grab;"></i>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold m-0 text-dark">Actividad Reciente</h6>
+                <i class="fa-solid fa-ellipsis text-muted ms-auto handle fs-5 p-2" style="cursor: grab;"></i>
             </div>
-            
-            <ul class="file-list flex-grow-1 overflow-auto">
+            <ul class="file-list flex-grow-1 overflow-auto" style="max-height: 250px;">
                 {% for cita in actividad_reciente %}
                 <li class="file-item">
                     <div class="file-icon-box {% if cita.estado_cita == 'Programada' %}bg-icon-1{% elif cita.estado_cita == 'Asistida' %}bg-icon-2{% else %}bg-icon-3{% endif %}">
                         <i class="fa-solid {% if cita.estado_cita == 'Programada' %}fa-clock{% elif cita.estado_cita == 'Asistida' %}fa-check{% else %}fa-xmark{% endif %}"></i>
                     </div>
-                    <div class="flex-grow-1">
-                        <h6 class="m-0 fw-bold text-dark">{{ cita.paciente.nombre_completo }}</h6>
-                        <small class="text-muted">Cita {{ cita.estado_cita|lower }} con {{ cita.psicologo.nombre_completo }}</small>
+                    <div class="flex-grow-1 ms-2">
+                        <h6 class="m-0 fw-bold text-dark fs-6">{{ cita.paciente.nombre_completo }}</h6>
+                        <small class="text-muted" style="font-size: 0.8rem;">Cita {{ cita.estado_cita|lower }} con {{ cita.psicologo.nombre_completo }}</small>
                     </div>
-                    <div class="text-muted small text-end fw-bold" style="min-width: 80px;">
-                        {{ cita.fecha_cita|date:"d M, y" }}
-                    </div>
-                </li>
-                {% empty %}
-                <li class="file-item text-center text-muted d-block py-5">
-                    <i class="fa-regular fa-folder-open fs-1 mb-3 opacity-50"></i><br>
-                    No hay actividad reciente para mostrar.
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-
-    <div class="col-12 col-xl-4 widget-wrapper d-none" data-widget="citas_hoy" data-title="Lista: Citas de Hoy">
-        <div class="widget">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h5 class="fw-bold m-0 text-dark"><i class="fa-regular fa-calendar-star me-2" style="color: var(--purple-accent);"></i>Citas para Hoy</h5>
-                </div>
-                <i class="fa-solid fa-grip-vertical text-muted ms-auto handle fs-5" style="cursor: grab;"></i>
-            </div>
-            <ul class="file-list flex-grow-1 overflow-auto">
-                {% for cita in citas_hoy %}
-                <li class="file-item">
-                    <div class="file-icon-box bg-icon-4">
-                        <span class="fw-bold">{{ cita.hora_cita|time:"H:i" }}</span>
-                    </div>
-                    <div class="flex-grow-1">
-                        <h6 class="m-0 fw-bold text-dark">{{ cita.paciente.nombre_completo }}</h6>
-                        <small class="text-muted">{{ cita.modalidad }}</small>
+                    <div class="text-muted small text-end fw-medium" style="min-width: 70px; font-size: 0.75rem;">
+                        {{ cita.fecha_cita|date:"d M" }}
                     </div>
                 </li>
                 {% empty %}
-                <li class="file-item text-center text-muted d-block py-4">
-                    Hoy tienes la agenda libre.
+                <li class="file-item text-center text-muted d-block py-5 border-0">
+                    <p class="mb-0">No hay actividad reciente.</p>
                 </li>
                 {% endfor %}
             </ul>
+            <button class="widget-resize-btn" onclick="cycleSize(this)"><i class="fa-solid fa-expand"></i></button>
         </div>
     </div>
 
-    <div class="col-12 col-md-6 col-xl-4 widget-wrapper d-none" data-widget="distribucion_modalidad" data-title="Gráfico: Modalidad de Atención">
-        <div class="widget">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold m-0 text-dark">Modalidad</h5>
-                <i class="fa-solid fa-grip-vertical text-muted ms-auto handle fs-5" style="cursor: grab;"></i>
-            </div>
-            
-            <div class="mb-4 mt-2">
-                <div class="d-flex justify-content-between align-items-end">
-                    <span class="fw-bold text-dark"><i class="fa-solid fa-video me-2" style="color: var(--purple-accent);"></i>Virtual</span>
-                    <span class="fw-bold">{{ modalidad_virtual }} <small class="text-muted fw-normal">({{ porcentaje_virtual }}%)</small></span>
-                </div>
-                <div class="progress-custom">
-                    <div class="progress-bar-virtual" style="width: {{ porcentaje_virtual }}%; height: 100%;"></div>
-                </div>
-            </div>
-
-            <div>
-                <div class="d-flex justify-content-between align-items-end">
-                    <span class="fw-bold text-dark"><i class="fa-solid fa-building me-2" style="color: var(--dark-bg);"></i>Presencial</span>
-                    <span class="fw-bold">{{ modalidad_presencial }} <small class="text-muted fw-normal">({{ porcentaje_presencial }}%)</small></span>
-                </div>
-                <div class="progress-custom">
-                    <div class="progress-bar-presencial" style="width: {{ porcentaje_presencial }}%; height: 100%;"></div>
-                </div>
-            </div>
+    <div class="col-12 col-md-6 col-xl-3 widget-wrapper d-none" data-widget="reloj" data-title="Reloj Digital" data-sizes="col-12 col-md-6 col-xl-3, col-12 col-md-12 col-xl-6">
+        <div class="widget clock-widget shadow-sm">
+            <i class="fa-solid fa-grip-lines position-absolute top-0 end-0 m-3 opacity-50 handle" style="cursor: grab;"></i>
+            <div id="clock-time">00:00</div>
+            <div id="clock-date">...</div>
+            <button class="widget-resize-btn text-white" onclick="cycleSize(this)"><i class="fa-solid fa-expand"></i></button>
         </div>
     </div>
 
-    <div class="col-12 col-md-6 col-xl-4 widget-wrapper d-none" data-widget="accesos_rapidos" data-title="Acceso: Enlaces Rápidos">
-        <div class="widget">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold m-0 text-dark">Accesos Rápidos</h5>
-                <i class="fa-solid fa-grip-vertical text-muted ms-auto handle fs-5" style="cursor: grab;"></i>
+    <div class="col-12 col-md-6 col-xl-4 widget-wrapper d-none" data-widget="pizarron" data-title="Pizarrón de Notas" data-sizes="col-12 col-md-6 col-xl-4, col-12 col-md-12 col-xl-8, col-12">
+        <div class="widget board-widget p-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small fw-bold text-uppercase opacity-50 text-white"><i class="fa-solid fa-pen me-2"></i>Notas</span>
+                <i class="fa-solid fa-grip-lines handle opacity-50 text-white p-2" style="cursor: grab;"></i>
             </div>
-            <div class="d-grid gap-3">
-                <a href="{% url 'crear_paciente' %}" class="btn btn-light text-start py-3 fw-bold rounded-4 border">
-                    <i class="fa-solid fa-user-plus me-3" style="color: var(--purple-accent);"></i>Registrar Nuevo Paciente
-                </a>
-                <a href="#" class="btn btn-light text-start py-3 fw-bold rounded-4 border">
-                    <i class="fa-solid fa-file-invoice-dollar me-3" style="color: #10b981;"></i>Generar Factura
-                </a>
-                <a href="{% url 'lista_staff' %}" class="btn btn-light text-start py-3 fw-bold rounded-4 border">
-                    <i class="fa-solid fa-user-doctor me-3" style="color: #f59e0b;"></i>Gestionar Personal
-                </a>
-            </div>
+            <textarea id="pizarron-notas" class="board-textarea" placeholder="Escribe un recordatorio aquí..."></textarea>
+            <button class="widget-resize-btn text-white" onclick="cycleSize(this)"><i class="fa-solid fa-expand"></i></button>
         </div>
     </div>
-
 </div>
 
 <script>
+    // Lógica de Redimensionamiento Cíclico (iOS Style)
+    window.cycleSize = function(btn) {
+        const wrapper = btn.closest('.widget-wrapper');
+        const sizesStr = wrapper.getAttribute('data-sizes');
+        if (!sizesStr) return;
+        
+        const sizes = sizesStr.split(',').map(s => s.trim());
+        if (sizes.length <= 1) return;
+
+        let currentClasses = wrapper.className;
+        let currentIndex = sizes.findIndex(sizeClass => currentClasses.includes(sizeClass));
+        let nextIndex = (currentIndex + 1) % sizes.length;
+
+        // Limpiar clases viejas y aplicar nuevas
+        sizes.forEach(size => size.split(' ').forEach(cls => wrapper.classList.remove(cls)));
+        sizes[nextIndex].split(' ').forEach(cls => wrapper.classList.add(cls));
+
+        // Refrescar el gráfico si existe
+        if (window.myChart) { setTimeout(() => window.myChart.resize(), 300); }
+        saveWidgetConfig();
+    };
+
     document.addEventListener("DOMContentLoaded", function() {
-        // --- 1. LÓGICA DEL GRÁFICO (Mantiene lo que tenías) ---
+        // Inicializar gráfico
         const pendientes = {{ citas_pendientes|default:0 }};
         const asistidas = {{ citas_asistidas|default:0 }};
         const canceladas = {{ citas_canceladas|default:0 }};
-        
         const total = pendientes + asistidas + canceladas;
-        document.getElementById('totalCitasText').innerText = total;
+        
+        const textEl = document.getElementById('totalCitasText');
+        if(textEl) textEl.innerText = total;
 
-        const ctx = document.getElementById('storageChart').getContext('2d');
-        let myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Pendientes', 'Asistidas', 'Canceladas'],
-                datasets: [{
-                    data: [pendientes, asistidas, canceladas],
-                    backgroundColor: ['#b09ade', '#7c5cbf', '#d6cbf0'],
-                    borderWidth: 0, hoverOffset: 8
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, cutout: '75%', 
-                plugins: { legend: { display: false } },
-                animation: { animateScale: true, animateRotate: true }
-            }
-        });
+        const canvas = document.getElementById('storageChart');
+        if (canvas && typeof Chart !== 'undefined') {
+            const ctx = canvas.getContext('2d');
+            window.myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pendientes', 'Asistidas', 'Canceladas'],
+                    datasets: [{
+                        data: [pendientes, asistidas, canceladas],
+                        backgroundColor: ['#b09ade', '#5e4396', '#e5e5ea'],
+                        borderWidth: 0, hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '80%', 
+                    plugins: { legend: { display: false } },
+                    animation: { animateScale: true, animateRotate: true, easing: 'easeOutQuart' }
+                }
+            });
+        }
 
-        // --- 2. LÓGICA DE WIDGETS (Sortable y LocalStorage) ---
+        // Sortable
         const grid = document.getElementById('dashboard-grid');
         const widgetMenu = document.getElementById('widgetMenu');
         const togglesContainer = document.getElementById('widget-toggles');
         
-        const sortable = new Sortable(grid, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            handle: '.handle, .folder-card', // Permite arrastrar desde los iconos
-            onEnd: function (evt) { saveWidgetConfig(); }
-        });
+        if (grid && typeof Sortable !== 'undefined') {
+            new Sortable(grid, {
+                animation: 350, 
+                easing: "cubic-bezier(0.25, 1, 0.3, 1)", 
+                ghostClass: 'sortable-ghost',
+                handle: '.handle, .folder-card',
+                delay: 200, 
+                delayOnTouchOnly: true, 
+                touchStartThreshold: 3,
+                onEnd: function () { saveWidgetConfig(); }
+            });
+        }
 
-        widgetMenu.addEventListener('show.bs.offcanvas', () => document.body.classList.add('edit-mode'));
-        widgetMenu.addEventListener('hide.bs.offcanvas', () => document.body.classList.remove('edit-mode'));
+        if(widgetMenu) {
+            widgetMenu.addEventListener('show.bs.offcanvas', () => document.body.classList.add('edit-mode'));
+            widgetMenu.addEventListener('hide.bs.offcanvas', () => document.body.classList.remove('edit-mode'));
+        }
 
         function loadWidgetConfig() {
-            const wrappers = document.querySelectorAll('.widget-wrapper');
             togglesContainer.innerHTML = '';
-            
             let savedConfig = JSON.parse(localStorage.getItem('neuroesencia_dashboard')) || [];
             
             if (savedConfig.length > 0) {
@@ -419,38 +441,42 @@
                         grid.appendChild(el); 
                         if (config.hidden) { el.classList.add('d-none'); } 
                         else { el.classList.remove('d-none'); }
+                        
+                        if (config.sizeClasses && el.getAttribute('data-sizes')) {
+                            const sizes = el.getAttribute('data-sizes').split(',').map(s => s.trim());
+                            sizes.forEach(size => size.split(' ').forEach(cls => el.classList.remove(cls)));
+                            config.sizeClasses.split(' ').forEach(cls => el.classList.add(cls));
+                        }
+                        el.style.animationDelay = "0s"; 
                     }
                 });
             }
 
-            // Crear switches en el menú lateral
+            // Generar switches iOS
             document.querySelectorAll('.widget-wrapper').forEach(wrapper => {
                 const id = wrapper.dataset.widget;
                 const title = wrapper.dataset.title;
                 const isHidden = wrapper.classList.contains('d-none');
                 
-                // No permitir ocultar la bienvenida ni el botón de agregar widget
-                if(id === 'bienvenida' || id === 'agregar_widget') return;
+                if(id === 'bienvenida') return;
 
                 const toggleHtml = `
-                    <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0">
-                        <span class="fw-medium text-dark">${title}</span>
-                        <div class="form-check form-switch m-0">
-                            <input class="form-check-input fs-5 widget-toggle-chk" type="checkbox" data-target="${id}" ${!isHidden ? 'checked' : ''}>
-                        </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0 bg-transparent px-0">
+                        <span class="fw-medium text-dark" style="font-size: 1.05rem;">${title}</span>
+                        <input class="ios-switch widget-toggle-chk shadow-sm" type="checkbox" data-target="${id}" ${!isHidden ? 'checked' : ''}>
                     </div>
                 `;
                 togglesContainer.insertAdjacentHTML('beforeend', toggleHtml);
             });
 
-            // Escuchar cambios en los switches
             document.querySelectorAll('.widget-toggle-chk').forEach(chk => {
                 chk.addEventListener('change', (e) => {
                     const targetId = e.target.dataset.target;
                     const widget = document.querySelector(`[data-widget="${targetId}"]`);
                     if(e.target.checked) {
                         widget.classList.remove('d-none');
-                        if(targetId === 'grafico') { myChart.resize(); }
+                        widget.style.animationDelay = "0s"; 
+                        if(targetId === 'grafico' && window.myChart) { window.myChart.resize(); }
                     } else {
                         widget.classList.add('d-none');
                     }
@@ -459,12 +485,20 @@
             });
         }
 
-        function saveWidgetConfig() {
+        window.saveWidgetConfig = function() {
             const config = [];
             document.querySelectorAll('.widget-wrapper').forEach(wrapper => {
+                let sizeClasses = "";
+                const sizesStr = wrapper.getAttribute('data-sizes');
+                if(sizesStr) {
+                    const activeSize = sizesStr.split(',').map(s => s.trim()).find(size => wrapper.className.includes(size.split(' ')[0]));
+                    if(activeSize) sizeClasses = activeSize;
+                }
+
                 config.push({
                     id: wrapper.dataset.widget,
-                    hidden: wrapper.classList.contains('d-none')
+                    hidden: wrapper.classList.contains('d-none'),
+                    sizeClasses: sizeClasses
                 });
             });
             localStorage.setItem('neuroesencia_dashboard', JSON.stringify(config));
@@ -478,26 +512,17 @@
         }
 
         function updateClock() {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-        const dateStr = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
-        
-        const timeEl = document.getElementById('clock-time');
-        const dateEl = document.getElementById('clock-date');
-        if(timeEl) timeEl.innerText = timeStr;
-        if(dateEl) dateEl.innerText = dateStr;
-}
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+            
+            const timeEl = document.getElementById('clock-time');
+            const dateEl = document.getElementById('clock-date');
+            if(timeEl) timeEl.innerText = timeStr;
+            if(dateEl) dateEl.innerText = dateStr;
+        }
         setInterval(updateClock, 1000);
         updateClock();
-
-        // 2. Pizarrón con auto-guardado
-        const pizarron = document.getElementById('pizarron-notas');
-        if(pizarron) {
-            pizarron.value = localStorage.getItem('neuro_notas_pizarron') || '';
-            pizarron.addEventListener('input', (e) => {
-                localStorage.setItem('neuro_notas_pizarron', e.target.value);
-            });
-        }
     });
 </script>
 {% endblock %}

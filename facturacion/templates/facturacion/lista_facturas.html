@@ -3,221 +3,213 @@
 {% block title %}Facturación - NeuroEsencia{% endblock %}
 
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
-    /* --- VARIABLES LOCALES (Sistema Unificado) --- */
+    /* --- VARIABLES PREMIUM --- */
     :root {
-        --card-bg: #ffffff;
-        --page-bg: #f4f7fe;
-        --purple-brand: #2a1f45;
-        --purple-light: #4c3b73;
-        --purple-pastel: #b09ade;
-        --text-dark: #2b3674;
-        --text-gray: #a3aed1;
-        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+        --purple-brand: #7C3AED; 
+        --purple-glow: rgba(124, 58, 237, 0.4);
+        --dark-bg: #0D0B14; 
+        --page-bg: #F4F7FE; 
+        --text-main: #111827;
+        --text-muted: #6B7280;
+        --card-bg: #FFFFFF;
+        
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+        --shadow-hover: 0 12px 30px rgba(124, 58, 237, 0.08);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     }
 
-    /* --- ANIMACIONES --- */
-    .fade-in-up {
-        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    @keyframes fadeInUp {
-        to { opacity: 1; transform: translateY(0); }
+    body { background-color: var(--page-bg); }
+
+    /* Animaciones en Cascada */
+    .stagger-1 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    .stagger-2 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.1s; opacity: 0; transform: translateY(20px); }
+    
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Título Gradiente */
+    .title-gradient {
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--purple-brand) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        letter-spacing: -0.03em;
     }
 
     /* Botón Principal */
-    .btn-add-invoice {
-        background: var(--purple-brand);
-        color: white !important; border: none; border-radius: 50px;
-        padding: 0 24px; height: 48px; font-weight: 600;
-        display: inline-flex; align-items: center; gap: 10px;
-        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2); transition: all 0.3s ease;
+    .btn-premium {
+        background: var(--purple-brand); color: white !important; border: none; border-radius: 12px;
+        padding: 0 24px; height: 44px; font-weight: 600; font-size: 0.9rem; display: inline-flex;
+        align-items: center; gap: 10px; transition: var(--transition-spring); box-shadow: 0 8px 20px var(--purple-glow);
+        text-decoration: none;
     }
-    .btn-add-invoice:hover { 
-        background: var(--purple-light); 
-        transform: translateY(-2px); 
-        box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3); 
-    }
+    .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 12px 25px var(--purple-glow); }
 
-    /* --- TABLA PREMIUM --- */
-    .table-wrapper {
-        background: var(--card-bg);
-        border-radius: 24px;
-        padding: 10px; 
-        box-shadow: var(--shadow-soft);
-        border: 1px solid rgba(0,0,0,0.02);
-        overflow: hidden; 
+    /* --- TABLA DE FILAS FLOTANTES --- */
+    .table-floating-container { margin-top: 10px; }
+    .table-floating { width: 100%; border-collapse: separate; border-spacing: 0 14px; }
+    
+    .table-floating th {
+        color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        font-weight: 700; padding: 0 24px 5px 24px; border: none;
     }
     
-    .table-premium { margin-bottom: 0; }
-    .table-premium thead { background-color: rgba(244, 247, 254, 0.6); }
-    .table-premium thead th {
-        color: var(--text-gray); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
-        border: none; padding: 20px 24px; font-weight: 700;
+    .table-floating tbody tr {
+        background: var(--card-bg); box-shadow: var(--shadow-soft); transition: var(--transition-spring);
     }
-    .table-premium thead th:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
-    .table-premium thead th:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+    .table-floating tbody tr:hover { transform: translateY(-4px) scale(1.005); box-shadow: var(--shadow-hover); }
+    
+    .table-floating td { padding: 20px 24px; vertical-align: middle; border-top: 1px solid transparent; border-bottom: 1px solid transparent; }
+    .table-floating td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; border-left: 1px solid transparent; }
+    .table-floating td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; border-right: 1px solid transparent; }
 
-    .table-premium tbody td {
-        vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.02);
-        padding: 15px 24px; color: var(--text-dark); font-weight: 500;
-    }
-    .table-premium tbody tr { transition: all 0.2s ease; border-radius: 16px; }
-    .table-premium tbody tr:hover { background-color: rgba(176, 154, 222, 0.05); }
-    .table-premium tbody tr:last-child td { border-bottom: none; }
-
-    /* Componentes visuales de la tabla */
+    /* Componentes visuales */
     .invoice-badge {
-        background: var(--page-bg);
-        color: var(--text-gray);
-        font-weight: 700;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        letter-spacing: 0.5px;
+        background: #F3F4F6; color: var(--text-muted); font-family: 'Courier New', Courier, monospace;
+        font-weight: 700; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; border: 1px solid #E5E7EB;
     }
 
-    .patient-avatar {
-        width: 40px; height: 40px; border-radius: 12px;
-        background: rgba(176, 154, 222, 0.15);
-        color: var(--purple-brand);
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+    .avatar-premium {
+        width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #F3E8FF, #E0E7FF);
+        color: var(--purple-brand); display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.2rem; flex-shrink: 0; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05);
     }
 
-    /* Etiquetas de Estado de Pago */
-    .status-paid {
-        background-color: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2);
-        font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center;
-    }
-    .status-pending {
-        background-color: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);
-        font-size: 0.75rem; font-weight: 700; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center;
-    }
-
-    /* Acciones Suavizadas (Ghost Buttons) */
-    .btn-action {
-        width: 40px; height: 40px; border-radius: 12px;
-        display: inline-flex; align-items: center; justify-content: center;
-        transition: all 0.2s; background: var(--page-bg);
-        color: var(--text-gray); border: 1px solid transparent; text-decoration: none;
-    }
-    .btn-action.view:hover { background: rgba(176, 154, 222, 0.1); color: var(--purple-brand); border-color: rgba(176, 154, 222, 0.3); transform: scale(1.05); }
-    .btn-action.download:hover { background: #fef2f2; color: #ef4444; border-color: #fecaca; transform: scale(1.05); }
-    
     .amount-text {
-        font-size: 1.05rem;
-        color: var(--purple-brand);
-        letter-spacing: -0.5px;
+        font-size: 1.15rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;
     }
+
+    /* Badges de Estado Dot Style */
+    .badge-dot {
+        padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.5px;
+    }
+    .badge-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+    
+    .badge-dot.paid { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .badge-dot.paid::before { background: #10B981; }
+    
+    .badge-dot.pending { background: rgba(245, 158, 11, 0.1); color: #D97706; }
+    .badge-dot.pending::before { background: #F59E0B; }
+    
+    .badge-dot.annulled { background: rgba(239, 68, 68, 0.1); color: #DC2626; text-decoration: line-through; }
+    .badge-dot.annulled::before { background: #EF4444; }
+
+    /* Botones de Acción de la Tabla */
+    .action-glass {
+        width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
+        background: var(--page-bg); color: var(--text-muted); transition: var(--transition-spring);
+        border: none; cursor: pointer; text-decoration: none;
+    }
+    .action-glass:hover { transform: scale(1.1); }
+    .action-glass.view:hover { background: #F3E8FF; color: var(--purple-brand); }
+    .action-glass.download:hover { background: #FEE2E2; color: #DC2626; }
 </style>
 
-<div class="fade-in-up" style="animation-delay: 0.1s;">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+<div class="stagger-1 mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h3 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">Facturación</h3>
-            <p class="mt-1 m-0" style="color: var(--text-gray); font-weight: 500;">Historial de cobros y recibos de pacientes.</p>
+            <h2 class="title-gradient m-0">Facturación</h2>
+            <p class="text-muted fw-medium mt-1 mb-0">Historial de cobros y recibos de pacientes.</p>
         </div>
-        <a href="{% url 'crear_factura' %}" class="btn-add-invoice text-decoration-none">
-            <i class="fa-solid fa-plus"></i> Nueva Factura
+        <a href="{% url 'crear_factura' %}" class="btn-premium">
+            <i class="fa-solid fa-plus"></i> <span>Nueva Factura</span>
         </a>
     </div>
 </div>
 
-<div class="table-wrapper fade-in-up" style="animation-delay: 0.2s;">
-    <div class="table-responsive">
-        <table class="table table-premium table-borderless table-hover align-middle">
-            <thead>
-                <tr>
-                    <th style="width: 15%;">Nº Factura</th>
-                    <th style="width: 30%;">Paciente</th>
-                    <th style="width: 15%;">Fecha de Emisión</th>
-                    <th style="width: 15%;">Importe Total</th>
-                    <th class="text-center" style="width: 15%;">Estado</th>
-                    <th class="text-end pe-4" style="width: 10%;">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for factura in facturas %}
-                <tr>
-                    <td>
-                        <span class="invoice-badge">
-                            {{ factura.nro_factura|default:factura.id }}
-                        </span>
-                    </td>
+<div class="table-responsive table-floating-container stagger-2">
+    <table class="table-floating">
+        <thead>
+            <tr>
+                <th class="ps-4" style="width: 15%;">Nº Factura</th>
+                <th style="width: 30%;">Paciente</th>
+                <th style="width: 15%;">Fecha de Emisión</th>
+                <th style="width: 15%;">Importe Total</th>
+                <th class="text-center" style="width: 15%;">Estado</th>
+                <th class="text-end pe-4" style="width: 10%;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for factura in facturas %}
+            <tr>
+                <td class="ps-4">
+                    <span class="invoice-badge shadow-sm">
+                        #{{ factura.nro_factura|default:factura.id }}
+                    </span>
+                </td>
 
-                    <td>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="patient-avatar shadow-sm">
-                                {{ factura.paciente.nombre_completo|slice:":1"|upper }}
-                            </div>
-                            <span class="d-block fw-bold" style="color: var(--text-dark);">
+                <td>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-premium">
+                            {{ factura.paciente.nombre_completo|slice:":1"|upper }}
+                        </div>
+                        <div>
+                            <span class="d-block fw-bold text-dark" style="font-size: 1rem;">
                                 {{ factura.paciente.nombre_completo }}
                             </span>
                         </div>
-                    </td>
+                    </div>
+                </td>
 
-                    <td>
-                        <div class="fw-semibold" style="color: var(--text-dark);">
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                            <i class="fa-regular fa-calendar-check text-muted" style="font-size: 0.7rem;"></i>
+                        </div>
+                        <span class="fw-semibold text-dark" style="font-size: 0.9rem;">
                             {{ factura.fecha|date:"d M, Y" }}
-                        </div>
-                    </td>
+                        </span>
+                    </div>
+                </td>
 
-                    <td>
-                        <div class="fw-bold amount-text">
-                            ${{ factura.total }}
-                        </div>
-                    </td>
+                <td>
+                    <div class="amount-text">
+                        ${{ factura.total }}
+                    </div>
+                </td>
 
-                    <td class="text-center">
-                        {% if factura.estado_pago == 'Pagada' %}
-                            <span class="status-paid shadow-sm">
-                                <i class="fa-solid fa-check-circle me-1"></i> Pagada
-                            </span>
-                        {% elif factura.estado_pago == 'Anulada' %}
-                            <span class="badge bg-danger text-white px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-ban me-1"></i> Anulada
-                            </span>
-                        {% else %}
-                            <span class="status-pending shadow-sm">
-                                <i class="fa-solid fa-clock me-1"></i> Pendiente
-                            </span>
-                        {% endif %}
-                    </td>
+                <td class="text-center">
+                    {% if factura.estado_pago == 'Pagada' %}
+                        <span class="badge-dot paid">PAGADA</span>
+                    {% elif factura.estado_pago == 'Anulada' %}
+                        <span class="badge-dot annulled">ANULADA</span>
+                    {% else %}
+                        <span class="badge-dot pending">PENDIENTE</span>
+                    {% endif %}
+                </td>
 
-                    <td class="text-end pe-3">
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'detalle_factura' factura.id %}" class="btn-action view" data-bs-toggle="tooltip" title="Ver Detalles">
-                                <i class="fa-solid fa-eye"></i>
-                            </a>
-                            <a href="{% url 'exportar_factura_pdf' factura.id %}" class="btn-action download" data-bs-toggle="tooltip" title="Descargar PDF">
-                                <i class="fa-solid fa-file-pdf"></i>
-                            </a>
+                <td class="text-end pe-4">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'detalle_factura' factura.id %}" class="action-glass view" data-bs-toggle="tooltip" title="Ver Detalles">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <a href="{% url 'exportar_factura_pdf' factura.id %}" class="action-glass download" data-bs-toggle="tooltip" title="Descargar PDF">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-5 bg-white" style="border-radius: 20px; box-shadow: var(--shadow-soft);">
+                    <div class="py-4">
+                        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: rgba(124, 58, 237, 0.05); border-radius: 24px; color: var(--purple-brand); font-size: 2.2rem;">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
                         </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center py-5">
-                        <div class="py-4">
-                            <div class="mx-auto mb-3" style="width: 70px; height: 70px; background: rgba(176, 154, 222, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--purple-brand);">
-                                <i class="fa-solid fa-receipt" style="font-size: 2rem;"></i>
-                            </div>
-                            <h5 class="fw-bold text-dark mb-1">Sin historial de facturación</h5>
-                            <p style="color: var(--text-gray); font-size: 0.95rem; max-width: 400px; margin: 0 auto;">
-                                Aún no has generado ningún recibo o factura en el sistema.
-                            </p>
-                            <a href="{% url 'crear_factura' %}" class="btn-add-invoice mt-4 text-decoration-none">
-                                <i class="fa-solid fa-plus"></i> Crear Primera Factura
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        <h5 class="fw-bold text-dark mb-1">Sin historial de facturación</h5>
+                        <p class="text-muted mb-4" style="font-size: 0.95rem;">Aún no has generado ningún recibo o factura en el sistema.</p>
+                        <a href="{% url 'crear_factura' %}" class="btn-premium mx-auto text-decoration-none">
+                            <i class="fa-solid fa-plus"></i> Crear Primera Factura
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 <script>

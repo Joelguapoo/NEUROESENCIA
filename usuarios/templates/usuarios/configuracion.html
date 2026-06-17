@@ -3,167 +3,180 @@
 
 {% block content %}
 <style>
-    /* --- ESTILOS DE CONFIGURACIÓN PREMIUM --- */
+    /* --- VARIABLES PREMIUM --- */
+    :root {
+        --purple-brand: #7C3AED; 
+        --purple-glow: rgba(124, 58, 237, 0.4);
+        --dark-bg: #0D0B14; 
+        --page-bg: #F4F7FE; 
+        --text-main: #111827;
+        --text-muted: #6B7280;
+        --card-bg: #FFFFFF;
+        --border-color: #E5E7EB;
+        
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+        --shadow-hover: 0 12px 30px rgba(124, 58, 237, 0.08);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    }
+
+    body { background-color: var(--page-bg); }
+
+    /* Animaciones en Cascada */
+    .stagger-1 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    .stagger-2 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.1s; opacity: 0; transform: translateY(20px); }
+    .stagger-3 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.2s; opacity: 0; transform: translateY(20px); }
+    
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
     .config-container { max-width: 900px; margin: auto; }
 
+    /* Título Gradiente */
+    .title-gradient {
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--purple-brand) 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        font-weight: 800; letter-spacing: -0.03em; font-size: 2rem;
+    }
+
+    /* --- TARJETA MODO OSCURO (Dark Glass) --- */
+    .dark-mode-toggle-card {
+        background: linear-gradient(145deg, var(--dark-bg), #1a1525);
+        border-radius: 20px; padding: 30px; color: white;
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 30px; box-shadow: 0 20px 40px rgba(13, 11, 20, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.05); position: relative; overflow: hidden;
+    }
+    .dark-mode-toggle-card::before {
+        content: ''; position: absolute; top: -50%; right: -10%; width: 200px; height: 200px;
+        background: radial-gradient(circle, var(--purple-brand) 0%, transparent 70%);
+        opacity: 0.3; filter: blur(40px); pointer-events: none;
+    }
+    .icon-moon-wrapper {
+        background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; color: #C4B5FD; border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- SWITCH ESTILO iOS --- */
+    .ios-switch {
+        appearance: none; width: 60px; height: 34px; background: rgba(255,255,255,0.2); border-radius: 34px;
+        position: relative; cursor: pointer; outline: none; transition: background 0.4s ease; z-index: 2;
+    }
+    .ios-switch::after {
+        content: ''; position: absolute; top: 3px; left: 3px; width: 28px; height: 28px;
+        background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.3, 1);
+    }
+    .ios-switch:checked { background: var(--purple-brand); }
+    .ios-switch:checked::after { transform: translateX(26px); }
+
+    /* --- TARJETAS DE AJUSTES BLANCAS --- */
     .settings-card {
-        background: var(--white);
-        border-radius: 25px;
-        padding: 30px;
-        box-shadow: 0 10px 30px rgba(42, 31, 69, 0.04);
-        border: 1px solid rgba(0,0,0,0.02);
-        height: 100%;
-        transition: var(--transition);
+        background: var(--card-bg); border-radius: 20px; padding: 30px;
+        box-shadow: var(--shadow-soft); border: 1px solid var(--border-color);
+        height: 100%; transition: var(--transition-spring);
     }
 
     .settings-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text-main);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        font-size: 0.9rem; font-weight: 700; color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px;
+        display: flex; align-items: center; gap: 10px;
     }
+    .settings-title i { color: var(--purple-brand); font-size: 1.2rem; }
 
-    .settings-title i { color: var(--purple-pastel); }
-
-    /* --- OPCIONES DE SELECCIÓN --- */
+    /* Opciones Seleccionables */
     .option-card {
-        background: var(--bg-main);
-        border: 2px solid transparent;
-        border-radius: 18px;
-        padding: 15px 20px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        transition: var(--transition);
-        margin-bottom: 12px;
+        background: transparent; border: 2px solid var(--border-color); border-radius: 16px;
+        padding: 16px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+        transition: var(--transition-spring); margin-bottom: 12px;
     }
-
-    .option-card:hover { transform: translateX(5px); background: #f8faff; }
-
-    /* Estado Activo */
+    .option-card:hover { border-color: #C4B5FD; transform: translateY(-2px); background: rgba(124, 58, 237, 0.02); }
+    
     .option-card.active {
-        border-color: var(--purple-pastel);
-        background: var(--white);
-        box-shadow: 0 5px 15px rgba(176, 154, 222, 0.2);
+        border-color: var(--purple-brand); background: rgba(124, 58, 237, 0.05);
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.1);
     }
-
-    .option-info { display: flex; align-items: center; gap: 15px; }
 
     .color-circle {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        border: 3px solid var(--white);
-        box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+        width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--white);
+        box-shadow: 0 0 0 2px rgba(0,0,0,0.1); transition: var(--transition-spring);
     }
+    .option-card.active .color-circle { box-shadow: 0 0 0 2px var(--purple-brand); transform: scale(1.1); }
 
-    .check-icon {
-        color: var(--purple-pastel);
-        font-size: 1.1rem;
-        display: none;
-    }
+    .check-icon { color: var(--purple-brand); font-size: 1.2rem; opacity: 0; transform: scale(0.5); transition: var(--transition-spring); }
+    .option-card.active .check-icon { opacity: 1; transform: scale(1); }
 
-    .option-card.active .check-icon { display: block; }
-
-    /* --- SWITCH MODO OSCURO --- */
-    .dark-mode-toggle-card {
-        background: linear-gradient(135deg, var(--bg-sidebar) 0%, var(--sidebar-accent) 100%);
-        color: white;
-        border-radius: 20px;
-        padding: 25px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 30px;
-        box-shadow: 0 15px 25px rgba(42, 31, 69, 0.2);
-    }
-
-    /* --- TAMAÑO DE FUENTE --- */
-    .font-btn-group {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-    }
-
+    /* Grid de Fuentes */
+    .font-btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .font-option {
-        background: var(--bg-main);
-        border: 2px solid transparent;
-        border-radius: 15px;
-        padding: 20px 10px;
-        text-align: center;
-        cursor: pointer;
-        transition: var(--transition);
+        background: transparent; border: 2px solid var(--border-color); border-radius: 16px;
+        padding: 20px 10px; text-align: center; cursor: pointer; transition: var(--transition-spring);
     }
-
-    .font-option i { display: block; margin-bottom: 8px; color: var(--text-muted); }
+    .font-option i { display: block; margin-bottom: 10px; color: var(--text-muted); transition: var(--transition-spring); }
     .font-option span { font-weight: 600; font-size: 0.85rem; color: var(--text-main); }
+    
+    .font-option:hover { border-color: #C4B5FD; transform: translateY(-2px); }
+    .font-option.active { border-color: var(--purple-brand); background: rgba(124, 58, 237, 0.05); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.1); }
+    .font-option.active i { color: var(--purple-brand); transform: scale(1.1); }
 
-    .font-option.active { border-color: var(--purple-pastel); background: var(--white); }
-    .font-option.active i { color: var(--purple-pastel); }
-
-    /* --- MODO OSCURO CSS --- */
-    body.dark-mode .settings-card { background: #1e1e1e; border-color: #333; }
-    body.dark-mode .option-card { background: #252525; }
-    body.dark-mode .option-card:hover { background: #2d2d2d; }
-    body.dark-mode .font-option { background: #252525; }
+    /* MODO OSCURO GLOBAL (Compatibilidad) */
+    body.dark-mode .settings-card { background: #18181B; border-color: #27272A; }
+    body.dark-mode .settings-title { color: #9CA3AF; }
+    body.dark-mode .option-card, body.dark-mode .font-option { border-color: #3F3F46; }
+    body.dark-mode .option-card:hover, body.dark-mode .font-option:hover { border-color: #7C3AED; background: rgba(124, 58, 237, 0.1); }
+    body.dark-mode .option-card.active, body.dark-mode .font-option.active { background: rgba(124, 58, 237, 0.2); border-color: #8B5CF6; }
+    body.dark-mode .font-option span { color: #F3F4F6; }
 </style>
 
-<div class="config-container fade-in-up">
-    <div class="mb-4">
-        <h3 class="fw-bold text-dark m-0">Preferencias del Sistema</h3>
-        <p class="text-muted">Personaliza tu entorno de trabajo para mayor comodidad.</p>
+<div class="config-container py-4">
+    <div class="stagger-1 mb-4">
+        <h2 class="title-gradient m-0">Preferencias del Sistema</h2>
+        <p class="text-muted fw-medium mt-1 mb-0">Personaliza tu entorno de trabajo para mayor comodidad visual.</p>
     </div>
 
-    <div class="dark-mode-toggle-card">
-        <div class="d-flex align-items-center gap-3">
-            <div class="bg-white bg-opacity-20 p-3 rounded-circle">
-                <i class="fa-solid fa-moon fs-4"></i>
+    <!-- Toggle Modo Oscuro -->
+    <div class="dark-mode-toggle-card stagger-2">
+        <div class="d-flex align-items-center gap-4 position-relative z-1">
+            <div class="icon-moon-wrapper">
+                <i class="fa-solid fa-moon"></i>
             </div>
             <div>
-                <h5 class="fw-bold m-0">Modo Oscuro</h5>
-                <small class="opacity-75">Reduce la fatiga visual en entornos oscuros.</small>
+                <h4 class="fw-bold m-0 text-white" style="letter-spacing: -0.5px;">Modo Oscuro</h4>
+                <span style="color: #9CA3AF; font-size: 0.9rem; font-weight: 500;">Reduce la fatiga visual en entornos de poca luz.</span>
             </div>
         </div>
-        <div class="form-check form-switch fs-3">
-            <input class="form-check-input" type="checkbox" id="darkModeSwitch" onclick="toggleDarkMode()" style="cursor: pointer;">
-        </div>
+        <input class="ios-switch" type="checkbox" id="darkModeSwitch" onchange="toggleDarkMode()">
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 stagger-3">
+        <!-- Temas de Color -->
         <div class="col-md-6">
             <div class="settings-card">
                 <div class="settings-title">
                     <i class="fa-solid fa-palette"></i>
-                    <span>Temas de Color</span>
+                    <span>Esquema de Colores</span>
                 </div>
 
                 <div id="themeOptions">
                     <div class="option-card" data-theme="" onclick="setTheme('')">
-                        <div class="option-info">
-                            <div class="color-circle" style="background: #2a1f45;"></div>
-                            <span class="fw-bold">Morado Profundo</span>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="color-circle" style="background: #7C3AED;"></div>
+                            <span class="fw-bold text-dark" style="font-size: 0.95rem;">Violeta Premium</span>
                         </div>
                         <i class="fa-solid fa-circle-check check-icon"></i>
                     </div>
 
                     <div class="option-card" data-theme="theme-vibrant-purple" onclick="setTheme('theme-vibrant-purple')">
-                        <div class="option-info">
-                            <div class="color-circle" style="background: #6a0dad;"></div>
-                            <span class="fw-bold">Morado Eléctrico</span>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="color-circle" style="background: #D946EF;"></div>
+                            <span class="fw-bold text-dark" style="font-size: 0.95rem;">Fucsia Eléctrico</span>
                         </div>
                         <i class="fa-solid fa-circle-check check-icon"></i>
                     </div>
 
                     <div class="option-card" data-theme="theme-soft-purple" onclick="setTheme('theme-soft-purple')">
-                        <div class="option-info">
-                            <div class="color-circle" style="background: #9f86c0;"></div>
-                            <span class="fw-bold">Lavanda Suave</span>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="color-circle" style="background: #8B5CF6;"></div>
+                            <span class="fw-bold text-dark" style="font-size: 0.95rem;">Lavanda Suave</span>
                         </div>
                         <i class="fa-solid fa-circle-check check-icon"></i>
                     </div>
@@ -171,30 +184,32 @@
             </div>
         </div>
 
+        <!-- Tamaño de Fuente -->
         <div class="col-md-6">
             <div class="settings-card">
                 <div class="settings-title">
-                    <i class="fa-solid fa-font"></i>
+                    <i class="fa-solid fa-text-height"></i>
                     <span>Accesibilidad de Texto</span>
                 </div>
 
                 <div class="font-btn-group">
                     <div class="font-option" data-font="font-small" onclick="setFont('font-small')">
-                        <i class="fa-solid fa-font" style="font-size: 0.8rem;"></i>
+                        <i class="fa-solid fa-a" style="font-size: 0.8rem;"></i>
                         <span>Pequeña</span>
                     </div>
                     <div class="font-option" data-font="font-medium" onclick="setFont('font-medium')">
-                        <i class="fa-solid fa-font" style="font-size: 1.1rem;"></i>
+                        <i class="fa-solid fa-a" style="font-size: 1.2rem;"></i>
                         <span>Normal</span>
                     </div>
                     <div class="font-option" data-font="font-large" onclick="setFont('font-large')">
-                        <i class="fa-solid fa-font" style="font-size: 1.4rem;"></i>
+                        <i class="fa-solid fa-a" style="font-size: 1.6rem;"></i>
                         <span>Grande</span>
                     </div>
                 </div>
 
-                <div class="mt-4 p-3 rounded-4 bg-light text-center">
-                    <p class="m-0 small text-muted">Este cambio afectará a todos los menús y tablas del portal.</p>
+                <div class="mt-4 p-3 rounded-3 text-center" style="background: rgba(124, 58, 237, 0.05); border: 1px dashed rgba(124, 58, 237, 0.2);">
+                    <i class="fa-solid fa-circle-info text-primary mb-2"></i>
+                    <p class="m-0 fw-medium" style="font-size: 0.85rem; color: var(--text-main);">El cambio de fuente se aplicará instantáneamente en todas las tablas y menús del portal.</p>
                 </div>
             </div>
         </div>
@@ -202,38 +217,74 @@
 </div>
 
 <script>
+    // Guardar y aplicar Tema
     function setTheme(t) {
         localStorage.setItem('neuro_tema', t);
-        aplicarPreferencias();
+        // Aplica el atributo al body para reflejo instantáneo si lo tienes configurado así en tu CSS global
+        document.body.setAttribute('data-theme', t); 
+        
+        if (typeof aplicarPreferencias === 'function') aplicarPreferencias();
         actualizarUI();
     }
 
+    // Guardar y aplicar Fuente
     function setFont(f) {
         localStorage.setItem('neuro_fuente', f);
-        aplicarPreferencias();
+        
+        // Efecto instantáneo removiendo clases antiguas
+        document.body.classList.remove('font-small', 'font-medium', 'font-large');
+        if(f && f !== 'font-medium') document.body.classList.add(f);
+
+        if (typeof aplicarPreferencias === 'function') aplicarPreferencias();
         actualizarUI();
     }
 
+    // Toggle para Modo Oscuro
+    function toggleDarkMode() {
+        const isDark = document.getElementById('darkModeSwitch').checked;
+        localStorage.setItem('neuro_dark_mode', isDark);
+        
+        // Cambio instantáneo del DOM
+        if(isDark) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+
+        if (typeof aplicarPreferencias === 'function') aplicarPreferencias();
+        actualizarUI();
+    }
+
+    // Actualizar los estados visuales (Tarjetas activas y Switch)
     function actualizarUI() {
         const temaActual = localStorage.getItem('neuro_tema') || '';
         const fuenteActual = localStorage.getItem('neuro_fuente') || 'font-medium';
         const darkModeActual = localStorage.getItem('neuro_dark_mode') === 'true';
 
-        // Actualizar tarjetas de tema
+        // Opciones de Tema
         document.querySelectorAll('.option-card').forEach(card => {
-            card.classList.toggle('active', card.dataset.theme === temaActual);
+            if (card.dataset.theme === temaActual) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
         });
 
-        // Actualizar tarjetas de fuente
+        // Opciones de Fuente
         document.querySelectorAll('.font-option').forEach(card => {
-            card.classList.toggle('active', card.dataset.font === fuenteActual);
+            if (card.dataset.font === fuenteActual) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
         });
 
-        // Sincronizar Switch
-        document.getElementById('darkModeSwitch').checked = darkModeActual;
+        // Sincronizar el Switch
+        const switchBtn = document.getElementById('darkModeSwitch');
+        if(switchBtn) switchBtn.checked = darkModeActual;
     }
 
-    // Inicializar UI al cargar
+    // Inicializar todo cuando carga la vista
     document.addEventListener('DOMContentLoaded', actualizarUI);
 </script>
 {% endblock %}

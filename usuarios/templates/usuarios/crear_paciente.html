@@ -6,51 +6,90 @@
 
 {% block content %}
 <style>
+    /* ==========================================================================
+       VARIABLES PREMIUM (SaaS Design)
+       ========================================================================== */
     :root {
-        --card-bg: #ffffff;
-        --page-bg: #f4f7fe;
-        --purple-brand: #2a1f45;
-        --purple-light: #4c3b73;
-        --purple-pastel: #b09ade;
-        --text-dark: #2b3674;
-        --text-gray: #a3aed1;
-        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+        --purple-brand: #7C3AED; 
+        --purple-glow: rgba(124, 58, 237, 0.2);
+        --dark-bg: #0D0B14; 
+        --page-bg: #F4F7FE; 
+        --text-main: #111827;
+        --text-muted: #6B7280;
+        --card-bg: #FFFFFF;
+        --border-color: #E5E7EB;
+        
+        --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.04);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        --transition-fast: all 0.2s ease-in-out;
     }
 
-    .fade-in-up {
-        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    @keyframes fadeInUp {
-        to { opacity: 1; transform: translateY(0); }
-    }
+    body { background-color: var(--page-bg); }
+
+    /* ==========================================================================
+       ANIMACIONES EN CASCADA
+       ========================================================================== */
+    .stagger-1 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    .stagger-2 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.1s; opacity: 0; transform: translateY(20px); }
+    .stagger-3 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.2s; opacity: 0; transform: translateY(20px); }
+    
+    .fade-in-up { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* ==========================================================================
+       ESTRUCTURA DE TARJETAS (CARDS)
+       ========================================================================== */
+    .form-wrapper { max-width: 850px; margin: 0 auto; padding: 10px 0; }
 
     .form-card {
         background: var(--card-bg);
         border-radius: 24px;
         padding: 40px;
         box-shadow: var(--shadow-soft);
-        border: 1px solid rgba(0,0,0,0.02);
+        border: 1px solid var(--border-color);
+        position: relative;
+        /* IMPORTANTE: No usar overflow: hidden aquí para no cortar el dropdown */
+    }
+
+    /* Brillo decorativo de fondo */
+    .form-card::before {
+        content: ''; position: absolute; top: -100px; right: -100px; width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
     }
 
     .form-header-icon {
-        width: 60px; height: 60px;
-        background: rgba(176, 154, 222, 0.15);
-        color: var(--purple-brand);
-        border-radius: 16px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; margin-bottom: 20px;
+        width: 64px; height: 64px; border-radius: 18px;
+        background: linear-gradient(135deg, #F3E8FF, #E0E7FF);
+        color: var(--purple-brand); display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05); flex-shrink: 0;
+        position: relative; z-index: 1;
     }
 
+    .title-gradient {
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--purple-brand) 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        font-weight: 800; letter-spacing: -0.02em; font-size: 1.6rem;
+        position: relative; z-index: 1;
+    }
+
+    /* ==========================================================================
+       ESTILOS DE ETIQUETAS (LABELS)
+       ========================================================================== */
     .form-label {
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: var(--text-dark);
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--text-main);
         margin-bottom: 8px;
         letter-spacing: 0.3px;
+        position: relative; z-index: 1;
     }
 
+    /* ==========================================================================
+       ESTILOS DE INPUTS Y SELECTS (DISEÑO PREMIUM)
+       ========================================================================== */
     .form-card input, 
     .form-card select, 
     .form-card textarea,
@@ -58,13 +97,15 @@
     .form-select {
         width: 100%;
         border-radius: 12px !important;
-        border: 2px solid transparent !important;
-        background-color: var(--page-bg) !important;
-        padding: 12px 18px !important;
+        border: 1px solid #CBD5E1 !important;
+        background-color: #F8FAFC !important;
+        padding: 14px 18px !important;
         font-weight: 500;
-        color: var(--text-dark);
-        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        color: var(--text-main);
+        transition: var(--transition-fast);
         box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important;
+        position: relative; z-index: 1;
     }
 
     .form-card input:focus, 
@@ -72,60 +113,63 @@
     .form-card textarea:focus,
     .form-control:focus, 
     .form-select:focus {
-        background-color: #ffffff !important;
-        border-color: var(--purple-pastel) !important;
-        box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15) !important;
+        background-color: #FFFFFF !important;
+        border-color: var(--purple-brand) !important;
+        box-shadow: 0 0 0 4px var(--purple-glow) !important;
         outline: none !important;
     }
 
+    .form-card input::placeholder, .form-card textarea::placeholder { color: #94A3B8; font-weight: 400; }
+
+    /* ==========================================================================
+       ESTILOS DE MENSAJES DE ERROR Y AYUDA
+       ========================================================================== */
     .error-text {
-        color: #ef4444;
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-top: 6px;
-        display: flex;
-        align-items: center;
-        gap: 5px;
+        color: #EF4444; background: #FEF2F2; padding: 8px 12px; border-radius: 8px;
+        font-size: 0.8rem; font-weight: 600; margin-top: 8px; display: inline-flex;
+        align-items: center; gap: 6px; border: 1px solid #FECACA; width: 100%;
+        position: relative; z-index: 1;
+    }
+    .help-text { color: var(--text-muted); font-size: 0.75rem; margin-top: 6px; display: block; font-weight: 500; }
+
+    /* ==========================================================================
+       ESTILOS DE BOTONES
+       ========================================================================== */
+    .btn-cancelar {
+        background-color: white; color: var(--text-muted); font-weight: 600; font-size: 0.95rem;
+        border-radius: 12px; padding: 0 24px; height: 48px; display: inline-flex; align-items: center;
+        justify-content: center; transition: var(--transition-fast); border: 1px solid var(--border-color);
+        text-decoration: none; position: relative; z-index: 1;
     }
 
-    .btn-cancelar {
-        background-color: transparent;
-        color: var(--text-gray);
-        font-weight: 600;
-        border-radius: 12px;
-        padding: 12px 24px;
-        transition: all 0.3s;
-        border: 1px solid var(--text-gray);
-    }
     .btn-cancelar:hover { 
-        background-color: rgba(163, 174, 209, 0.1); 
-        color: var(--text-dark);
-        border-color: var(--text-dark);
+        background-color: #F1F5F9; 
+        color: var(--text-main);
+        transform: translateY(-2px);
     }
 
     .btn-guardar {
-        background-color: var(--purple-brand);
-        color: white;
-        font-weight: 600;
-        border-radius: 12px;
-        padding: 12px 30px;
-        transition: all 0.3s;
-        border: none;
-        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2);
+        background: var(--purple-brand); color: white !important; border: none; border-radius: 12px;
+        padding: 0 30px; height: 48px; font-weight: 600; font-size: 0.95rem; display: inline-flex;
+        align-items: center; justify-content: center; gap: 10px; transition: var(--transition-spring); 
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3); position: relative; z-index: 1;
     }
+
     .btn-guardar:hover {
-        background-color: var(--purple-light);
-        transform: translateY(-2px);
-        box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3);
+        transform: translateY(-3px); box-shadow: 0 12px 25px rgba(124, 58, 237, 0.4);
     }
+    
+    .btn-guardar:disabled { opacity: 0.7; transform: none; cursor: not-allowed; box-shadow: none; }
+
+    .divider { height: 1px; background: var(--border-color); margin: 30px 0; width: 100%; position: relative; z-index: 1; }
 </style>
 
-<div class="container-fluid py-2">
-    <div class="mx-auto fade-in-up" style="max-width: 850px; animation-delay: 0.1s;">
+<div class="container-fluid py-4">
+    <div class="form-wrapper stagger-1">
         
         <div class="form-card">
             
-            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom border-light">
+            <div class="d-flex align-items-center gap-4 mb-4 stagger-2">
                 <div class="form-header-icon">
                     {% if editando %}
                         <i class="fa-solid fa-user-pen"></i>
@@ -134,23 +178,34 @@
                     {% endif %}
                 </div>
                 <div>
-                    <h4 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">
+                    <h3 class="title-gradient m-0">
                         {% if editando %}Editar Información{% else %}Registrar Nuevo Paciente{% endif %}
-                    </h4>
-                    <p class="m-0 mt-1" style="color: var(--text-gray); font-size: 0.95rem;">
-                        {% if editando %}Actualiza los datos personales de {{ paciente.nombre_completo }}.{% else %}Ingresa los datos personales para crear un nuevo expediente clínico.{% endif %}
+                    </h3>
+                    <p class="m-0 mt-1" style="color: var(--text-muted); font-size: 0.95rem; font-weight: 500;">
+                        {% if editando %}
+                            Actualiza los datos personales de <b>{{ paciente.nombre_completo }}</b>.
+                        {% else %}
+                            Ingresa los datos personales para crear un nuevo expediente clínico.
+                        {% endif %}
                     </p>
                 </div>
             </div>
 
-            <form method="POST" novalidate>
+            <div class="divider stagger-2"></div>
+
+            <form method="POST" novalidate id="pacienteForm" class="stagger-3">
                 {% csrf_token %} 
+                
                 <div class="row g-4">
                     {% for field in form %}
+                    <!-- Quité el 'position-relative z-1' para arreglar el bug de apilamiento -->
                     <div class="col-md-6">
+                        
                         <label class="form-label" for="{{ field.id_for_label }}">
                             {{ field.label }} 
-                            {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            {% if field.field.required %}
+                                <span class="text-danger ms-1" title="Campo obligatorio">*</span>
+                            {% endif %}
                         </label>
                         
                         {{ field }}
@@ -158,156 +213,501 @@
                         {% if field.errors %}
                             <div class="error-text">
                                 <i class="fa-solid fa-circle-exclamation"></i>
-                                {{ field.errors|striptags }}
+                                <span>{{ field.errors|striptags }}</span>
                             </div>
                         {% endif %}
                         
                         {% if field.help_text %}
-                            <small style="color: var(--text-gray); font-size: 0.8rem; margin-top: 4px; display: block;">
-                                {{ field.help_text }}
-                            </small>
+                            <span class="help-text">{{ field.help_text }}</span>
                         {% endif %}
+                        
                     </div>
                     {% endfor %}
                 </div>
 
-                <div class="mt-5 pt-4 border-top border-light d-flex justify-content-end gap-3 flex-wrap">
-                    <a href="{% url 'lista_pacientes' %}" class="btn-cancelar text-decoration-none">
+                <div class="divider mt-5"></div>
+
+                <div class="d-flex justify-content-end align-items-center gap-3 flex-wrap position-relative z-1">
+                    <a href="{% url 'lista_pacientes' %}" class="btn-cancelar">
                         Cancelar
                     </a>
-                    <button type="submit" class="btn-guardar">
-                        <i class="fa-solid fa-floppy-disk me-2"></i>
-                        {% if editando %}Guardar Cambios{% else %}Confirmar Registro{% endif %}
+                    <button type="submit" class="btn-guardar" id="btnSubmit">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>{% if editando %}Guardar Cambios{% else %}Confirmar Registro{% endif %}</span>
                     </button>
                 </div>
+
             </form>
 
         </div>
     </div>
 </div>
+
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    
-    // 1. VALIDACIÓN: SOLO NÚMEROS (DNI, Teléfono)
-    const camposNumericos = ['id_dni_paciente', 'id_telefono'];
-    camposNumericos.forEach(function(id) {
-        const input = document.getElementById(id);
-        if (input) {
-            let errorSpan = document.createElement('div');
-            errorSpan.className = 'error-text'; 
-            errorSpan.style.display = 'none';   
-            errorSpan.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Solo se permiten números.';
-            input.parentNode.insertBefore(errorSpan, input.nextSibling);
-
-            input.addEventListener('input', function(e) {
-                const caracteresInvalidos = /[^0-9]/g;
-                if (caracteresInvalidos.test(e.target.value)) {
-                    errorSpan.style.display = 'flex';
-                    e.target.value = e.target.value.replace(caracteresInvalidos, '');
-                    setTimeout(() => { errorSpan.style.display = 'none'; }, 2000);
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        /**
+         * ====================================================================
+         * SECCIÓN 0: REEMPLAZO DINÁMICO DE "RESIDENCIA"
+         * Transformamos el input de texto a un menú desplegable (Select)
+         * ====================================================================
+         */
+        const residenciaInput = document.getElementById('id_residencia');
+        
+        if (residenciaInput && residenciaInput.tagName === 'INPUT') {
+            const idOriginal = residenciaInput.id;
+            const nameOriginal = residenciaInput.name;
+            const valorActual = residenciaInput.value; 
+            
+            const selectResidencia = document.createElement('select');
+            selectResidencia.id = idOriginal;
+            selectResidencia.name = nameOriginal;
+            selectResidencia.className = 'form-select';
+            selectResidencia.required = true;
+            
+            const opcionesVivienda = [
+                { val: "", text: "Seleccione el tipo de vivienda..." },
+                { val: "Casa", text: "Casa" },
+                { val: "Apartamento", text: "Apartamento" },
+                { val: "Habitación", text: "Habitación (Arrendada)" },
+                { val: "Finca", text: "Finca / Zona Rural" },
+                { val: "Otro", text: "Otro Tipo de Vivienda" }
+            ];
+            
+            opcionesVivienda.forEach(optData => {
+                const option = document.createElement('option');
+                option.value = optData.val;
+                option.text = optData.text;
+                
+                if (optData.val === "") {
+                    option.disabled = true;
+                    option.selected = true;
                 }
-            });
-        }
-    });
-
-    // 2. VALIDACIÓN: SOLO TEXTO
-    const camposTexto = ['id_nombre_completo', 'id_ocupacion', 'id_lugar_origen', 'id_residencia'];
-    camposTexto.forEach(function(id) {
-        const input = document.getElementById(id);
-        if (input) {
-            let errorSpan = document.createElement('div');
-            errorSpan.className = 'error-text'; 
-            errorSpan.style.display = 'none';   
-            errorSpan.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> No se permiten números.';
-            input.parentNode.insertBefore(errorSpan, input.nextSibling);
-
-            input.addEventListener('input', function(e) {
-                const numeros = /[0-9]/g;
-                if (numeros.test(e.target.value)) {
-                    errorSpan.style.display = 'flex';
-                    e.target.value = e.target.value.replace(numeros, '');
-                    setTimeout(() => { errorSpan.style.display = 'none'; }, 2000);
+                
+                if (valorActual && optData.val === valorActual) {
+                    option.selected = true;
                 }
+                
+                selectResidencia.appendChild(option);
             });
+            
+            residenciaInput.parentNode.replaceChild(selectResidencia, residenciaInput);
         }
-    });
 
-    // 3. CONSUMO DE API
-    const inputOrigen = document.getElementById('id_lugar_origen');
-    
-    if (inputOrigen) {
-        const sugerenciasBox = document.createElement('div');
-        sugerenciasBox.id = 'api-suggestions';
-        
-        
-        sugerenciasBox.style = `
-            position: absolute; 
-            z-index: 99999; 
-            background: white; 
-            width: 100%; 
-            top: 100%; 
-            left: 0;
-            border-radius: 10px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            display: none; 
-            max-height: 200px; 
-            overflow-y: auto; 
-            border: 1px solid #d1d9e2;
-            margin-top: 5px;
-        `;
-        
-       
-        inputOrigen.parentNode.style.position = 'relative';
-        inputOrigen.parentNode.style.overflow = 'visible'; 
-        inputOrigen.parentNode.appendChild(sugerenciasBox);
 
-        inputOrigen.addEventListener('input', function() {
-            const query = this.value;
-            if (query.length < 2) { 
-                sugerenciasBox.style.display = 'none'; 
-                return; 
+        /**
+         * ====================================================================
+         * SECCIÓN 1: FUNCIONES DE APOYO PARA MOSTRAR ERRORES VISUALES
+         * ====================================================================
+         */
+        function mostrarError(inputElement, mensaje) {
+            let errorSpan = inputElement.nextElementSibling;
+            
+            if (!errorSpan || !errorSpan.classList.contains('error-text-js')) {
+                errorSpan = document.createElement('div');
+                errorSpan.className = 'error-text error-text-js fade-in-up';
+                inputElement.parentNode.insertBefore(errorSpan, inputElement.nextSibling);
+            }
+            
+            errorSpan.style.display = 'flex';
+            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${mensaje}</span>`;
+            return errorSpan;
+        }
+
+        function ocultarError(inputElement) {
+            let errorSpan = inputElement.nextElementSibling;
+            
+            if (errorSpan && errorSpan.classList.contains('error-text-js')) {
+                errorSpan.style.display = 'none';
+                errorSpan.classList.remove('fade-in-up');
+            }
+        }
+
+
+        /**
+         * ====================================================================
+         * SECCIÓN 2: LÓGICA DE DNI DINÁMICO
+         * Ajusta el tamaño y tipo de caracteres dependiendo del documento
+         * ====================================================================
+         */
+        const tipoDoc = document.getElementById('id_tipo_documento');
+        const dni = document.getElementById('id_dni_paciente');
+
+        function actualizarReglasDni() {
+            if (!tipoDoc || !dni) return;
+
+            let tipo = tipoDoc.options[tipoDoc.selectedIndex].text.toLowerCase();
+            let esAlfanumerico = false;
+            let min = '2';
+            let max = '25';
+
+            if (tipo.includes('ciudadanía') || tipo.includes('cc')) {
+                min = '8'; max = '10';
+            } else if (tipo.includes('identidad') || tipo.includes('ti')) {
+                min = '10'; max = '11';
+            } else if (tipo.includes('extranjería') || tipo.includes('ce')) {
+                min = '6'; max = '7';
+            } else if (tipo.includes('pasaporte')) {
+                min = '8'; max = '9';
+                esAlfanumerico = true;
+            } else if (tipo.includes('ppt') || tipo.includes('pep') || tipo.includes('permiso')) {
+                min = '7'; max = '15';
+                esAlfanumerico = true;
+            } else {
+                esAlfanumerico = true; 
             }
 
-            fetch(`/api/municipios/?term=${query}`)
-                .then(response => {
-                    if (!response.ok) throw new Error("Error en la ruta");
-                    return response.json();
-                })
-                .then(data => {
-                    sugerenciasBox.innerHTML = '';
-                    if (data.length > 0) {
-                        sugerenciasBox.style.display = 'block';
-                        data.forEach(nombre => {
-                            const item = document.createElement('div');
-                            item.innerHTML = nombre;
-                            item.style = 'padding: 12px 15px; cursor: pointer; color: #2b3674; border-bottom: 1px solid #f8f9fe; font-size: 0.9rem;';
-                            
-                            item.onmouseover = () => item.style.backgroundColor = '#f4f7fe';
-                            item.onmouseout = () => item.style.backgroundColor = 'white';
-                            
-                            item.onclick = function() {
-                                inputOrigen.value = nombre;
-                                sugerenciasBox.style.display = 'none';
-                            };
-                            sugerenciasBox.appendChild(item);
-                        });
-                    } else { 
-                        sugerenciasBox.style.display = 'none'; 
-                    }
-                })
-                .catch(error => {
-                    // Si falla, intentamos la ruta alternativa automáticamente
-                    fetch(`/usuarios/api/municipios/?term=${query}`)
-                        .then(res => res.json())
-                        .then(data => { /* misma lógica de arriba */ });
-                });
-        });
+            dni.setAttribute('minlength', min);
+            dni.setAttribute('maxlength', max);
+            dni.dataset.alfanumerico = esAlfanumerico;
+            
+            if (dni.value.length > 0) {
+                validarDNI({ target: dni });
+            }
+        }
 
-        // Cerrar al hacer clic fuera
-        document.addEventListener('click', (e) => {
-            if (e.target !== inputOrigen) sugerenciasBox.style.display = 'none';
-        });
-    }
-});
+        function validarDNI(e) {
+            if (!dni) return;
+            
+            const esAlfa = dni.dataset.alfanumerico === 'true';
+            const caracteresInvalidos = esAlfa ? /[^a-zA-Z0-9]/g : /[^0-9]/g;
+            const min = parseInt(dni.getAttribute('minlength'));
+            
+            let valor = e.target.value;
+
+            if (caracteresInvalidos.test(valor)) {
+                mostrarError(dni, esAlfa ? 'Este documento permite letras y números.' : 'Este documento solo permite números.');
+                e.target.value = valor.replace(caracteresInvalidos, '');
+                
+                setTimeout(() => ocultarError(dni), 3500);
+            }
+
+            if (e.target.value.length > 0 && e.target.value.length < min) {
+                dni.setCustomValidity(`Mínimo ${min} caracteres.`);
+            } else {
+                dni.setCustomValidity("");
+                ocultarError(dni);
+            }
+        }
+
+        if (tipoDoc && dni) {
+            tipoDoc.addEventListener('change', actualizarReglasDni);
+            dni.addEventListener('input', validarDNI);
+            actualizarReglasDni();
+        }
+
+
+        /**
+         * ====================================================================
+         * SECCIÓN 3: VALIDACIÓN DE CORREO ELECTRÓNICO
+         * ====================================================================
+         */
+        const correo = document.getElementById('id_correo');
+        
+        if (correo) {
+            correo.setAttribute('required', 'true');
+            correo.setAttribute('minlength', '7');
+            correo.setAttribute('maxlength', '50');
+
+            correo.addEventListener('input', function(e) {
+                const valor = e.target.value.trim();
+                const tieneLetras = /[a-zA-Z]/.test(valor);
+                const tieneNumeros = /[0-9]/.test(valor);
+                const formatoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
+
+                if (valor.length === 0) {
+                    correo.setCustomValidity("El correo es obligatorio.");
+                } else if (!formatoValido) {
+                    correo.setCustomValidity("Formato de correo inválido.");
+                    mostrarError(correo, 'Ingresa un formato válido (Ej: usuario1@dominio.com).');
+                } else if (!tieneLetras || !tieneNumeros) {
+                    correo.setCustomValidity("Debe contener letras y números.");
+                    mostrarError(correo, 'El correo debe contener al menos una letra y un número.');
+                } else {
+                    correo.setCustomValidity("");
+                    ocultarError(correo);
+                }
+            });
+        }
+
+
+        /**
+         * ====================================================================
+         * SECCIÓN 4: VALIDACIÓN DE DIRECCIÓN
+         * ====================================================================
+         */
+        const direccion = document.getElementById('id_direccion');
+        
+        if (direccion) {
+            direccion.setAttribute('required', 'true'); 
+            direccion.setAttribute('minlength', '2');
+            direccion.setAttribute('maxlength', '50');
+
+            direccion.addEventListener('input', function(e) {
+                const valor = e.target.value.trim();
+                const tieneLetras = /[a-zA-Z]/.test(valor);
+                const tieneNumeros = /[0-9]/.test(valor);
+
+                if (valor.length === 0) {
+                    direccion.setCustomValidity("La dirección es obligatoria.");
+                } else if (!tieneLetras || !tieneNumeros) {
+                    direccion.setCustomValidity("Debe contener letras y números.");
+                    mostrarError(direccion, 'Formato inválido (Ej: Calle 123 #45-67).');
+                } else {
+                    direccion.setCustomValidity("");
+                    ocultarError(direccion);
+                }
+            });
+        }
+
+
+        /**
+         * ====================================================================
+         * SECCIÓN 5: NOMBRES, OCUPACIÓN Y OTROS TEXTOS
+         * ====================================================================
+         */
+        function aplicarTitleCase(e, inputElement) {
+            const numeros = /[0-9]/g;
+            let valor = e.target.value;
+
+            if (numeros.test(valor)) {
+                mostrarError(inputElement, 'No se permiten números en este campo.');
+                valor = valor.replace(numeros, '');
+                setTimeout(() => ocultarError(inputElement), 2500);
+            }
+            
+            e.target.value = valor.toLowerCase().replace(/(?:^|\s)\S/g, function(letra) {
+                return letra.toUpperCase();
+            });
+        }
+
+        const nombre = document.getElementById('id_nombre_completo');
+        if (nombre) {
+            nombre.setAttribute('minlength', '2');
+            nombre.setAttribute('maxlength', '50');
+            nombre.addEventListener('input', (e) => aplicarTitleCase(e, nombre));
+        }
+
+        const ocupacion = document.getElementById('id_ocupacion');
+        if (ocupacion) {
+            ocupacion.setAttribute('minlength', '3');
+            ocupacion.addEventListener('input', (e) => aplicarTitleCase(e, ocupacion));
+        }
+
+
+        /**
+         * ====================================================================
+         * SECCIÓN 6: VALIDACIÓN ESTRICTA DE TELÉFONO
+         * ====================================================================
+         */
+        const telefono = document.getElementById('id_telefono');
+        
+        if (telefono) {
+            telefono.setAttribute('minlength', '10');
+            telefono.setAttribute('maxlength', '10');
+
+            telefono.addEventListener('input', function(e) {
+                const caracteresInvalidos = /[^0-9]/g;
+                
+                if (caracteresInvalidos.test(e.target.value)) {
+                    mostrarError(telefono, 'Solo se permiten números.');
+                    e.target.value = e.target.value.replace(caracteresInvalidos, '');
+                    setTimeout(() => ocultarError(telefono), 2500);
+                }
+                
+                if (e.target.value.length > 0 && e.target.value.length < 10) {
+                    telefono.setCustomValidity("Faltan dígitos.");
+                } else {
+                    telefono.setCustomValidity("");
+                }
+            });
+        }
+
+
+        /**
+         * ====================================================================
+         * SECCIÓN 7: BLOQUEO DE FECHAS FUTURAS EN NACIMIENTO
+         * ====================================================================
+         */
+        const fechaNacimiento = document.getElementById('id_fecha_nacimiento');
+        
+        if (fechaNacimiento) {
+            const hoy = new Date();
+            const yyyy = hoy.getFullYear();
+            const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dd = String(hoy.getDate()).padStart(2, '0');
+            const fechaMaxima = `${yyyy}-${mm}-${dd}`;
+            
+            fechaNacimiento.setAttribute('max', fechaMaxima);
+
+            fechaNacimiento.addEventListener('change', function(e) {
+                if (e.target.value > fechaMaxima) {
+                    mostrarError(fechaNacimiento, 'La fecha no puede estar en el futuro.');
+                    e.target.value = ''; 
+                    setTimeout(() => ocultarError(fechaNacimiento), 3000);
+                }
+            });
+        }
+
+
+        /**
+         * ====================================================================
+         * SECCIÓN 8: API DE MUNICIPIOS DE COLOMBIA (CORREGIDO PARA Z-INDEX)
+         * ====================================================================
+         */
+        const inputOrigen = document.getElementById('id_lugar_origen');
+        
+        if (inputOrigen) {
+            
+            const sugerenciasBox = document.createElement('div');
+            sugerenciasBox.id = 'api-suggestions';
+            
+            // Estilos fijos. Añadimos un z-index altísimo y color de fondo sólido
+            sugerenciasBox.style.cssText = `
+                position: absolute; 
+                z-index: 999999; 
+                background: #ffffff; 
+                width: 100%; 
+                top: 100%; 
+                left: 0;
+                border-radius: 12px; 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                display: none; 
+                max-height: 220px; 
+                overflow-y: auto; 
+                border: 1px solid var(--border-color);
+                margin-top: 4px;
+            `;
+            
+            // Hacemos que el contenedor directo del input sea la base del menú flotante
+            // Y nos aseguramos de que su propio z-index se eleve al usar el buscador
+            const parentDiv = inputOrigen.parentNode;
+            parentDiv.style.position = 'relative';
+            parentDiv.appendChild(sugerenciasBox);
+
+            function pintarSugerencias(data) {
+                sugerenciasBox.innerHTML = ''; 
+                
+                if (data.length > 0) {
+                    sugerenciasBox.style.display = 'block';
+                    parentDiv.style.zIndex = '1000'; // Elevamos la columna completa temporalmente
+                    
+                    data.forEach(nombre => {
+                        const item = document.createElement('div');
+                        item.innerHTML = nombre;
+                        item.style = 'padding: 12px 18px; cursor: pointer; color: #111827; border-bottom: 1px solid #F3F4F6; font-size: 0.9rem; font-weight: 500; transition: background 0.2s;';
+                        
+                        item.onmouseover = () => item.style.backgroundColor = '#F4F7FE';
+                        item.onmouseout = () => item.style.backgroundColor = '#ffffff';
+                        
+                        item.onclick = function() {
+                            inputOrigen.value = nombre;
+                            sugerenciasBox.style.display = 'none';
+                            parentDiv.style.zIndex = '1'; // Restaurar z-index
+                            ocultarError(inputOrigen);
+                        };
+                        
+                        sugerenciasBox.appendChild(item);
+                    });
+                } else { 
+                    sugerenciasBox.style.display = 'none'; 
+                    parentDiv.style.zIndex = '1';
+                }
+            }
+
+            inputOrigen.addEventListener('input', function() {
+                const query = this.value;
+                
+                if (query.length < 2) { 
+                    sugerenciasBox.style.display = 'none'; 
+                    parentDiv.style.zIndex = '1';
+                    return; 
+                }
+
+                fetch(`/api/municipios/?term=${query}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error("Error en la ruta principal");
+                        return response.json();
+                    })
+                    .then(data => pintarSugerencias(data))
+                    .catch(error => {
+                        fetch(`/usuarios/api/municipios/?term=${query}`)
+                            .then(res => {
+                                if (!res.ok) throw new Error("Error en la ruta alternativa");
+                                return res.json();
+                            })
+                            .then(data => pintarSugerencias(data))
+                            .catch(err => console.error("Las dos API fallaron.", err));
+                    });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== inputOrigen) {
+                    sugerenciasBox.style.display = 'none';
+                    parentDiv.style.zIndex = '1';
+                }
+            });
+        }
+
+
+        /**
+         * ====================================================================
+         * SECCIÓN FINAL: INTERCEPTOR DE FORMULARIO (SUBMIT)
+         * ====================================================================
+         */
+        const form = document.getElementById('pacienteForm');
+        
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let formValido = true;
+
+                if (dni && dni.value.length < parseInt(dni.getAttribute('minlength'))) {
+                    mostrarError(dni, `Faltan caracteres. Mínimo ${dni.getAttribute('minlength')} requeridos.`);
+                    formValido = false;
+                }
+
+                if (direccion && direccion.value.trim() === '') {
+                    mostrarError(direccion, 'Este campo es obligatorio.');
+                    formValido = false;
+                }
+
+                if (correo && correo.value.trim() === '') {
+                    mostrarError(correo, 'Este campo es obligatorio.');
+                    formValido = false;
+                }
+
+                const todosLosInputs = form.querySelectorAll('input, select, textarea');
+                todosLosInputs.forEach(input => {
+                    if (!input.checkValidity()) {
+                        if (input.id === 'id_residencia' && input.value === '') {
+                            mostrarError(input, 'Por favor seleccione una opción del menú.');
+                        } else {
+                            mostrarError(input, 'Verifique este campo antes de continuar.');
+                        }
+                        formValido = false;
+                    }
+                });
+
+                if (!formValido) {
+                    e.preventDefault(); 
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const btnSubmit = document.getElementById('btnSubmit');
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Procesando...</span>';
+                    }
+                }
+            });
+        }
+        
+        // Auto-focus en el primer campo vacío al entrar
+        const firstEmptyInput = document.querySelector('input[type="text"]:not([value]), input[type="text"][value=""], input[type="email"]:not([value]), input[type="number"]:not([value])');
+        if(firstEmptyInput) {
+            firstEmptyInput.focus();
+        }
+
+    });
 </script>
+
 {% endblock %}

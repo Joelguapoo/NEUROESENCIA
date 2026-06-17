@@ -1,69 +1,272 @@
 {% extends 'usuarios/base.html' %}
+
+{% block title %}Importación Masiva - NeuroEsencia{% endblock %}
+
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    /* --- VARIABLES PREMIUM --- */
+    :root {
+        --purple-brand: #7C3AED; 
+        --purple-glow: rgba(124, 58, 237, 0.4);
+        --dark-bg: #0D0B14; 
+        --page-bg: #F4F7FE; 
+        --text-main: #111827;
+        --text-muted: #6B7280;
+        --card-bg: #FFFFFF;
+        --border-color: #E5E7EB;
+        
+        --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.04);
+        --shadow-hover: 0 12px 30px rgba(124, 58, 237, 0.08);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    }
+
+    body { background-color: var(--page-bg); }
+
+    /* Animaciones en Cascada */
+    .stagger-1 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    .stagger-2 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.1s; opacity: 0; transform: translateY(20px); }
+    .stagger-3 { animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.2s; opacity: 0; transform: translateY(20px); }
+    
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Contenedor Principal Flotante */
+    .import-card {
+        background: var(--card-bg);
+        border-radius: 24px;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid var(--border-color);
+        max-width: 650px;
+        margin: 0 auto;
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Decoración de fondo sutil */
+    .import-card::before {
+        content: ''; position: absolute; top: -100px; left: -100px; width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* Icono Superior */
+    .icon-header {
+        width: 80px; height: 80px; border-radius: 20px;
+        background: linear-gradient(135deg, #F3E8FF, #E0E7FF);
+        color: var(--purple-brand); display: flex; align-items: center; justify-content: center;
+        font-size: 2.2rem; margin: 0 auto 20px auto;
+        box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* Título Gradiente */
+    .title-gradient {
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--purple-brand) 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        font-weight: 800; letter-spacing: -0.02em; font-size: 2rem; margin-bottom: 8px;
+    }
+
+    /* Caja de Instrucciones */
+    .instructions-box {
+        background: #F8FAFC; border: 1px solid #E2E8F0;
+        border-radius: 16px; padding: 20px; margin-bottom: 30px;
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .instructions-title { color: var(--text-main); font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+    .badge-column {
+        background: white; border: 1px solid #CBD5E1; color: var(--purple-brand);
+        font-family: 'Courier New', Courier, monospace; font-weight: 700; font-size: 0.75rem;
+        padding: 6px 12px; border-radius: 8px; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    /* Zona Drag & Drop Premium */
+    .upload-zone {
+        border: 2px dashed #CBD5E1; border-radius: 20px; padding: 40px 20px;
+        text-align: center; cursor: pointer; transition: all 0.3s ease;
+        background: #FFFFFF; position: relative;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+        border-color: var(--purple-brand); background: #F5F3FF;
+    }
+    .upload-zone i { color: #94A3B8; transition: all 0.3s ease; }
+    .upload-zone:hover i, .upload-zone.dragover i { color: var(--purple-brand); transform: translateY(-5px); }
+    
+    .upload-title { color: var(--text-main); font-weight: 700; font-size: 1.1rem; margin-top: 15px; margin-bottom: 5px; transition: color 0.3s ease;}
+    .upload-subtitle { color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
+
+    /* Estado de Archivo Seleccionado */
+    .upload-zone.has-file { border-style: solid; border-color: #10B981; background: #ECFDF5; }
+    .upload-zone.has-file i { color: #10B981; transform: none; }
+    .upload-zone.has-file .upload-title { color: #059669; }
+
+    /* Botón Principal */
+    .btn-premium {
+        background: var(--purple-brand); color: white !important; border: none; border-radius: 14px;
+        padding: 0 24px; height: 54px; font-weight: 700; font-size: 1rem; display: flex; width: 100%;
+        align-items: center; justify-content: center; gap: 10px; transition: var(--transition-spring); 
+        box-shadow: 0 8px 20px var(--purple-glow); margin-top: 25px;
+    }
+    .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 12px 25px var(--purple-glow); }
+    .btn-premium:disabled { background: #94A3B8; box-shadow: none; transform: none; cursor: not-allowed; }
+
+    /* Link Volver */
+    .back-link {
+        display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted);
+        font-weight: 600; font-size: 0.9rem; text-decoration: none; transition: all 0.2s;
+        margin-top: 20px;
+    }
+    .back-link:hover { color: var(--text-main); transform: translateX(-4px); }
+</style>
+
 <div class="container py-5">
-    <div class="card border-0 shadow-lg mx-auto" style="border-radius: 30px; max-width: 700px;">
-        <div class="card-body p-5">
-            <div class="text-center mb-4">
-                <div class="mx-auto mb-3" style="width: 80px; height: 80px; background: rgba(176, 154, 222, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--purple-brand);">
-                    <i class="fa-solid fa-file-excel fa-3x"></i>
-                </div>
-                <h2 class="fw-bold">Importación Masiva</h2>
-                <p class="text-muted">Sube tu archivo Excel con la base de datos de pacientes.</p>
+    <div class="import-card stagger-1">
+        
+        <div class="text-center stagger-2">
+            <div class="icon-header">
+                <i class="fa-solid fa-file-excel"></i>
             </div>
+            <h2 class="title-gradient">Importación Masiva</h2>
+            <p class="text-muted fw-medium mb-4">Sube tu archivo Excel para registrar múltiples pacientes al instante.</p>
+        </div>
 
-            <div class="alert alert-info border-0 rounded-4 mb-4" style="background: #f0f7ff;">
-                <h6 class="fw-bold"><i class="fa-solid fa-circle-info me-2"></i>Formato del archivo:</h6>
-                <small>El Excel debe contener las siguientes columnas exactas:</small>
-                <div class="mt-2">
-                    <span class="badge bg-white text-dark border me-1">dni</span>
-                    <span class="badge bg-white text-dark border me-1">nombre_completo</span>
-                    <span class="badge bg-white text-dark border me-1">correo</span>
-                    <span class="badge bg-white text-dark border">telefono</span>
-                </div>
+        <div class="instructions-box stagger-2">
+            <div class="instructions-title">
+                <i class="fa-solid fa-circle-info text-primary"></i> Estructura requerida del archivo
             </div>
-
-            <form method="POST" enctype="multipart/form-data" id="uploadForm">
-                {% csrf_token %}
-                <div class="upload-container mb-4">
-                    <input type="file" name="archivo_excel" id="fileInput" class="d-none" accept=".xlsx, .xls">
-                    <label for="fileInput" class="w-100 p-5 text-center border-dashed rounded-4" style="border: 2px dashed #b09ade; cursor: pointer; transition: 0.3s;" id="dropZone">
-                        <i class="fa-solid fa-cloud-arrow-up fa-2x mb-3" style="color: #b09ade;"></i>
-                        <p class="mb-0 fw-bold" id="fileName">Haz clic para buscar o arrastra el archivo aquí</p>
-                        <p class="small text-muted">Solo archivos .xlsx o .xls</p>
-                    </label>
-                </div>
-
-                <button type="submit" class="btn w-100 py-3 rounded-pill text-white fw-bold shadow-sm" style="background: var(--purple-brand);">
-                    Iniciar Procesamiento Masivo <i class="fa-solid fa-bolt ms-2"></i>
-                </button>
-            </form>
-
-            <div class="text-center mt-4">
-                <a href="{% url 'lista_pacientes' %}" class="text-decoration-none text-muted small">Volver al listado</a>
+            <span class="text-muted" style="font-size: 0.85rem;">La primera fila del archivo Excel (.xlsx o .xls) debe contener exactamente las siguientes cabeceras:</span>
+            <div class="d-flex flex-wrap gap-2 mt-1">
+                <span class="badge-column">dni</span>
+                <span class="badge-column">nombre_completo</span>
+                <span class="badge-column">correo</span>
+                <span class="badge-column">telefono</span>
             </div>
         </div>
+
+        <form method="POST" enctype="multipart/form-data" id="uploadForm" class="stagger-3">
+            {% csrf_token %}
+            
+            <input type="file" name="archivo_excel" id="fileInput" class="d-none" accept=".xlsx, .xls">
+            
+            <label for="fileInput" class="upload-zone w-100" id="dropZone">
+                <i class="fa-solid fa-cloud-arrow-up fa-3x" id="uploadIcon"></i>
+                <h4 class="upload-title" id="fileName">Arrastra tu archivo aquí o haz clic</h4>
+                <p class="upload-subtitle" id="fileSubtitle">Soporta formatos .xlsx y .xls (Max. 10MB)</p>
+            </label>
+
+            <button type="submit" class="btn-premium" id="submitBtn" disabled>
+                Procesar Base de Datos <i class="fa-solid fa-bolt ms-1"></i>
+            </button>
+        </form>
+
+        <div class="text-center stagger-3">
+            <a href="{% url 'lista_pacientes' %}" class="back-link">
+                <i class="fa-solid fa-arrow-left"></i> Volver al Directorio
+            </a>
+        </div>
+        
     </div>
 </div>
 
 <script>
-    const fileInput = document.getElementById('fileInput');
-    const fileNameDisplay = document.getElementById('fileName');
-    const dropZone = document.getElementById('dropZone');
+    document.addEventListener("DOMContentLoaded", function() {
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileName');
+        const fileSubtitle = document.getElementById('fileSubtitle');
+        const dropZone = document.getElementById('dropZone');
+        const uploadIcon = document.getElementById('uploadIcon');
+        const submitBtn = document.getElementById('submitBtn');
+        const uploadForm = document.getElementById('uploadForm');
 
-    fileInput.addEventListener('change', function() {
-        if(this.files.length > 0) {
-            fileNameDisplay.innerText = "Archivo listo: " + this.files[0].name;
-            dropZone.style.background = "#f8f4ff";
-            dropZone.style.borderColor = "var(--purple-brand)";
-        }
-    });
+        // Manejo de la selección de archivo
+        fileInput.addEventListener('change', function() {
+            if(this.files.length > 0) {
+                const file = this.files[0];
+                fileNameDisplay.innerText = file.name;
+                fileSubtitle.innerText = `Tamaño: ${(file.size / 1024).toFixed(1)} KB`;
+                
+                // Cambiar apariencia a "Éxito"
+                dropZone.classList.add('has-file');
+                uploadIcon.classList.remove('fa-cloud-arrow-up');
+                uploadIcon.classList.add('fa-file-circle-check');
+                
+                // Habilitar botón
+                submitBtn.disabled = false;
+            } else {
+                resetDropZone();
+            }
+        });
 
-    // Efecto visual al arrastrar
-    ['dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, e => {
+        // Efectos Visuales Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
             e.preventDefault();
-            if (eventName === 'dragover') dropZone.style.background = "#f8f4ff";
-            else dropZone.style.background = "transparent";
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            
+            if(files.length > 0) {
+                // Validar extensión
+                const fileName = files[0].name;
+                if(fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event('change'));
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '<span style="font-family: \'Poppins\', sans-serif; font-weight: 800; color: #111827;">Formato Inválido</span>',
+                        html: '<span style="font-family: \'Poppins\', sans-serif; color: #6B7280; font-weight: 500;">Por favor, sube únicamente archivos de Excel (.xlsx o .xls).</span>',
+                        confirmButtonColor: '#7C3AED',
+                        customClass: { popup: 'rounded-4 shadow-lg border-0', confirmButton: 'btn rounded-3 px-4 py-2 fw-bold shadow-sm' },
+                        buttonsStyling: false
+                    });
+                }
+            }
+        });
+
+        function resetDropZone() {
+            fileNameDisplay.innerText = "Arrastra tu archivo aquí o haz clic";
+            fileSubtitle.innerText = "Soporta formatos .xlsx y .xls (Max. 10MB)";
+            dropZone.classList.remove('has-file');
+            uploadIcon.classList.remove('fa-file-circle-check');
+            uploadIcon.classList.add('fa-cloud-arrow-up');
+            submitBtn.disabled = true;
+        }
+
+        // Pop-up de Procesamiento al enviar el formulario
+        uploadForm.addEventListener('submit', function(e) {
+            // No prevenimos el default porque queremos que el form se envíe
+            // Pero mostramos el sweet alert de carga
+            Swal.fire({
+                title: `<span style="font-family: 'Poppins', sans-serif; font-weight: 800; color: #111827;">Procesando Datos...</span>`,
+                html: `<span style="font-family: 'Poppins', sans-serif; color: #6B7280; font-weight: 500;">Leyendo el archivo Excel e importando pacientes. Por favor no cierres esta ventana.</span>`,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                customClass: {
+                    popup: 'rounded-4 shadow-lg border-0'
+                }
+            });
+            // Deshabilitar botón para evitar doble submit
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Procesando... <i class="fa-solid fa-spinner fa-spin ms-1"></i>';
         });
     });
 </script>
