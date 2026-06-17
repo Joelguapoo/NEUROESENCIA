@@ -27,6 +27,9 @@ SECRET_KEY = 'django-insecure-#7lvl6d()!o^sbz-ug3jr)w__jqd^z4up)3bg_mt9jh48e-0k^
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://neuroesencia-production.up.railway.app',
+]
 
 
 # Application definition
