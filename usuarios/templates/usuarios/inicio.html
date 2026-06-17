@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{% static 'IMG/Logo.png' %}" type="image/x-icon">
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
+
     <title>NeuroEsencia | Psicología Especializada del Futuro</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,26 +23,24 @@
                     fontFamily: { sans: ['Inter', 'sans-serif'], },
                     colors: {
                         brand: {
-                            dark: '#2a1f45',   /* Morado oscuro de tu Dashboard */
-                            light: '#4c3b73',  /* Morado medio */
-                            pastel: '#b09ade', /* Morado claro/pastel */
-                            accent: '#20c997', /* Verde menta del robot/UI */
+                            dark: '#2a1f45',
+                            light: '#4c3b73',
+                            pastel: '#b09ade',
+                            accent: '#20c997',
                         }
                     },
                     animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'blob': 'blob 7s infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'blob': 'blob 15s infinite alternate',
                     },
                     keyframes: {
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
+                            '50%': { transform: 'translateY(-15px)' },
                         },
                         blob: {
                             '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '50%': { transform: 'translate(20px, -30px) scale(1.1)' },
                             '100%': { transform: 'translate(0px, 0px) scale(1)' },
                         }
                     }
@@ -51,30 +50,87 @@
     </script>
 
     <style>
-        /* Efectos de cristal y futuristas */
-        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
-        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.3); }
-        .glass-dark { background: rgba(42, 31, 69, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(176, 154, 222, 0.2); }
-        .gradient-text { background: linear-gradient(135deg, #2a1f45, #20c997); -webkit-background-clip: text; color: transparent; }
-        .blob-bg { position: absolute; filter: blur(90px); z-index: -1; opacity: 0.5; mix-blend-mode: multiply; }
+        /* Pantalla de carga ultrarrápida */
+        #preloader {
+            position: fixed; inset: 0; background: #2a1f45; z-index: 99999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.4s ease, visibility 0.4s;
+        }
+        body.loaded #preloader { opacity: 0; visibility: hidden; }
+
+        /* Efectos de cristal optimizados (menor desenfoque para mejor rendimiento) */
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.8); 
+        }
+        .glass-nav { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px); 
+            border-bottom: 1px solid rgba(255,255,255,0.4); 
+        }
+        .glass-dark { 
+            background: rgba(42, 31, 69, 0.85); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(176, 154, 222, 0.2); 
+        }
         
-        /* Ocultar scrollbar pero permitir scroll */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #b09ade; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4c3b73; }
+        /* Rendimiento de hardware para fondos */
+        .blob-bg { 
+            filter: blur(80px); 
+            will-change: transform; 
+            opacity: 0.5; 
+        }
+        
+        /* Cursor Personalizado Acelerado por Hardware */
+        @media (pointer: fine) {
+            body { cursor: none; }
+            .cursor-dot {
+                width: 6px; height: 6px; background: #20c997; border-radius: 50%;
+                position: fixed; pointer-events: none; z-index: 100000;
+                top: 0; left: 0;
+                will-change: transform;
+            }
+            .cursor-outline {
+                width: 36px; height: 36px; border: 1.5px solid rgba(32, 201, 151, 0.6); border-radius: 50%;
+                position: fixed; pointer-events: none; z-index: 99999;
+                top: 0; left: 0;
+                transition: width 0.2s, height 0.2s, background-color 0.2s, transform 0.1s ease-out;
+                will-change: transform, width, height;
+            }
+            body:has(a:hover, button:hover) .cursor-outline,
+            body:has(.interactive:hover) .cursor-outline {
+                width: 50px; height: 50px; background: rgba(32, 201, 151, 0.15); border-color: #20c997;
+            }
+        }
+
+        html.lenis { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        ::-webkit-scrollbar { width: 0px; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased overflow-x-hidden selection:bg-brand-accent selection:text-white">
+<body class="bg-[#f8f9fa] text-slate-800 antialiased overflow-x-hidden selection:bg-brand-accent selection:text-white">
 
-    <nav class="glass-nav fixed w-full top-0 z-50 transition-all duration-500" id="navbar">
+    <div id="preloader">
+        <i class="fa-solid fa-brain text-5xl text-brand-accent animate-pulse"></i>
+    </div>
+
+    <div class="cursor-dot hidden md:block" id="cursor-dot"></div>
+    <div class="cursor-outline hidden md:block" id="cursor-outline"></div>
+
+    <nav class="glass-nav fixed w-full top-0 z-50 transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="{% url 'inicio' %}" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 bg-gradient-to-br from-brand-pastel to-brand-light rounded-xl flex items-center justify-center text-white shadow-lg shadow-brand-pastel/50 group-hover:scale-105 transition-transform duration-300">
+                    <div class="w-10 h-10 bg-gradient-to-br from-brand-pastel to-brand-light rounded-xl flex items-center justify-center text-white shadow-lg group-hover:rotate-6 transition-transform duration-300">
                         <i class="fa-solid fa-brain text-xl"></i>
                     </div>
-                    <span class="font-bold text-2xl text-brand-dark tracking-tight">Neuro<span class="text-brand-accent">Esencia</span></span>
+                    <span class="font-extrabold text-2xl text-brand-dark tracking-tight">Neuro<span class="text-brand-accent">Esencia</span></span>
                 </a>
 
                 <div class="hidden md:flex items-center space-x-8">
@@ -82,49 +138,63 @@
                     <a href="#conoce-mas" class="text-slate-500 font-medium hover:text-brand-dark transition-colors">Especialista</a>
                     <a href="#ecosistema" class="text-slate-500 font-medium hover:text-brand-dark transition-colors">Plataforma</a>
                     
-                    <a href="{% url 'iniciar_sesion' %}" class="relative inline-flex items-center justify-center px-6 py-2.5 overflow-hidden font-bold text-white rounded-full group">
-                        <span class="absolute w-full h-full bg-brand-dark group-hover:bg-brand-light transition-colors duration-300 ease-out"></span>
-                        <span class="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-black"></span>
-                        <span class="relative flex items-center gap-2">
-                            Ingresar <i class="fa-solid fa-arrow-right-to-bracket text-brand-accent"></i>
+                    <a href="{% url 'iniciar_sesion' %}" class="relative inline-flex items-center justify-center px-6 py-2.5 font-bold text-white bg-brand-dark rounded-full hover:bg-brand-accent transition-colors duration-300 hover:shadow-lg hover:-translate-y-0.5 transform">
+                        <span class="flex items-center gap-2">
+                            Ingresar <i class="fa-solid fa-arrow-right-to-bracket"></i>
                         </span>
                     </a>
                 </div>
+
+                <button id="mobile-menu-btn" class="md:hidden text-brand-dark text-2xl p-2 focus:outline-none">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-screen flex items-center">
-        <div class="absolute inset-0 w-full h-full bg-slate-50 overflow-hidden z-0">
-            <div class="absolute top-0 -left-4 w-96 h-96 bg-brand-pastel rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-            <div class="absolute top-0 -right-4 w-96 h-96 bg-brand-accent rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-            <div class="absolute -bottom-8 left-20 w-96 h-96 bg-brand-light rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div> </div>
+    <div id="mobile-menu" class="fixed inset-0 bg-brand-dark/95 backdrop-blur-md z-40 transform translate-x-full transition-transform duration-300 flex flex-col justify-center items-center">
+        <button id="close-menu-btn" class="absolute top-6 right-6 text-white text-3xl hover:text-brand-accent">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="flex flex-col items-center gap-6 text-xl font-bold text-white">
+            <a href="{% url 'inicio' %}" class="mobile-link">Inicio</a>
+            <a href="#conoce-mas" class="mobile-link">Especialista</a>
+            <a href="#ecosistema" class="mobile-link">Plataforma</a>
+            <a href="{% url 'iniciar_sesion' %}" class="mt-4 px-6 py-3 bg-brand-accent text-brand-dark rounded-full mobile-link">Ingresar</a>
+        </div>
+    </div>
+
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-[90vh] flex items-center">
+        <div class="absolute inset-0 w-full h-full bg-[#f8f9fa] overflow-hidden z-0">
+            <div class="absolute -top-[10%] -left-[10%] w-[40vw] h-[40vw] bg-brand-pastel rounded-full blob-bg animate-blob"></div>
+            <div class="absolute top-[20%] -right-[10%] w-[40vw] h-[40vw] bg-brand-accent rounded-full blob-bg animate-blob" style="animation-delay: -5s;"></div>
+            <div class="absolute -bottom-[20%] left-[20%] w-[50vw] h-[50vw] bg-brand-light/50 rounded-full blob-bg animate-blob" style="animation-delay: -10s;"></div>
+        </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-            <div class="text-center max-w-4xl mx-auto" data-aos="zoom-y-out" data-aos-duration="1000">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 border border-brand-accent/30 shadow-sm mb-8 backdrop-blur-md" data-aos="fade-down" data-aos-delay="200">
-                    <span class="flex h-3 w-3 relative">
+            <div class="text-center max-w-4xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel shadow-sm mb-8" data-aos="fade-down">
+                    <span class="flex h-2.5 w-2.5 relative">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-accent"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-accent"></span>
                     </span>
-                    <span class="text-sm font-semibold text-brand-dark">La evolución del bienestar mental</span>
+                    <span class="text-xs font-bold text-brand-dark uppercase">Evolución del bienestar</span>
                 </div>
                 
-                <h1 class="text-5xl md:text-6xl lg:text-7xl font-extrabold text-brand-dark tracking-tight mb-8 leading-tight">
-                    Conecta con tu mente. <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-dark via-brand-light to-brand-accent">Transforma tu vida.</span>
+                <h1 class="text-5xl md:text-7xl font-black text-brand-dark tracking-tight mb-6 leading-[1.1]" data-aos="fade-up" data-aos-delay="100">
+                    Conecta con tu mente.<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-light to-brand-accent">Transforma tu vida.</span>
                 </h1>
                 
-                <p class="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="400">
-                    Atención psicológica clínica con tecnología de punta. Accede a tu portal privado, monitorea tus emociones y recibe el acompañamiento que mereces, todo desde un solo lugar.
+                <p class="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
+                    Atención psicológica clínica con tecnología de punta. Accede a tu portal privado y recibe el acompañamiento que mereces desde un solo lugar.
                 </p>
                 
-                <div class="flex flex-col sm:flex-row gap-4 justify-center" data-aos="fade-up" data-aos-delay="600">
-                    <a href="{% url 'iniciar_sesion' %}" class="bg-brand-dark text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl shadow-brand-dark/20 hover:shadow-brand-accent/40 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 border border-brand-light">
+                <div class="flex flex-col sm:flex-row gap-4 justify-center" data-aos="fade-up" data-aos-delay="300">
+                    <a href="{% url 'iniciar_sesion' %}" class="bg-brand-dark text-white px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-brand-accent/40 hover:-translate-y-1 hover:bg-brand-light transition-all duration-300 flex items-center justify-center gap-3">
                         Agendar Sesión <i class="fa-solid fa-calendar-check text-brand-accent"></i>
                     </a>
-                    <a href="#ecosistema" class="glass-panel text-brand-dark px-8 py-4 rounded-full font-bold text-lg hover:bg-white transition-all duration-300 flex items-center justify-center gap-3">
+                    <a href="#ecosistema" class="glass-panel text-brand-dark px-8 py-4 rounded-full font-bold hover:bg-white/90 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
                         Ver Plataforma <i class="fa-solid fa-microchip"></i>
                     </a>
                 </div>
@@ -132,195 +202,237 @@
         </div>
     </section>
 
-    <section id="ecosistema" class="py-24 relative z-10 bg-white">
+    <section id="ecosistema" class="py-24 relative z-10 bg-white rounded-t-[2.5rem] -mt-8 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-brand-accent font-bold tracking-widest uppercase text-sm mb-3"><i class="fa-solid fa-network-wired"></i> Tu Ecosistema Personal</h2>
-                <h3 class="text-4xl font-extrabold text-brand-dark">Mucho más que una consulta</h3>
-                <p class="mt-4 text-slate-500 max-w-2xl mx-auto text-lg">Al agendar tu cita, obtienes acceso exclusivo a nuestro panel inteligente diseñado para potenciar tu proceso terapéutico.</p>
+                <h2 class="text-brand-accent font-bold uppercase text-xs mb-3 tracking-widest">Tu Ecosistema Personal</h2>
+                <h3 class="text-4xl md:text-5xl font-black text-brand-dark">Mucho más que una consulta</h3>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 shadow-lg hover:shadow-2xl hover:shadow-brand-pastel/20 transition-all duration-500 group" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center text-2xl text-brand-dark mb-6 group-hover:scale-110 group-hover:bg-brand-dark group-hover:text-white transition-all">
+                <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-xl transition-shadow duration-300 group" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-2xl text-brand-dark mb-6 shadow-sm group-hover:text-brand-accent transition-colors">
                         <i class="fa-solid fa-laptop-medical"></i>
                     </div>
                     <h4 class="text-xl font-bold text-brand-dark mb-3">Portal Paciente 24/7</h4>
-                    <p class="text-slate-600 leading-relaxed">Accede a un dashboard intuitivo donde podrás gestionar tus citas, revisar recomendaciones de tu especialista y ver tu historial clínico con total seguridad.</p>
+                    <p class="text-slate-600">Accede a un dashboard intuitivo donde podrás gestionar tus citas y revisar recomendaciones de tu especialista.</p>
                 </div>
 
-                <div class="bg-gradient-to-br from-brand-dark to-brand-light rounded-3xl p-8 shadow-2xl relative overflow-hidden group transform md:-translate-y-4" data-aos="fade-up" data-aos-delay="200">
-                    <div class="absolute top-0 right-0 p-6 opacity-10 text-9xl text-white group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700">
+                <div class="bg-gradient-to-br from-brand-dark to-brand-light rounded-3xl p-8 shadow-xl relative overflow-hidden transform md:-translate-y-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="absolute top-0 right-0 p-6 opacity-10 text-8xl text-white">
                         <i class="fa-solid fa-robot"></i>
                     </div>
-                    <div class="w-14 h-14 bg-brand-accent/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl text-brand-accent mb-6">
+                    <div class="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl text-brand-accent mb-6">
                         <i class="fa-solid fa-face-smile-beam"></i>
                     </div>
-                    <h4 class="text-xl font-bold text-white mb-3">Panel Biométrico IA</h4>
-                    <p class="text-brand-pastel leading-relaxed">Conoce a nuestro asistente virtual. Registra tu nivel de energía vital y tu emoción dominante para un análisis en tiempo real que optimiza cada sesión.</p>
+                    <h4 class="text-xl font-bold text-white mb-3 relative z-10">Panel Biométrico IA</h4>
+                    <p class="text-brand-pastel relative z-10">Conoce a nuestro asistente virtual. Registra tu energía vital para un análisis en tiempo real.</p>
                 </div>
 
-                <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 shadow-lg hover:shadow-2xl hover:shadow-brand-accent/20 transition-all duration-500 group" data-aos="fade-up" data-aos-delay="300">
-                    <div class="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center text-2xl text-brand-dark mb-6 group-hover:scale-110 group-hover:bg-brand-accent group-hover:text-white transition-all">
+                <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:shadow-xl transition-shadow duration-300 group" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-2xl text-brand-dark mb-6 shadow-sm group-hover:text-brand-accent transition-colors">
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
                     <h4 class="text-xl font-bold text-brand-dark mb-3">Privacidad Absoluta</h4>
-                    <p class="text-slate-600 leading-relaxed">Tu información está cifrada. Un espacio seguro, confidencial y libre de juicios, diseñado con los estándares más altos de seguridad digital.</p>
+                    <p class="text-slate-600">Tu información está cifrada. Un espacio seguro, confidencial y libre de juicios, altamente protegido.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="py-20 relative z-10 bg-slate-50">
+    <section class="py-20 bg-[#f8f9fa]">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="glass-dark rounded-[2.5rem] p-10 md:p-14 text-center relative overflow-hidden shadow-2xl shadow-brand-dark/40" data-aos="zoom-in">
-                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-pastel via-brand-accent to-brand-pastel"></div>
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-brand-accent opacity-20 rounded-full blur-3xl"></div>
+            <div class="glass-dark rounded-[2.5rem] p-10 md:p-16 text-center relative overflow-hidden shadow-2xl shadow-brand-dark/30" data-aos="zoom-in">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-brand-pastel via-brand-accent to-brand-pastel"></div>
+                <div class="absolute -top-20 -right-20 w-64 h-64 bg-brand-accent opacity-20 rounded-full blur-[60px]"></div>
                 
-                <h3 class="text-brand-pastel font-bold tracking-widest uppercase text-sm mb-2">Inversión en tu Salud Mental</h3>
-                <h4 class="text-3xl md:text-5xl font-extrabold text-white mb-6">Tarifa Única y Transparente</h4>
+                <h3 class="text-brand-pastel font-bold uppercase text-xs mb-3 tracking-widest">Inversión en tu Salud</h3>
+                <h4 class="text-3xl md:text-5xl font-black text-white mb-6">Tarifa Única</h4>
                 
-                <div class="flex items-end justify-center gap-2 mb-6">
-                    <span class="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-brand-pastel">$50.000</span>
-                    <span class="text-xl text-brand-accent font-bold mb-2 md:mb-4">COP</span>
-                    <span class="text-slate-400 font-medium mb-2 md:mb-4">/ sesión</span>
+                <div class="flex items-end justify-center gap-2 mb-8">
+                    <span class="text-6xl md:text-8xl font-black text-white">$50K</span>
+                    <div class="text-left pb-2 md:pb-4">
+                        <span class="block text-xl text-brand-accent font-bold leading-none">COP</span>
+                        <span class="block text-sm text-slate-400">/ sesión</span>
+                    </div>
                 </div>
                 
                 <p class="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-                    Sin suscripciones ocultas ni letras pequeñas. Paga solo por el acompañamiento que necesitas y obtén <strong class="text-white">acceso total gratuito</strong> a todas las herramientas tecnológicas de nuestro portal.
+                    Sin letras pequeñas. Paga por el acompañamiento y obtén <strong class="text-white">acceso gratuito</strong> a nuestras herramientas tecnológicas.
                 </p>
                 
-                <a href="{% url 'iniciar_sesion' %}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-brand-dark bg-brand-accent rounded-full hover:bg-white hover:scale-105 transition-all duration-300 shadow-lg shadow-brand-accent/30 gap-3">
+                <a href="{% url 'iniciar_sesion' %}" class="inline-flex items-center px-8 py-4 font-bold text-brand-dark bg-brand-accent rounded-full hover:bg-white hover:-translate-y-1 transition-transform shadow-lg gap-3">
                     Empezar mi proceso hoy <i class="fa-solid fa-arrow-right"></i>
                 </a>
             </div>
         </div>
     </section>
 
-    <section id="conoce-mas" class="py-24 bg-white relative z-10 overflow-hidden">
+    <section id="conoce-mas" class="py-24 bg-white relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="relative" data-aos="fade-right">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-brand-accent to-brand-dark rounded-[2.5rem] transform translate-x-4 translate-y-4 opacity-20"></div>
+                    <div class="absolute inset-0 bg-brand-accent rounded-[2rem] transform translate-x-4 translate-y-4 opacity-20"></div>
                     <img src="{% static 'IMG/IMG_20250615_142717.jpg' %}" alt="Alejandra - Psicóloga" 
-                         class="relative rounded-[2rem] w-full h-[600px] object-cover shadow-2xl z-10 border-4 border-white"
+                         class="w-full h-[500px] md:h-[600px] object-cover rounded-[2rem] shadow-xl relative z-10 border-4 border-white"
                          onerror="this.src='https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'">
                     
-                    <div class="absolute -bottom-8 -left-8 glass-panel p-6 rounded-2xl shadow-xl z-20 animate-float hidden md:block border border-white/40">
-                        <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 bg-brand-dark rounded-full flex items-center justify-center text-brand-accent text-2xl shadow-inner">
-                                <i class="fa-solid fa-award"></i>
-                            </div>
-                            <div>
-                                <p class="text-3xl font-extrabold text-brand-dark">+10</p>
-                                <p class="text-sm font-bold text-brand-light uppercase tracking-wider">Años de Exp.</p>
-                            </div>
+                    <div class="absolute -bottom-6 -left-6 glass-panel p-5 rounded-2xl shadow-xl z-20 animate-float hidden md:flex items-center gap-4 border border-white/60">
+                        <div class="w-12 h-12 bg-brand-dark rounded-full flex items-center justify-center text-brand-accent text-xl">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-brand-dark leading-none">+10</p>
+                            <p class="text-[10px] font-bold text-brand-light uppercase tracking-wider">Años de Exp.</p>
                         </div>
                     </div>
                 </div>
 
                 <div data-aos="fade-left">
-                    <h2 class="text-sm font-bold text-brand-accent uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <h2 class="text-xs font-bold text-brand-accent uppercase tracking-widest mb-3 flex items-center gap-2">
                         <i class="fa-solid fa-user-doctor"></i> Dirección Clínica
                     </h2>
-                    <h3 class="text-4xl font-extrabold text-brand-dark mb-6">Hola, soy Alejandra</h3>
-                    <p class="text-slate-600 text-lg mb-6 leading-relaxed">
-                        Psicóloga y Magíster en Neuropsicología y Educación. He integrado mi experiencia en acompañamiento clínico con las mejores herramientas digitales para ofrecerte un espacio de crecimiento real, accesible y moderno.
+                    <h3 class="text-4xl md:text-5xl font-black text-brand-dark mb-6">Hola, soy Alejandra</h3>
+                    <p class="text-slate-600 text-lg mb-6">
+                        Psicóloga y Magíster en Neuropsicología y Educación. He integrado mi experiencia clínica con herramientas digitales para ofrecerte un espacio moderno y accesible.
                     </p>
-                    <blockquote class="relative p-6 bg-slate-50 rounded-2xl border-l-4 border-brand-accent my-8 italic text-slate-700 text-lg shadow-sm">
-                        <i class="fa-solid fa-quote-left absolute top-4 right-4 text-brand-pastel/30 text-4xl"></i>
-                        "El vínculo terapéutico es fundamental. Combino la empatía humana con tecnología para ayudarte a reconectar con aquello que le da sentido a tu vida de una forma innovadora."
+                    
+                    <blockquote class="p-6 bg-slate-50 rounded-xl border-l-4 border-brand-accent my-8 text-slate-700 italic">
+                        "Combino la empatía humana con tecnología para ayudarte a reconectar con lo que le da sentido a tu vida."
                     </blockquote>
-                    <ul class="space-y-4 mb-8 text-slate-700 font-medium">
-                        <li class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-slate-100"><div class="w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-brand-accent"><i class="fa-solid fa-brain"></i></div> Enfoque en educación y neurodesarrollo</li>
-                        <li class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm border border-slate-100"><div class="w-8 h-8 rounded-full bg-brand-accent/20 flex items-center justify-center text-brand-accent"><i class="fa-solid fa-heart-pulse"></i></div> Terapias adaptadas a tu ritmo de vida</li>
+                    
+                    <ul class="space-y-4 text-slate-700 font-medium">
+                        <li class="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                            <div class="text-brand-accent w-6"><i class="fa-solid fa-brain"></i></div> Enfoque en educación y neurodesarrollo
+                        </li>
+                        <li class="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
+                            <div class="text-brand-accent w-6"><i class="fa-solid fa-heart-pulse"></i></div> Terapias adaptadas a tu ritmo
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="bg-brand-dark text-slate-300 py-16 border-t border-brand-light relative z-10 overflow-hidden">
-        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+    <footer class="bg-brand-dark text-slate-300 py-16 border-t border-brand-light/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-12 mb-12">
                 <div>
                     <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 bg-brand-accent rounded-xl flex items-center justify-center text-brand-dark shadow-lg shadow-brand-accent/20">
-                            <i class="fa-solid fa-brain text-xl"></i>
+                        <div class="w-10 h-10 bg-brand-accent rounded-xl flex items-center justify-center text-brand-dark">
+                            <i class="fa-solid fa-brain"></i>
                         </div>
-                        <span class="font-bold text-2xl text-white">Neuro<span class="text-brand-accent">Esencia</span></span>
+                        <span class="font-black text-2xl text-white">Neuro<span class="text-brand-accent">Esencia</span></span>
                     </div>
-                    <p class="text-sm leading-relaxed mb-6 text-slate-400">
-                        La primera clínica psicológica digital que fusiona el calor del acompañamiento humano con el poder de la tecnología para tu bienestar integral.
+                    <p class="text-sm text-slate-400">
+                        La clínica psicológica digital que fusiona el acompañamiento humano con tecnología.
                     </p>
                 </div>
 
                 <div>
-                    <h4 class="text-white font-bold text-lg mb-6">Contacto y Soporte</h4>
-                    <ul class="space-y-4 text-sm">
-                        <li class="flex items-start gap-3 hover:text-brand-accent transition-colors cursor-pointer">
-                            <div class="w-8 h-8 rounded-full bg-brand-light flex items-center justify-center text-brand-pastel"><i class="fa-solid fa-phone"></i></div>
-                            <span class="mt-1">+57 312 323 9944</span>
-                        </li>
-                        <li class="flex items-start gap-3 hover:text-brand-accent transition-colors cursor-pointer">
-                            <div class="w-8 h-8 rounded-full bg-brand-light flex items-center justify-center text-brand-pastel"><i class="fa-solid fa-envelope"></i></div>
-                            <span class="mt-1">NeuroEsencia@gmail.com</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-brand-light flex items-center justify-center text-brand-pastel"><i class="fa-solid fa-globe"></i></div>
-                            <span class="mt-1">Atención Virtual Especializada</span>
-                        </li>
+                    <h4 class="text-white font-bold mb-6">Contacto y Soporte</h4>
+                    <ul class="space-y-4 text-sm text-slate-400">
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-brand-pastel w-4"></i> +57 312 323 9944</li>
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-envelope text-brand-pastel w-4"></i> NeuroEsencia@gmail.com</li>
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-globe text-brand-pastel w-4"></i> Atención Virtual Especializada</li>
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="text-white font-bold text-lg mb-6">Accesos Rápidos</h4>
-                    <ul class="space-y-3">
-                        <li><a href="{% url 'iniciar_sesion' %}" class="flex items-center gap-2 text-slate-400 hover:text-brand-accent transition-colors group"><i class="fa-solid fa-arrow-right text-xs transform group-hover:translate-x-1 transition-transform"></i> Ingreso de Pacientes</a></li>
-                        <li><a href="{% url 'iniciar_sesion' %}" class="flex items-center gap-2 text-slate-400 hover:text-brand-accent transition-colors group"><i class="fa-solid fa-arrow-right text-xs transform group-hover:translate-x-1 transition-transform"></i> Panel de Administración</a></li>
-                        <li><a href="#ecosistema" class="flex items-center gap-2 text-slate-400 hover:text-brand-accent transition-colors group"><i class="fa-solid fa-arrow-right text-xs transform group-hover:translate-x-1 transition-transform"></i> Conoce la Plataforma</a></li>
+                    <h4 class="text-white font-bold mb-6">Accesos Rápidos</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="{% url 'iniciar_sesion' %}" class="text-slate-400 hover:text-brand-accent transition-colors">Ingreso de Pacientes</a></li>
+                        <li><a href="{% url 'iniciar_sesion' %}" class="text-slate-400 hover:text-brand-accent transition-colors">Panel de Administración</a></li>
+                        <li><a href="#ecosistema" class="text-slate-400 hover:text-brand-accent transition-colors">Conoce la Plataforma</a></li>
                     </ul>
                 </div>
             </div>
 
-            <div class="border-t border-brand-light/50 pt-8 text-center text-sm flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="border-t border-brand-light/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
                 <p class="text-slate-500">&copy; 2026 NeuroEsencia. Todos los derechos reservados.</p>
                 <div class="flex gap-4">
-                    <a href="#" class="w-10 h-10 rounded-full bg-brand-light flex items-center justify-center hover:bg-brand-accent hover:text-brand-dark hover:scale-110 transition-all shadow-lg"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-brand-light flex items-center justify-center hover:bg-brand-accent hover:text-brand-dark hover:scale-110 transition-all shadow-lg"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-brand-light/20 flex items-center justify-center hover:bg-brand-accent hover:text-brand-dark transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-brand-light/20 flex items-center justify-center hover:bg-brand-accent hover:text-brand-dark transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <a href="https://wa.me/573123239944" target="_blank" class="fixed bottom-8 right-8 z-50 group" data-aos="zoom-in" data-aos-delay="1000">
-        <div class="absolute inset-0 bg-[#25D366] rounded-full animate-ping opacity-75"></div>
-        <div class="relative bg-gradient-to-tr from-[#128C7E] to-[#25D366] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-2xl hover:scale-110 transition-transform duration-300 border-2 border-white">
+    <a href="https://wa.me/573123239944" target="_blank" class="fixed bottom-8 right-8 z-50 hover:scale-110 transition-transform">
+        <div class="absolute inset-0 bg-[#25D366] rounded-full animate-ping opacity-60"></div>
+        <div class="relative bg-[#25D366] text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-lg">
             <i class="fa-brands fa-whatsapp"></i>
         </div>
     </a>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Inicializar animaciones de scroll
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 100,
+        // 1. Quitar preloader inmediatamente al cargar
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
         });
 
-        // Efecto del Navbar al scrollear
+        // 2. AOS Optimizado (Animaciones más rápidas)
+        AOS.init({
+            duration: 600, // Tiempos cortos = se siente rápido
+            easing: 'ease-out',
+            once: true,
+            offset: 50,
+        });
+
+        // 3. Lenis Optimizado (Lerp bajo para respuesta inmediata pero suave)
+        const lenis = new Lenis({
+            lerp: 0.1, // Respuesta rápida
+            smoothWheel: true,
+            wheelMultiplier: 1,
+            touchMultiplier: 2,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+        lenis.on('scroll', () => AOS.refresh());
+
+        // 4. Navbar Compacto
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 20) {
-                nav.classList.add('shadow-lg');
-                nav.classList.add('py-2');
+                nav.classList.add('shadow-md', 'py-1');
             } else {
-                nav.classList.remove('shadow-lg');
-                nav.classList.remove('py-2');
+                nav.classList.remove('shadow-md', 'py-1');
             }
         });
+
+        // 5. Cursor Liviano (Aceleración CSS)
+        if (window.matchMedia("(pointer: fine)").matches) {
+            const cursorDot = document.getElementById('cursor-dot');
+            const cursorOutline = document.getElementById('cursor-outline');
+            
+            window.addEventListener('mousemove', (e) => {
+                const x = e.clientX;
+                const y = e.clientY;
+                // Usar translate3d fuerza a la tarjeta de video a procesarlo (0 lag)
+                cursorDot.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`;
+                cursorOutline.style.transform = `translate3d(calc(${x}px - 50%), calc(${y}px - 50%), 0)`;
+            });
+        }
+
+        // 6. Menú Móvil
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const links = document.querySelectorAll('.mobile-link');
+
+        function toggle() {
+            mobileMenu.classList.toggle('translate-x-full');
+            document.body.classList.toggle('overflow-hidden');
+        }
+
+        menuBtn.addEventListener('click', toggle);
+        closeMenuBtn.addEventListener('click', toggle);
+        links.forEach(l => l.addEventListener('click', toggle));
     </script>
 </body>
 </html>
