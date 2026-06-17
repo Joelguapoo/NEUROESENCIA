@@ -123,6 +123,20 @@
     .btn-guardar:disabled { opacity: 0.7; transform: none; cursor: not-allowed; box-shadow: none; }
 
     .divider { height: 1px; background: var(--border-color); margin: 30px 0; width: 100%; position: relative; z-index: 1; }
+
+    /* ==========================================================================
+       ESTILOS DEL BLOQUE DE ERRORES DEL BACKEND
+       ========================================================================== */
+    .backend-errors-alert {
+        background-color: #FEF2F2;
+        border: 1px solid #FECACA;
+        color: #991B1B;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        position: relative;
+        z-index: 1;
+    }
 </style>
 
 <div class="container-fluid py-4">
@@ -143,6 +157,25 @@
             </div>
 
             <div class="divider stagger-2"></div>
+
+            {% if form.errors %}
+            <div class="backend-errors-alert stagger-2">
+                <strong style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #7F1D1D; font-size: 0.95rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    No se pudo guardar el tratamiento. Verifica los siguientes campos:
+                </strong>
+                <ul style="margin: 0; padding-left: 24px; font-size: 0.85rem;">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li><strong>{{ field.label }}:</strong> {{ error|striptags }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
 
             <form method="POST" novalidate id="tratamientoForm" class="stagger-3">
                 {% csrf_token %}

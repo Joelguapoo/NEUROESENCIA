@@ -6,105 +6,145 @@
 
 {% block content %}
 <style>
-    /* --- VARIABLES LOCALES (Sistema Unificado) --- */
+    /* ==========================================================================
+       VARIABLES PREMIUM (SaaS Design)
+       ========================================================================== */
     :root {
-        --card-bg: #ffffff;
-        --page-bg: #f4f7fe;
-        --purple-brand: #2a1f45;
-        --purple-light: #4c3b73;
-        --purple-pastel: #b09ade;
-        --text-dark: #2b3674;
-        --text-gray: #a3aed1;
-        --shadow-soft: 0 10px 30px rgba(42, 31, 69, 0.04);
+        --purple-brand: #7C3AED; 
+        --purple-glow: rgba(124, 58, 237, 0.2);
+        --dark-bg: #0D0B14; 
+        --page-bg: #F4F7FE; 
+        --text-main: #111827;
+        --text-muted: #6B7280;
+        --card-bg: #FFFFFF;
+        --border-color: #E5E7EB;
+        
+        --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.04);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        --transition-fast: all 0.2s ease-in-out;
     }
 
-    /* --- ANIMACIONES --- */
-    .fade-in-up {
-        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    @keyframes fadeInUp {
-        to { opacity: 1; transform: translateY(0); }
-    }
+    body { background-color: var(--page-bg); }
 
-    /* --- TARJETA DEL FORMULARIO --- */
+    /* ==========================================================================
+       ANIMACIONES EN CASCADA
+       ========================================================================== */
+    .stagger-1 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    .stagger-2 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.1s; opacity: 0; transform: translateY(20px); }
+    .stagger-3 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.2s; opacity: 0; transform: translateY(20px); }
+    
+    .fade-in-up { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* ==========================================================================
+       ESTRUCTURA DE TARJETAS (CARDS)
+       ========================================================================== */
+    .form-wrapper { max-width: 850px; margin: 0 auto; padding: 10px 0; }
+
     .form-card {
         background: var(--card-bg);
         border-radius: 24px;
         padding: 40px;
         box-shadow: var(--shadow-soft);
-        border: 1px solid rgba(0,0,0,0.02);
+        border: 1px solid var(--border-color);
+        position: relative;
+    }
+
+    /* Brillo decorativo de fondo */
+    .form-card::before {
+        content: ''; position: absolute; top: -100px; right: -100px; width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
     }
 
     .form-header-icon {
-        width: 60px; height: 60px;
-        background: rgba(176, 154, 222, 0.15);
-        color: var(--purple-brand);
-        border-radius: 16px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; margin-bottom: 20px;
+        width: 64px; height: 64px; border-radius: 18px;
+        background: linear-gradient(135deg, #F3E8FF, #E0E7FF);
+        color: var(--purple-brand); display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05); flex-shrink: 0;
+        position: relative; z-index: 1;
     }
 
-    /* --- ESTILOS DE INPUTS PREMIUM --- */
-    .form-label-custom {
+    .title-gradient {
+        background: linear-gradient(135deg, var(--text-main) 0%, var(--purple-brand) 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        font-weight: 800; letter-spacing: -0.02em; font-size: 1.6rem;
+        position: relative; z-index: 1;
+    }
+
+    /* ==========================================================================
+       ESTILOS DE ETIQUETAS (LABELS)
+       ========================================================================== */
+    .form-label {
         font-weight: 700;
-        font-size: 0.75rem;
-        color: var(--text-gray);
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
+        font-size: 0.85rem;
+        color: var(--text-main);
         margin-bottom: 8px;
+        letter-spacing: 0.3px;
+        position: relative; z-index: 1;
         display: block;
     }
 
-    /* Forzamos el estilo premium a todos los inputs (Django y HTML nativo) */
+    /* ==========================================================================
+       ESTILOS DE INPUTS Y SELECTS (DISEÑO PREMIUM)
+       ========================================================================== */
     .form-card input, 
     .form-card select, 
+    .form-card textarea,
     .form-control, 
     .form-select {
         width: 100%;
         border-radius: 12px !important;
-        border: 2px solid transparent !important;
-        background-color: var(--page-bg) !important;
-        padding: 12px 18px !important;
+        border: 1px solid #CBD5E1 !important;
+        background-color: #F8FAFC !important;
+        padding: 14px 18px !important;
         font-weight: 500;
-        color: var(--text-dark);
-        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        color: var(--text-main);
+        transition: var(--transition-fast);
         box-shadow: inset 0 2px 4px rgba(0,0,0,0.01) !important;
+        position: relative; z-index: 1;
     }
 
-    /* Estado Focus */
     .form-card input:focus, 
     .form-card select:focus, 
+    .form-card textarea:focus,
     .form-control:focus, 
     .form-select:focus {
-        background-color: #ffffff !important;
-        border-color: var(--purple-pastel) !important;
-        box-shadow: 0 0 0 4px rgba(176, 154, 222, 0.15) !important;
+        background-color: #FFFFFF !important;
+        border-color: var(--purple-brand) !important;
+        box-shadow: 0 0 0 4px var(--purple-glow) !important;
         outline: none !important;
     }
 
     /* Estado Deshabilitado / Solo Lectura (DNI al editar) */
     .form-card input[readonly], 
-    .form-card select[disabled] {
-        background-color: rgba(163, 174, 209, 0.1) !important;
-        color: var(--text-gray);
+    .form-card select[disabled],
+    .form-control[readonly],
+    .form-select[disabled] {
+        background-color: #E2E8F0 !important;
+        color: var(--text-muted);
         cursor: not-allowed;
     }
 
-    /* Pequeño ajuste para las ayudas de texto */
-    .help-text {
-        color: var(--text-gray);
-        font-size: 0.75rem;
-        font-weight: 500;
-        margin-top: 6px;
-        display: block;
-    }
-    .help-text.warning {
-        color: #d97706; /* Naranja ámbar suave */
-    }
+    .form-card input::placeholder, .form-card textarea::placeholder { color: #94A3B8; font-weight: 400; }
 
-    /* --- ALERTAS PREMIUM --- */
+    /* ==========================================================================
+       ESTILOS DE MENSAJES DE ERROR Y AYUDA
+       ========================================================================== */
+    .error-text {
+        color: #EF4444; background: #FEF2F2; padding: 8px 12px; border-radius: 8px;
+        font-size: 0.8rem; font-weight: 600; margin-top: 8px; display: inline-flex;
+        align-items: center; gap: 6px; border: 1px solid #FECACA; width: 100%;
+        position: relative; z-index: 1;
+    }
+    
+    .help-text { color: var(--text-muted); font-size: 0.75rem; margin-top: 6px; display: block; font-weight: 500; }
+    .help-text.warning { color: #d97706; }
+
+    /* --- ALERTAS PREMIUM (MESSAGES DJANGO) --- */
     .alert-premium {
         border-radius: 12px;
         border: none;
@@ -115,42 +155,40 @@
     .alert-premium.danger { background: #fef2f2; color: #ef4444; border-left: 4px solid #ef4444; }
     .alert-premium.success { background: #f0fdf4; color: #10b981; border-left: 4px solid #10b981; }
 
-    /* --- BOTONES --- */
+    /* ==========================================================================
+       ESTILOS DE BOTONES
+       ========================================================================== */
     .btn-cancelar {
-        background-color: transparent;
-        color: var(--text-gray);
-        font-weight: 600;
-        border-radius: 12px;
-        padding: 12px 24px;
-        transition: all 0.3s;
-        border: 1px solid var(--text-gray);
-        text-align: center;
+        background-color: white; color: var(--text-muted); font-weight: 600; font-size: 0.95rem;
+        border-radius: 12px; padding: 0 24px; height: 48px; display: inline-flex; align-items: center;
+        justify-content: center; transition: var(--transition-fast); border: 1px solid var(--border-color);
+        text-decoration: none; position: relative; z-index: 1;
     }
+
     .btn-cancelar:hover { 
-        background-color: rgba(163, 174, 209, 0.1); 
-        color: var(--text-dark);
-        border-color: var(--text-dark);
+        background-color: #F1F5F9; 
+        color: var(--text-main);
+        transform: translateY(-2px);
     }
 
     .btn-guardar {
-        background-color: var(--purple-brand);
-        color: white;
-        font-weight: 600;
-        border-radius: 12px;
-        padding: 12px 30px;
-        transition: all 0.3s;
-        border: none;
-        box-shadow: 0 8px 20px rgba(42, 31, 69, 0.2);
+        background: var(--purple-brand); color: white !important; border: none; border-radius: 12px;
+        padding: 0 30px; height: 48px; font-weight: 600; font-size: 0.95rem; display: inline-flex;
+        align-items: center; justify-content: center; gap: 10px; transition: var(--transition-spring); 
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3); position: relative; z-index: 1;
     }
+
     .btn-guardar:hover {
-        background: var(--purple-light);
-        transform: translateY(-2px);
-        box-shadow: 0 12px 25px rgba(42, 31, 69, 0.3);
+        transform: translateY(-3px); box-shadow: 0 12px 25px rgba(124, 58, 237, 0.4);
     }
+    
+    .btn-guardar:disabled { opacity: 0.7; transform: none; cursor: not-allowed; box-shadow: none; }
+
+    .divider { height: 1px; background: var(--border-color); margin: 30px 0; width: 100%; position: relative; z-index: 1; }
 </style>
 
-<div class="container-fluid py-2">
-    <div class="mx-auto fade-in-up" style="max-width: 650px; animation-delay: 0.1s;">
+<div class="container-fluid py-4">
+    <div class="form-wrapper stagger-1">
         
         {% if messages %}
             <div class="mb-4">
@@ -165,7 +203,7 @@
 
         <div class="form-card">
             
-            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom border-light">
+            <div class="d-flex align-items-center gap-4 mb-4 stagger-2">
                 <div class="form-header-icon">
                     {% if editando %}
                         <i class="fa-solid fa-user-pen"></i>
@@ -174,22 +212,28 @@
                     {% endif %}
                 </div>
                 <div>
-                    <h4 class="fw-bold m-0" style="color: var(--text-dark); letter-spacing: -0.5px;">
+                    <h3 class="title-gradient m-0">
                         {% if editando %}Actualizar Colaborador{% else %}Registrar Colaborador{% endif %}
-                    </h4>
-                    <p class="m-0 mt-1" style="color: var(--text-gray); font-size: 0.95rem;">
-                        {% if editando %}Modifica los accesos y datos de {{ empleado.nombre_completo }}.{% else %}Agrega un nuevo miembro a tu equipo clínico o administrativo.{% endif %}
+                    </h3>
+                    <p class="m-0 mt-1" style="color: var(--text-muted); font-size: 0.95rem; font-weight: 500;">
+                        {% if editando %}
+                            Modifica los accesos y datos de <b>{{ empleado.nombre_completo }}</b>.
+                        {% else %}
+                            Agrega un nuevo miembro a tu equipo clínico o administrativo.
+                        {% endif %}
                     </p>
                 </div>
             </div>
 
-            <form method="POST">
+            <div class="divider stagger-2"></div>
+
+            <form method="POST" novalidate id="staffForm" class="stagger-3">
                 {% csrf_token %}
                 
                 <div class="row g-4">
                     
                     <div class="col-12">
-                        <label class="form-label-custom">Rol en el Sistema <span class="text-danger">*</span></label>
+                        <label class="form-label">Rol en el Sistema <span class="text-danger ms-1">*</span></label>
                         <select name="rol" class="form-select" required>
                             <option value="" disabled {% if not empleado and not request.POST.rol %}selected{% endif %}>Seleccione los permisos para este usuario...</option>
                             {% for rol in roles_disponibles %}
@@ -202,19 +246,19 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label-custom">Nombre de Usuario <span class="text-danger">*</span></label>
+                        <label class="form-label">Nombre de Usuario <span class="text-danger ms-1">*</span></label>
                         {{ form.username }}
                         <span class="help-text">Ej: jdoe, admin_neuro</span>
                     </div>
                     
                     <div class="col-md-6">
-                        <label class="form-label-custom">Email <span class="text-danger">*</span></label>
+                        <label class="form-label">Email <span class="text-danger ms-1">*</span></label>
                         {{ form.email }}
                         <span class="help-text">Para notificaciones y recuperación.</span>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label-custom">Tipo Doc. <span class="text-danger">*</span></label>
+                        <label class="form-label">Tipo Doc. <span class="text-danger ms-1">*</span></label>
                         <select name="tipo_documento" class="form-select" required {% if editando %}disabled{% endif %}>
                             <option value="CC" {% if empleado.tipo_documento == 'CC' or request.POST.tipo_documento == 'CC' %}selected{% endif %}>C.C.</option>
                             <option value="TI" {% if empleado.tipo_documento == 'TI' or request.POST.tipo_documento == 'TI' %}selected{% endif %}>T.I.</option>
@@ -228,7 +272,7 @@
                     </div>
                     
                     <div class="col-md-8">
-                        <label class="form-label-custom">Número de Documento <span class="text-danger">*</span></label>
+                        <label class="form-label">Número de Documento <span class="text-danger ms-1">*</span></label>
                         <input type="text" name="dni_empleado" class="form-control" 
                             required maxlength="15" placeholder="Ej: 1002345678"
                             value="{% if empleado %}{{ empleado.dni_empleado }}{% else %}{{ request.POST.dni_empleado|default:'' }}{% endif %}"
@@ -239,20 +283,20 @@
                     </div>
 
                     <div class="col-md-7">
-                        <label class="form-label-custom">Nombre Completo <span class="text-danger">*</span></label>
+                        <label class="form-label">Nombre Completo <span class="text-danger ms-1">*</span></label>
                         <input type="text" name="nombre_completo" class="form-control" required maxlength="100" placeholder="Nombres y Apellidos"
                             value="{% if empleado %}{{ empleado.nombre_completo }}{% else %}{{ request.POST.nombre_completo|default:'' }}{% endif %}">
                     </div>
 
                     <div class="col-md-5">
-                        <label class="form-label-custom">Teléfono</label>
-                        <input type="text" name="telefono" class="form-control" maxlength="20" placeholder="Ej: 300 123 4567"
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" name="telefono" class="form-control" maxlength="20" placeholder="Ej: 3001234567"
                             value="{% if empleado %}{{ empleado.telefono }}{% else %}{{ request.POST.telefono|default:'' }}{% endif %}">
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label-custom">
-                            {% if editando %}Nueva Contraseña{% else %}Contraseña Temporal <span class="text-danger">*</span>{% endif %}
+                        <label class="form-label">
+                            {% if editando %}Nueva Contraseña{% else %}Contraseña Temporal <span class="text-danger ms-1">*</span>{% endif %}
                         </label>
                         {{ form.password }}
                         {% if editando %}
@@ -263,13 +307,15 @@
                     </div>
                 </div>
 
-                <div class="mt-5 pt-4 border-top border-light d-flex justify-content-end gap-3 flex-wrap">
-                    <a href="{% url 'lista_staff' %}" class="btn-cancelar text-decoration-none">
+                <div class="divider mt-5"></div>
+
+                <div class="d-flex justify-content-end align-items-center gap-3 flex-wrap position-relative z-1">
+                    <a href="{% url 'lista_staff' %}" class="btn-cancelar">
                         Cancelar
                     </a>
-                    <button type="submit" class="btn-guardar d-flex align-items-center gap-2">
+                    <button type="submit" class="btn-guardar" id="btnSubmit">
                         <i class="fa-solid fa-user-check"></i>
-                        {% if editando %}Actualizar Datos{% else %}Guardar Colaborador{% endif %}
+                        <span>{% if editando %}Actualizar Datos{% else %}Guardar Colaborador{% endif %}</span>
                     </button>
                 </div>
 
@@ -277,6 +323,7 @@
         </div>
     </div>
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         
@@ -291,13 +338,12 @@
             let errorSpan = inputElement.parentNode.querySelector('.error-text-js');
             if (!errorSpan) {
                 errorSpan = document.createElement('div');
-                errorSpan.className = 'error-text error-text-js fade-in-up mt-1 text-danger fw-bold';
-                errorSpan.style.fontSize = '0.8rem';
-                // Insertamos el error al final del contenedor para no romper la maquetación de los help-texts
+                // Ajustado al estilo premium SaaS
+                errorSpan.className = 'error-text error-text-js fade-in-up'; 
                 inputElement.parentNode.appendChild(errorSpan);
             }
             errorSpan.style.display = 'flex';
-            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation me-1"></i> ${mensaje}`;
+            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${mensaje}</span>`;
             return errorSpan;
         }
 
@@ -514,7 +560,6 @@
                 let formValido = true;
                 
                 // Lista de campos que SÍ o SÍ deben estar llenos
-                // Ahora como les inyectamos 'required' dinámicamente al teléfono y correo, este query los captura automáticamente
                 const requiredInputs = form.querySelectorAll('input[required], select[required]');
                 
                 requiredInputs.forEach(input => {
@@ -539,6 +584,12 @@
                 if (!formValido) {
                     e.preventDefault(); 
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const btnSubmit = document.getElementById('btnSubmit');
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Procesando...</span>';
+                    }
                 }
             });
         }

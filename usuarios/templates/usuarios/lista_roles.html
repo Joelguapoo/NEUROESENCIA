@@ -246,7 +246,7 @@
                 </td>
                 <td class="text-end pe-4">
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="#" class="action-glass edit" data-bs-toggle="tooltip" title="Editar Permisos">
+                        <a href="{% url 'editar_rol' rol.id %}" class="action-glass edit" data-bs-toggle="tooltip" title="Editar Permisos">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
                         {% if rol.estado_rol == 'Activo' %}
@@ -382,8 +382,8 @@
                 const form = document.getElementById('form-estado');
                 const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
                 
-                // Asegúrate de que esta URL coincida con tu endpoint en urls.py para roles
-                const urlFetch = `/roles/cambiar_estado/${rolId}/`; // URL Genérica sugerida
+                // AQUÍ SE CORRIGIÓ LA URL USANDO EL SISTEMA DE RUTAS DE DJANGO
+                const urlFetch = "{% url 'cambiar_estado_rol' 0 %}".replace('0', rolId);
                 
                 fetch(urlFetch, {
                     method: 'POST',
@@ -393,7 +393,7 @@
                     }
                 })
                 .then(response => {
-                    if(!response.ok) throw new Error("Error en la petición (Verifica la URL en el script)");
+                    if(!response.ok) throw new Error("Error en la petición");
                     return response.json();
                 })
                 .then(data => {
@@ -407,15 +407,14 @@
                     }).then(() => location.reload());
                 })
                 .catch(error => {
-                    // Fallback visual en caso de que la URL de fetch no esté implementada aún
                     Swal.fire({
-                        title: `<span style="font-family: 'Poppins', sans-serif; font-weight: 800; color: #111827;">¡Simulación Exitosa!</span>`,
-                        text: 'El SweetAlert funciona, pero debes conectar la URL correcta en el fetch() de JavaScript.',
-                        icon: 'success',
-                        confirmButtonColor: '#7C3AED',
+                        title: `<span style="font-family: 'Poppins', sans-serif; font-weight: 800; color: #111827;">Error</span>`,
+                        text: 'Hubo un problema de conexión con el servidor. Verifica las rutas en urls.py.',
+                        icon: 'error',
+                        confirmButtonColor: '#EF4444',
                         customClass: { confirmButton: 'btn rounded-3 px-5 py-2 fw-bold shadow-sm' },
                         buttonsStyling: false
-                    }).then(() => location.reload());
+                    });
                 });
             }
         });

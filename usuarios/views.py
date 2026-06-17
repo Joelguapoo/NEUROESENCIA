@@ -531,36 +531,55 @@ def configuracion_sistema(request):
     return render(request, 'usuarios/configuracion.html')
 
 
+@login_required
 def perfil_usuario(request):
-    """Maneja el perfil dinámico para Pacientes y Staff."""
+    """Maneja el perfil dinámico para Pacientes, Staff y Superusuarios de Consola."""
     es_paciente = 'paciente_id' in request.session
     perfil_obj = None
+    es_superuser_consola = False
 
     if es_paciente:
         perfil_obj = get_object_or_404(Paciente, id=request.session['paciente_id'])
     else:
-        perfil_obj = get_object_or_404(Empleado, usuario=request.user.username)
+        # Intentamos buscar el empleado
+        empleado = Empleado.objects.filter(usuario=request.user.username).first()
+        if empleado:
+            perfil_obj = empleado
+        else:
+            # SOLUCIÓN AL 404: Si no hay empleado (creado por consola), usamos el User nativo de Django
+            perfil_obj = request.user
+            es_superuser_consola = True
 
     if request.method == 'POST':
-        perfil_obj.nombre_completo = request.POST.get('nombre_completo')
-        perfil_obj.correo = request.POST.get('correo')
-        perfil_obj.telefono = request.POST.get('telefono')
-        
-        if not es_paciente:
-            user_django = request.user
-            user_django.email = perfil_obj.correo
-            user_django.first_name = perfil_obj.nombre_completo.split(' ')[0]
-            user_django.save()
+        if es_superuser_consola:
+            # Actualizamos los datos básicos del superusuario de consola
+            perfil_obj.first_name = request.POST.get('nombre_completo', '')
+            perfil_obj.email = request.POST.get('correo', '')
+            perfil_obj.save()
+        else:
+            # Actualizamos al empleado o paciente
+            perfil_obj.nombre_completo = request.POST.get('nombre_completo')
+            perfil_obj.correo = request.POST.get('correo')
+            perfil_obj.telefono = request.POST.get('telefono')
             
-        perfil_obj.save()
-        messages.success(request, "¡Tu perfil se ha actualizado correctamente!")
+            if not es_paciente:
+                # Sincronizamos con el User nativo de Django
+                user_django = request.user
+                user_django.email = perfil_obj.correo
+                nombres = perfil_obj.nombre_completo.split(' ')
+                user_django.first_name = nombres[0] if nombres else ''
+                user_django.save()
+                
+            perfil_obj.save()
+            
+        messages.success(request, "¡Tu perfil se ha actualizado bajo estrictos protocolos de seguridad!")
         return redirect('perfil_usuario')
 
     return render(request, 'usuarios/perfil.html', {
         'perfil': perfil_obj,
-        'es_paciente': es_paciente
+        'es_paciente': es_paciente,
+        'es_superuser_consola': es_superuser_consola
     })
-
 from django.urls import reverse
 
 def recuperar_password(request):
@@ -686,3 +705,51 @@ def crear_rol(request):
     else:
         form = RolForm()
     return render(request, 'usuarios/crear_rol.html', {'form': form})
+
+# --- Añadir al final de tu views.py ---
+
+@login_required
+def editar_rol(request, rol_id):
+    # Opcional: Seguridad para que solo administradores editen roles
+    if not (request.user.is_superuser or request.user.groups.filter(name='Administrador').exists()):
+        messages.error(request, "No tienes permisos para editar roles.")
+        return redirect('lista_roles')
+        
+    rol = get_object_or_404(Rol, id=rol_id)
+    
+    if request.method == 'POST':
+        form = RolForm(request.POST, instance=rol)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"El rol '{rol.nombre_rol}' ha sido actualizado correctamente.")
+            return redirect('lista_roles')
+        else:
+            messages.error(request, "Revisa los errores del formulario.")
+    else:
+        form = RolForm(instance=rol)
+        
+    return render(request, 'usuarios/crear_rol.html', {'form': form, 'editando': True, 'rol': rol})
+
+@login_required
+def cambiar_estado_rol(request, rol_id):
+    """Vista que responde al fetch de SweetAlert2 en JavaScript"""
+    if not (request.user.is_superuser or request.user.groups.filter(name='Administrador').exists()):
+        return JsonResponse({'status': 'error', 'mensaje': 'No tienes permisos para esta acción.'}, status=403)
+        
+    rol = get_object_or_404(Rol, id=rol_id)
+    
+    if request.method == 'POST':
+        if rol.estado_rol == 'Activo':
+            rol.estado_rol = 'Inactivo'
+            accion = "inactivado"
+        else:
+            rol.estado_rol = 'Activo'
+            accion = "reactivado"
+            
+        rol.save()
+        return JsonResponse({
+            'status': 'success', 
+            'mensaje': f'El rol {rol.nombre_rol} ha sido {accion} exitosamente.'
+        })
+        
+    return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido.'}, status=400)

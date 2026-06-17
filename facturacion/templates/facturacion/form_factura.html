@@ -4,147 +4,315 @@
 
 {% block content %}
 <style>
+    /* ==========================================================================
+       VARIABLES FINTECH (Bank / Corporate Vibe)
+       ========================================================================== */
     :root {
-        --purple-main: #7d5e9e;
-        --purple-hover: #624a7b;
-        --bg-light: #f8f9fa;
-        --success-green: #2ecc71;
+        --bank-navy: #0B192C;        /* Azul oscuro institucional */
+        --bank-blue: #1E3A8A;        /* Azul rey de confianza */
+        --money-green: #10B981;      /* Verde financiero/éxito */
+        --money-glow: rgba(16, 185, 129, 0.25);
+        --bg-light: #F8FAFC;
+        --text-main: #0F172A;
+        --text-muted: #64748B;
+        --card-bg: #FFFFFF;
+        --border-color: #E2E8F0;
+        
+        --shadow-bank: 0 15px 40px rgba(11, 25, 44, 0.08);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     }
+
+    body { background-color: var(--bg-light); }
+
+    /* ==========================================================================
+       ANIMACIONES EN CASCADA
+       ========================================================================== */
+    .stagger-1 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    .stagger-2 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.1s; opacity: 0; transform: translateY(20px); }
+    .stagger-3 { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.2s; opacity: 0; transform: translateY(20px); }
+    
+    .fade-in-up { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* ==========================================================================
+       ESTRUCTURA DE TARJETAS (BILLING CARD)
+       ========================================================================== */
+    .form-wrapper { max-width: 950px; margin: 0 auto; padding: 10px 0; }
 
     .billing-card {
-        background: white;
-        border-radius: 30px;
-        border: none;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        background: var(--card-bg);
+        border-radius: 24px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-bank);
+        position: relative;
+        overflow: hidden;
     }
 
+    /* Marca de agua de Banco (Escudo de fondo) */
+    .billing-card::before {
+        content: '\f3ed'; /* Icono de escudo de FontAwesome */
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        font-size: 300px;
+        color: rgba(30, 58, 138, 0.03); /* Azul rey ultra transparente */
+        pointer-events: none;
+        z-index: 0;
+        transform: rotate(-15deg);
+    }
+
+    /* Encabezados de Sección estilo "Extracto Bancario" */
     .step-header {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.5px;
         font-weight: 800;
-        color: #adb5bd;
-        margin-bottom: 1.5rem;
-        display: block;
-        border-bottom: 2px solid var(--bg-light);
-        padding-bottom: 10px;
+        color: var(--bank-blue);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 2px solid #F1F5F9;
+        padding-bottom: 12px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .step-header i { font-size: 1.2rem; }
+
+    /* ==========================================================================
+       ESTILOS DE INPUTS Y SELECTS (Seguridad FinTech)
+       ========================================================================== */
+    .form-label {
+        font-weight: 800;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        letter-spacing: 1px;
+        position: relative; z-index: 1;
     }
 
+    /* Forzamos el estilo bancario a todos los inputs */
+    #billingForm input[type="text"], 
+    #billingForm input[type="number"], 
+    #billingForm select, 
+    .form-control, 
+    .form-select {
+        width: 100%;
+        border-radius: 12px !important;
+        border: 2px solid var(--border-color) !important;
+        background-color: var(--bg-light) !important;
+        padding: 14px 18px !important;
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--bank-navy) !important;
+        transition: var(--transition-fast);
+        box-shadow: none !important;
+        position: relative; z-index: 1;
+    }
+
+    #billingForm input:focus, 
+    #billingForm select:focus, 
+    .form-control:focus, 
+    .form-select:focus {
+        background-color: #FFFFFF !important;
+        border-color: var(--bank-blue) !important;
+        box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1) !important; /* Glow azul banco */
+        outline: none !important;
+    }
+
+    /* Inputs numéricos alineados a la derecha (estilo contable) */
+    #id_subtotal, #id_impuestos {
+        text-align: right;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 1.2rem;
+        letter-spacing: -0.5px;
+    }
+
+    /* ==========================================================================
+       DISPLAY TOTAL (DASHBOARD FINANCIERO)
+       ========================================================================== */
     .total-display-card {
-        background: linear-gradient(135deg, var(--purple-main) 0%, var(--purple-hover) 100%);
+        background: linear-gradient(135deg, var(--bank-navy) 0%, var(--bank-blue) 100%);
         border-radius: 20px;
         color: white;
         text-align: center;
-        padding: 30px 20px;
-        box-shadow: 0 10px 25px rgba(125, 94, 158, 0.3);
+        padding: 40px 20px;
+        box-shadow: 0 15px 30px rgba(11, 25, 44, 0.25);
+        border-bottom: 6px solid var(--money-green); /* Línea verde base */
+        position: relative;
+        z-index: 1;
+    }
+    
+    .total-display-card::after {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.05)"/></svg>');
+        pointer-events: none;
     }
 
-    .btn-confirmar {
-        background: var(--success-green);
-        color: white;
-        padding: 15px 40px;
-        border-radius: 15px;
+    .total-label {
+        letter-spacing: 3px; 
+        font-size: 0.85rem; 
+        color: #93C5FD;
         font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .total-number {
+        font-family: 'Courier New', Courier, monospace; /* Fuente de cajero/banco */
+        font-weight: 800;
+        font-size: 3.8rem;
+        letter-spacing: -2px;
+        text-shadow: 0 4px 15px var(--money-glow);
+        margin: 0;
+    }
+
+    /* ==========================================================================
+       BOTONES Y ALERTAS
+       ========================================================================== */
+    .btn-confirmar {
+        background: var(--money-green);
+        color: white !important;
+        padding: 16px 45px;
+        border-radius: 14px;
+        font-weight: 800;
+        font-size: 1.05rem;
         border: none;
-        transition: 0.3s;
-        box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+        transition: var(--transition-spring);
+        box-shadow: 0 10px 25px var(--money-glow);
+        display: inline-flex; align-items: center; gap: 10px;
     }
     .btn-confirmar:hover {
-        transform: translateY(-2px);
-        background: #27ae60;
-        color: white;
+        transform: translateY(-3px);
+        background: #059669;
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
     }
-    /* Estilos para mensajes de error JS */
+
+    .btn-volver {
+        background-color: white; color: var(--bank-navy); font-weight: 700; font-size: 0.95rem;
+        border-radius: 50px; padding: 10px 25px; transition: var(--transition-fast);
+        border: 1px solid var(--border-color); text-decoration: none;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+    }
+    .btn-volver:hover { background-color: var(--bg-light); color: var(--bank-blue); border-color: var(--bank-blue); }
+
     .error-text {
-        color: #ef4444;
-        font-size: 0.8rem;
-        font-weight: 700;
-        margin-top: 6px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        color: #EF4444; background: #FEF2F2; padding: 8px 12px; border-radius: 8px;
+        font-size: 0.8rem; font-weight: 700; margin-top: 8px; display: inline-flex;
+        align-items: center; gap: 6px; border: 1px solid #FECACA; width: 100%;
+        position: relative; z-index: 1;
     }
+
+    /* Sello de seguridad decorativo */
+    .security-badge {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        color: var(--text-muted); font-size: 0.8rem; font-weight: 600; margin-top: 20px;
+    }
+    .security-badge i { color: var(--money-green); }
 </style>
 
-<div class="container py-4 animate-item">
-    <div class="d-flex justify-content-between align-items-center mb-5">
-        <div>
-            <h2 class="fw-bold text-dark">Nueva Factura</h2>
-            <p class="text-muted">Registro de cobros y servicios terapéuticos.</p>
-        </div>
-        <a href="{% url 'lista_facturas' %}" class="btn btn-light fw-bold px-4 border rounded-pill">
-            <i class="fa-solid fa-arrow-left me-2"></i>Volver al Listado
-        </a>
-    </div>
-
-    <form method="POST" id="billingForm">
-        {% csrf_token %}
-        {{ form.nro_factura }} <div class="card billing-card p-4 p-lg-5">
-            <div class="row g-5">
-                
-                <div class="col-lg-6 border-end border-light">
-                    <span class="step-header"><i class="fa-solid fa-file-medical me-2"></i>1. Detalles del Servicio</span>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small text-secondary">PACIENTE</label>
-                        {{ form.paciente }}
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small text-secondary">CITA ASOCIADA</label>
-                        {{ form.cita }}
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <label class="form-label fw-bold small text-secondary">MÉTODO DE PAGO</label>
-                            {{ form.metodo }}
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <label class="form-label fw-bold small text-secondary">ESTADO DEL PAGO</label>
-                            {{ form.estado_pago }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <span class="step-header"><i class="fa-solid fa-calculator me-2"></i>2. Desglose de Valores</span>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small text-secondary">SUBTOTAL ($)</label>
-                            {{ form.subtotal }}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold small text-secondary">IMPUESTOS ($)</label>
-                            {{ form.impuestos }}
-                        </div>
-                    </div>
-
-                    <div class="total-display-card mt-4">
-                        <p class="mb-1 fw-bold text-light" style="letter-spacing: 2px; font-size: 0.9rem;">TOTAL A COBRAR</p>
-                        <h1 class="display-4 fw-bold mb-0" id="totalDisplay">$0.00</h1>
-                    </div>
-                </div>
-
+<div class="container-fluid py-4">
+    <div class="form-wrapper stagger-1">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold m-0" style="color: var(--bank-navy); letter-spacing: -0.5px;">Emisión de Factura</h2>
+                <p class="text-muted fw-medium mt-1 mb-0">Portal de liquidación y registro financiero.</p>
             </div>
+            <a href="{% url 'lista_facturas' %}" class="btn-volver">
+                <i class="fa-solid fa-arrow-left-long me-2"></i>Volver al Libro Mayor
+            </a>
         </div>
 
-        <div class="text-end mt-4">
-            <button type="submit" class="btn btn-confirmar">
-                <i class="fa-solid fa-file-invoice-dollar me-2"></i>Generar Factura Oficial
-            </button>
-        </div>
-    </form>
+        <form method="POST" id="billingForm" class="stagger-2">
+            {% csrf_token %}
+            <div style="display: none;">{{ form.nro_factura }}</div> 
+
+            <div class="billing-card p-4 p-lg-5">
+                <div class="row g-5">
+                    
+                    <div class="col-lg-6 border-end border-light position-relative z-1">
+                        <div class="step-header">
+                            <i class="fa-solid fa-file-signature"></i> 1. Información del Servicio
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">PACIENTE TITULAR</label>
+                            {{ form.paciente }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">CITA CLÍNICA ASOCIADA</label>
+                            {{ form.cita }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">MÉTODO DE PAGO</label>
+                                {{ form.metodo }}
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">ESTADO DEL COBRO</label>
+                                {{ form.estado_pago }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 position-relative z-1">
+                        <div class="step-header">
+                            <i class="fa-solid fa-calculator"></i> 2. Liquidación de Valores
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">BASE / SUBTOTAL ($)</label>
+                                {{ form.subtotal }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">IMPUESTOS ($)</label>
+                                {{ form.impuestos }}
+                            </div>
+                        </div>
+
+                        <div class="total-display-card mt-4 stagger-3">
+                            <p class="total-label">IMPORTE TOTAL A COBRAR</p>
+                            <h1 class="total-number" id="totalDisplay">$0.00</h1>
+                        </div>
+                        
+                        <div class="security-badge stagger-3">
+                            <i class="fa-solid fa-lock"></i> Transacción cifrada con seguridad SSL de 256 bits
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="text-end mt-4 pt-2 stagger-3">
+                <button type="submit" class="btn-confirmar" id="btnSubmit">
+                    <i class="fa-solid fa-check-double"></i> Procesar y Emitir Factura Oficial
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
-
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         
         const form = document.getElementById('billingForm');
         if (form) form.setAttribute('novalidate', 'true'); // Apaga alertas feas del navegador
+
+        // Aplicar clases de Bootstrap/Custom a los inputs de Django dinámicamente
+        const allInputs = document.querySelectorAll('#billingForm input, #billingForm select');
+        allInputs.forEach(el => {
+            if (el.tagName === 'SELECT') {
+                el.classList.add('form-select');
+            } else if (el.type !== 'hidden') {
+                el.classList.add('form-control');
+            }
+        });
 
         // ==========================================
         // 1. FUNCIONES DE APOYO PARA ERRORES
@@ -157,7 +325,7 @@
                 inputElement.parentNode.appendChild(errorSpan);
             }
             errorSpan.style.display = 'flex';
-            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${mensaje}`;
+            errorSpan.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${mensaje}</span>`;
         }
 
         function ocultarError(inputElement) {
@@ -211,7 +379,7 @@
             let impuestos = parseFloat(inputImpuestos.value) || 0;
             let total = subtotal + impuestos;
             
-            // Formatea a 2 decimales y actualiza el cartel morado
+            // Formatea a 2 decimales y actualiza el cartel del banco
             totalDisplay.innerText = '$' + total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
@@ -262,19 +430,15 @@
                 if (!formValido) {
                     e.preventDefault(); 
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const btnSubmit = document.getElementById('btnSubmit');
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando Transacción...';
+                    }
                 }
             });
         }
-        
-        // Aplicar clases de Bootstrap/Custom a los inputs de Django dinámicamente
-        const allInputs = document.querySelectorAll('#billingForm input, #billingForm select');
-        allInputs.forEach(el => {
-            if (el.tagName === 'SELECT') {
-                el.classList.add('form-select');
-            } else if (el.type !== 'hidden') {
-                el.classList.add('form-control');
-            }
-        });
 
     });
 </script>

@@ -1,145 +1,173 @@
 {% extends 'usuarios/base.html' %}
-{% block title %}Mi Perfil - NeuroEsencia{% endblock %}
+{% block title %}Mi Perfil Corporativo - NeuroEsencia{% endblock %}
 
 {% block content %}
 <style>
-    /* Estilos específicos para la página de Perfil */
-    .profile-container {
-        max-width: 850px;
-        margin: auto;
+    /* ==========================================================================
+       VARIABLES PREMIUM (SaaS Purple Vibe)
+       ========================================================================== */
+    :root {
+        --purple-brand: #7C3AED;      /* Morado principal */
+        --purple-dark: #4C1D95;       /* Morado profundo institucional */
+        --purple-light: #C4B5FD;      /* Morado claro para bordes/detalles */
+        --purple-glow: rgba(124, 58, 237, 0.25);
+        --success-green: #10B981;     /* Verde solo para confirmaciones/éxito */
+        
+        --bg-light: #F4F7FE;
+        --text-main: #111827;
+        --text-muted: #6B7280;
+        --card-bg: #FFFFFF;
+        --border-color: #E5E7EB;
+        
+        --shadow-premium: 0 15px 40px rgba(124, 58, 237, 0.08);
+        --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        --transition-fast: all 0.2s ease-in-out;
     }
+
+    body { background-color: var(--bg-light); }
+
+    .fade-in-up { animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    @keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* ==========================================================================
+       ESTRUCTURA DE TARJETA DE PERFIL
+       ========================================================================== */
+    .profile-container { max-width: 900px; margin: auto; padding: 20px 0; }
 
     .profile-card {
-        background: var(--white);
-        border-radius: 30px;
+        background: var(--card-bg);
+        border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 20px 40px rgba(42, 31, 69, 0.06);
-        border: 1px solid rgba(0,0,0,0.02);
+        box-shadow: var(--shadow-premium);
+        border: 1px solid var(--border-color);
+        position: relative;
     }
 
-    /* Cabecera del Perfil */
+    /* Marca de agua institucional */
+    .profile-card::before {
+        content: '\f2c2'; /* Icono de ID Card */
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        top: 80px;
+        right: -40px;
+        font-size: 250px;
+        color: rgba(124, 58, 237, 0.03); /* Morado ultra transparente */
+        pointer-events: none;
+        z-index: 0;
+        transform: rotate(-10deg);
+    }
+
+    /* Banner Superior */
     .profile-header-banner {
-        height: 140px;
-        background: linear-gradient(135deg, var(--bg-sidebar) 0%, var(--sidebar-accent) 100%);
+        height: 160px;
+        background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-brand) 100%);
         position: relative;
+        border-bottom: 4px solid var(--purple-light);
+    }
+
+    .profile-header-banner::after {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.05)"/></svg>');
+        pointer-events: none;
     }
 
     .profile-avatar-wrapper {
-        margin-top: -70px;
+        margin-top: -75px;
         position: relative;
         display: inline-block;
+        z-index: 2;
     }
 
     .profile-avatar {
-        width: 140px;
-        height: 140px;
-        border-radius: 40px; /* Estilo squircle moderno */
-        border: 6px solid var(--white);
-        background: var(--white);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        width: 150px;
+        height: 150px;
+        border-radius: 20px;
+        border: 6px solid var(--card-bg);
+        background: var(--card-bg);
+        box-shadow: 0 10px 25px rgba(124, 58, 237, 0.15);
         object-fit: cover;
     }
 
-    /* Etiquetas y Secciones */
+    /* ==========================================================================
+       ESTILOS DE INPUTS (Seguridad & Diseño)
+       ========================================================================== */
     .section-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 25px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--bg-main);
+        font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px;
+        font-weight: 800; color: var(--purple-brand); margin-bottom: 1.5rem;
+        display: flex; align-items: center; gap: 10px;
+        border-bottom: 2px solid #F8FAFC; padding-bottom: 12px;
+        position: relative; z-index: 1;
     }
 
-    .section-header i {
-        color: var(--purple-pastel);
-        font-size: 1.2rem;
-    }
-
-    .section-header h5 {
-        margin: 0;
-        font-weight: 700;
-        color: var(--text-main);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.9rem;
-    }
-
-    /* Inputs Estilizados */
-    .input-group-custom {
-        position: relative;
-        margin-bottom: 5px;
-    }
-
-    .input-group-custom i {
-        position: absolute;
-        left: 18px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-muted);
-        transition: var(--transition);
-        z-index: 10;
+    .form-label {
+        font-weight: 800; font-size: 0.75rem; color: var(--text-muted);
+        letter-spacing: 1px; position: relative; z-index: 1;
     }
 
     .form-control-profile {
-        padding-left: 50px !important;
-        border: 2px solid transparent !important;
-        background-color: var(--bg-main) !important;
-        border-radius: 18px !important;
-        height: 60px;
-        font-weight: 500;
-        color: var(--text-main);
+        width: 100%; border-radius: 12px !important; border: 2px solid var(--border-color) !important;
+        background-color: var(--bg-light) !important; padding: 14px 18px !important;
+        font-weight: 600; font-size: 1rem; color: var(--text-main) !important;
+        transition: var(--transition-fast); box-shadow: none !important;
+        position: relative; z-index: 1;
     }
 
     .form-control-profile:focus {
-        border-color: var(--purple-pastel) !important;
-        background-color: var(--white) !important;
-        box-shadow: 0 10px 20px rgba(176, 154, 222, 0.15) !important;
+        background-color: #FFFFFF !important; border-color: var(--purple-brand) !important;
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1) !important; outline: none !important;
     }
 
-    .form-control-profile:focus + i {
-        color: var(--purple-pastel);
+    /* Campos Bloqueados (Estilo Bóveda) */
+    .form-control-profile[readonly] {
+        background-color: #F1F5F9 !important;
+        color: #94A3B8 !important;
+        border-color: #E2E8F0 !important;
+        cursor: not-allowed;
+        font-family: 'Courier New', Courier, monospace; /* Fuente de documento oficial */
+        letter-spacing: -0.5px;
     }
 
-    /* Botón */
+    /* ==========================================================================
+       BOTONES Y ALERTAS
+       ========================================================================== */
     .btn-update {
-        background: var(--bg-sidebar);
-        color: white;
-        border: none;
-        border-radius: 18px;
-        padding: 18px 40px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        transition: var(--transition);
-        box-shadow: 0 10px 20px rgba(42, 31, 69, 0.2);
+        background: var(--purple-brand); color: white !important;
+        padding: 16px 45px; border-radius: 14px; font-weight: 800; font-size: 1.05rem;
+        border: none; transition: var(--transition-spring);
+        box-shadow: 0 10px 25px var(--purple-glow);
+        display: inline-flex; align-items: center; gap: 10px;
+        position: relative; z-index: 1;
     }
-
     .btn-update:hover {
-        background: var(--sidebar-accent);
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(42, 31, 69, 0.3);
-        color: white;
+        transform: translateY(-3px); background: var(--purple-dark);
+        box-shadow: 0 15px 35px rgba(124, 58, 237, 0.35);
     }
 
-    /* Dark Mode Adjustments */
-    body.dark-mode .profile-avatar {
-        background: var(--card-bg);
-        border-color: var(--card-bg);
+    .security-badge {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        color: var(--text-muted); font-size: 0.8rem; font-weight: 600; margin-top: 20px;
     }
-    body.dark-mode .form-control-profile {
-        background-color: #252525 !important;
-        color: white;
+    .security-badge i { color: var(--purple-brand); }
+
+    .alert-premium {
+        background: #F0FDF4; color: #065F46; border: none; border-left: 5px solid var(--success-green);
+        border-radius: 12px; font-weight: 600; box-shadow: var(--shadow-premium);
     }
 </style>
 
 <div class="profile-container fade-in-up">
     
     {% if messages %}
+        <div class="mb-4">
         {% for message in messages %}
-            <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center" role="alert">
-                <i class="fa-solid fa-circle-check me-3 fs-4"></i>
+            <div class="alert alert-premium alert-dismissible fade show d-flex align-items-center" role="alert">
+                <i class="fa-solid fa-shield-check fs-4 me-3" style="color: var(--success-green);"></i>
                 <div>{{ message }}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
+        </div>
     {% endif %}
 
     <div class="profile-card">
@@ -147,19 +175,35 @@
 
         <div class="p-4 p-md-5 pt-0 text-center">
             <div class="profile-avatar-wrapper">
-                <img src="https://ui-avatars.com/api/?name={{ perfil.nombre_completo }}&background=b09ade&color=fff&size=200&bold=true" class="profile-avatar" alt="Avatar">
-                <div class="position-absolute bottom-0 end-0 p-1">
-                    <span class="badge bg-success border border-white border-4 rounded-circle p-2" title="Cuenta Activa"></span>
+                <!-- Mostramos el first_name si es de consola, sino el nombre_completo, y color de fondo morado -->
+                <img src="https://ui-avatars.com/api/?name={% if es_superuser_consola %}{{ perfil.first_name|default:perfil.username }}{% else %}{{ perfil.nombre_completo }}{% endif %}&background=7C3AED&color=fff&size=200&bold=true" class="profile-avatar" alt="Avatar Institucional">
+                <div class="position-absolute bottom-0 end-0 p-2">
+                    <span class="badge rounded-circle p-2" style="background-color: var(--success-green); border: 4px solid white;" title="Identidad Verificada"></span>
                 </div>
             </div>
 
-            <div class="mt-3 mb-5">
-                <h3 class="fw-bold text-dark m-0">{{ perfil.nombre_completo }}</h3>
-                <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
-                    <span class="badge bg-light text-primary border rounded-pill px-4 py-2 fw-bold">
-                        <i class="fa-solid fa-id-badge me-2"></i>{% if es_paciente %}Paciente{% else %}{{ perfil.rol.nombre_rol }}{% endif %}
+            <div class="mt-3 mb-5 position-relative z-1">
+                <h3 class="fw-bold m-0" style="color: var(--text-main);">
+                    {% if es_superuser_consola %}
+                        {{ perfil.first_name|default:"Superusuario del Sistema" }}
+                    {% else %}
+                        {{ perfil.nombre_completo }}
+                    {% endif %}
+                </h3>
+                <div class="d-flex align-items-center justify-content-center gap-2 mt-2 flex-wrap">
+                    <span class="badge" style="background: rgba(124, 58, 237, 0.1); color: var(--purple-brand); border: 1px solid var(--purple-brand); padding: 8px 16px; border-radius: 50px; font-weight: 700;">
+                        <i class="fa-solid fa-id-card-clip me-2"></i>
+                        {% if es_superuser_consola %}
+                            Administrador Root (Consola)
+                        {% elif es_paciente %}
+                            Paciente Titular
+                        {% else %}
+                            {{ perfil.rol.nombre_rol }}
+                        {% endif %}
                     </span>
-                    <span class="text-muted small fw-medium">@{{ perfil.usuario|default:"usuario_activo" }}</span>
+                    <span class="text-muted small fw-bold" style="font-family: 'Courier New', Courier, monospace;">
+                        @{{ perfil.usuario|default:perfil.username }}
+                    </span>
                 </div>
             </div>
 
@@ -167,38 +211,59 @@
                 {% csrf_token %}
                 
                 <div class="section-header">
-                    <i class="fa-solid fa-user-gear"></i>
-                    <h5>Datos Personales</h5>
+                    <i class="fa-solid fa-file-shield"></i> Expediente Personal de Seguridad
                 </div>
 
-                <div class="row g-4">
-                    <div class="col-12">
-                        <label class="form-label fw-bold small text-muted ms-2">NOMBRE COMPLETO</label>
-                        <div class="input-group-custom">
-                            <input type="text" name="nombre_completo" class="form-control form-control-profile" value="{{ perfil.nombre_completo }}" placeholder="Tu nombre..." required>
-                            <i class="fa-solid fa-signature"></i>
-                        </div>
+                <div class="row g-4 position-relative z-1">
+                    
+                    <!-- DATOS BLOQUEADOS (Solo visibles si no eres superusuario de consola) -->
+                    {% if not es_superuser_consola %}
+                    <div class="col-md-4">
+                        <label class="form-label">TIPO DE DOCUMENTO</label>
+                        <input type="text" class="form-control-profile" value="{{ perfil.tipo_documento }}" readonly title="Dato verificado y bloqueado.">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">NRO. IDENTIFICACIÓN <i class="fa-solid fa-lock text-muted ms-1"></i></label>
+                        <input type="text" class="form-control-profile" value="{% if es_paciente %}{{ perfil.dni_paciente }}{% else %}{{ perfil.dni_empleado }}{% endif %}" readonly title="Por seguridad, este dato no se puede modificar.">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">CREDENCIAL DE ACCESO <i class="fa-solid fa-lock text-muted ms-1"></i></label>
+                        <input type="text" class="form-control-profile" value="{{ perfil.usuario }}" readonly title="Tu usuario de ingreso es inmutable.">
+                    </div>
+                    {% else %}
+                    <!-- Si es consola, mostramos solo el Username bloqueado -->
+                    <div class="col-md-12">
+                        <label class="form-label">CREDENCIAL DE ACCESO (ROOT) <i class="fa-solid fa-lock text-muted ms-1"></i></label>
+                        <input type="text" class="form-control-profile" value="{{ perfil.username }}" readonly>
+                    </div>
+                    {% endif %}
+
+
+                    <!-- DATOS EDITABLES -->
+                    <div class="col-md-{% if es_superuser_consola %}6{% else %}12{% endif %}">
+                        <label class="form-label">NOMBRE Y APELLIDO REGISTRADO</label>
+                        <input type="text" name="nombre_completo" class="form-control-profile" 
+                            value="{% if es_superuser_consola %}{{ perfil.first_name }}{% else %}{{ perfil.nombre_completo }}{% endif %}" required>
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label fw-bold small text-muted ms-2">CORREO ELECTRÓNICO</label>
-                        <div class="input-group-custom">
-                            <input type="email" name="correo" class="form-control form-control-profile" value="{{ perfil.correo }}" placeholder="correo@ejemplo.com" required>
-                            <i class="fa-solid fa-envelope"></i>
-                        </div>
+                        <label class="form-label">CORREO ELECTRÓNICO OFICIAL</label>
+                        <input type="email" name="correo" class="form-control-profile" 
+                            value="{% if es_superuser_consola %}{{ perfil.email }}{% else %}{{ perfil.correo }}{% endif %}" required>
                     </div>
 
+                    {% if not es_superuser_consola %}
                     <div class="col-md-6">
-                        <label class="form-label fw-bold small text-muted ms-2">TELÉFONO DE CONTACTO</label>
-                        <div class="input-group-custom">
-                            <input type="text" name="telefono" class="form-control form-control-profile" value="{{ perfil.telefono }}" placeholder="+57 000 0000000">
-                            <i class="fa-solid fa-phone"></i>
-                        </div>
+                        <label class="form-label">TELÉFONO MÓVIL / CONTACTO</label>
+                        <input type="text" name="telefono" class="form-control-profile" value="{{ perfil.telefono }}">
                     </div>
+                    {% endif %}
 
-                    <div class="col-12 text-center mt-5">
-                        <button type="submit" class="btn btn-update">
-                            <i class="fa-solid fa-arrows-rotate me-2"></i>Actualizar Información de Perfil
+                    <div class="col-12 text-center mt-5 pt-3 border-top" style="border-color: var(--border-color) !important;">
+                        <button type="submit" class="btn-update">
+                            <i class="fa-solid fa-fingerprint"></i> Autorizar Actualización de Datos
                         </button>
                     </div>
                 </div>
@@ -206,11 +271,29 @@
         </div>
     </div>
 
-    <div class="text-center mt-4 mb-5">
-        <p class="text-muted small">
-            <i class="fa-solid fa-shield-halved me-1"></i> 
-            Tus datos están protegidos bajo los protocolos de seguridad de NeuroEsencia.
-        </p>
+    <!-- Sello Institucional Inferior -->
+    <div class="security-badge mb-5">
+        <i class="fa-solid fa-shield-halved"></i> 
+        Información resguardada bajo estrictos protocolos de encriptación de NeuroEsencia.
     </div>
 </div>
+
+<script>
+    // Pequeño script para evitar que se envíen espacios vacíos si tratan de burlar el 'required'
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const requiredInputs = form.querySelectorAll('input[required]');
+            let isValid = true;
+            requiredInputs.forEach(input => {
+                if(input.value.trim() === '') {
+                    input.style.borderColor = '#EF4444';
+                    input.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.1)';
+                    isValid = false;
+                }
+            });
+            if(!isValid) e.preventDefault();
+        });
+    });
+</script>
 {% endblock %}

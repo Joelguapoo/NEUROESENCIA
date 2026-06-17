@@ -303,6 +303,13 @@
 </div>
 
 <script>
+    // --- FIX DE ZONA HORARIA Y SINCRONIZACIÓN CON EL SERVIDOR ---
+    // Obtenemos la hora real en milisegundos desde el backend de Django al momento de cargar la página.
+    // Esto asegura que el tiempo evaluado sea la realidad y no el tiempo del reloj de Windows del usuario.
+    const serverTimeMs = parseInt("{% now 'U' %}") * 1000;
+    const localLoadTimeMs = Date.now();
+    // ------------------------------------------------------------
+
     // LÓGICA INTACTA DEL SISTEMA
     const slotsBase = ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
     let horasOcupadasGlobal = [];
@@ -346,7 +353,10 @@
 
     // Configuración Flatpickr
     const fp = flatpickr("#calendarInline", {
-        inline: true, locale: "es", minDate: "today",
+        inline: true, 
+        locale: "es", 
+        minDate: "today",
+        dateFormat: "Y-m-d", // FIX: Se asegura que siempre entregue formato AAAA-MM-DD
         disable: [ function(date) { return (date.getDay() === 0 || date.getDay() === 6); } ], 
         onChange: function(selectedDates, dateStr) {
             document.getElementById('fecha_seleccionada').value = dateStr;
@@ -424,16 +434,21 @@
         
         const fechaSeleccionada = document.getElementById('fecha_seleccionada').value;
         const duracionRequerida = parseInt(document.getElementById('selectDuracion').value);
-        const ahora = new Date(); 
+        
+        // Calculamos la hora exacta y real combinando el tiempo del servidor + el tiempo que lleva el usuario en la página.
+        const currentRealMs = serverTimeMs + (Date.now() - localLoadTimeMs);
+        const ahora = new Date(currentRealMs);
 
         let hayDisponibilidad = false;
 
         slotsBase.forEach((horaStr, index) => {
-            const [year, month, day] = fechaSeleccionada.split('-').map(Number);
-            const [horaFormato, minutosFormato] = horaStr.split(':').map(Number);
-            const fechaDelBloque = new Date(year, month - 1, day, horaFormato, minutosFormato);
+            // FIX: En lugar de crear un "new Date" estándar, anclamos explícitamente el bloque horario 
+            // a la zona horaria UTC-5 (Colombia) para compararlo de manera uniforme con el "ahora" de arriba.
+            const targetStr = `${fechaSeleccionada}T${horaStr}:00-05:00`;
+            const fechaDelBloque = new Date(targetStr);
             
-            const yaPaso = fechaDelBloque < ahora;
+            // Si la hora del bloque cronológicamente es menor a la hora real, ya pasó
+            const yaPaso = fechaDelBloque.getTime() < ahora.getTime();
             let estaOcupada = ocupadas.includes(horaStr) || yaPaso;
 
             let bloquePosible = true;

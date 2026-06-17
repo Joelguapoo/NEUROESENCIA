@@ -30,5 +30,7 @@ urlpatterns = [
     path('roles/', views.lista_roles, name='lista_roles'),
     path('roles/nuevo/', views.crear_rol, name='crear_rol'),
     path('api/municipios/', api.buscar_municipios, name="api_municipios"),
+    path('roles/editar/<int:rol_id>/', views.editar_rol, name='editar_rol'),
+    path('roles/cambiar_estado/<int:rol_id>/', views.cambiar_estado_rol, name='cambiar_estado_rol'),
 
 ]

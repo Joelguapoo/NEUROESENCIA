@@ -337,6 +337,13 @@ def crear_tratamiento(request):
             form.save()
             messages.success(request, "Plan de tratamiento iniciado con éxito.")
             return redirect('lista_tratamientos')
+        else:
+            # 1. Imprime los errores en la terminal para que los puedas debugear
+            print("Errores del formulario:", form.errors)
+            
+            # 2. Envía un mensaje de error a la interfaz
+            messages.error(request, "Hubo un error al guardar. Por favor revisa los campos.")
     else:
         form = TratamientoForm()
+        
     return render(request, 'clinica/crear_tratamiento.html', {'form': form})
