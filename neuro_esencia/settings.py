@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -129,29 +130,28 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# neuro_esencia/settings.py
 
-# neuro_esencia/settings.py
-
-# Configuración de Servidor de Correos (Gmail) para NeuroEsencia
+# ==============================================================================
+# CONFIGURACIÓN DE CORREO - ADAPTADA PARA PRODUCCIÓN EN RAILWAY (SSL Directo)
+# ==============================================================================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_PORT = 465             # Usamos el puerto SSL para saltar el bloqueo de Railway
+EMAIL_USE_SSL = True         # Activamos conexión segura directa
+EMAIL_USE_TLS = False        # Desactivamos TLS (ya que estamos usando SSL)
 EMAIL_HOST_USER = 'neuroesencia381@gmail.com'
-# La contraseña de aplicación va sin espacios:
 EMAIL_HOST_PASSWORD = 'ihfckcoyvnfhjpty' 
 DEFAULT_FROM_EMAIL = 'NeuroEsencia <neuroesencia381@gmail.com>'
 
+# ==============================================================================
+# CONFIGURACIÓN DE SESIONES Y VISTAS
+# ==============================================================================
 LOGIN_URL = 'iniciar_sesion'
 
 # Indica que al entrar con éxito, nos mande siempre a la lista de pacientes
 LOGIN_REDIRECT_URL = 'lista_pacientes'
 
 # Opcional: Para que los mensajes de error de Django se vean con colores de Bootstrap
-from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
-
-
