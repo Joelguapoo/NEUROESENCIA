@@ -1,3 +1,4 @@
+import os
 """
 Django settings for neuro_esencia project.
 
@@ -78,11 +79,11 @@ WSGI_APPLICATION = 'neuro_esencia.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'db_nueroesencia', 
-        'USER': 'root',            
-        'PASSWORD': '123',            
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.getenv('MYSQLDATABASE'),
+        'USER': os.getenv('MYSQLUSER'),
+        'PASSWORD': os.getenv('MYSQLPASSWORD'),
+        'HOST': os.getenv('MYSQLHOST'),
+        'PORT': os.getenv('MYSQLPORT'),
     }
 }
 
