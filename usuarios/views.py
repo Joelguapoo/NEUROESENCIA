@@ -1,3 +1,4 @@
+import threading
 import uuid
 from django.conf import settings
 from django.contrib import messages
@@ -100,6 +101,17 @@ def lista_pacientes(request):
     }
     return render(request, 'usuarios/lista_pacientes.html', contexto)
 
+def enviar_correo_en_segundo_plano(asunto, mensaje, destinatario):
+    try:
+        send_mail(
+            asunto, 
+            mensaje, 
+            settings.EMAIL_HOST_USER, 
+            [destinatario]
+        )
+    except Exception as e:
+        print(f"Error enviando correo en segundo plano: {e}")
+
 
 def crear_paciente(request):
     if request.method == 'POST':
@@ -111,11 +123,15 @@ def crear_paciente(request):
             url_activacion = f"{esquema}://{host}/activar/{paciente.dni_paciente}/"
             
             mensaje = f"Hola {paciente.nombre_completo},\n\nActiva tu cuenta de Neuroesencia aquí: {url_activacion}"
-            try:
-                send_mail('Bienvenido a NeuroEsencia', mensaje, settings.EMAIL_HOST_USER, [paciente.correo])
-                messages.success(request, f"Paciente {paciente.nombre_completo} creado y correo enviado.")
-            except Exception as e:
-                messages.warning(request, f"Paciente creado, pero el correo falló: {e}")
+            
+            # ---> NUEVA LÓGICA DE CORREO <---
+            hilo = threading.Thread(
+                target=enviar_correo_en_segundo_plano, 
+                args=('Bienvenido a NeuroEsencia', mensaje, paciente.correo)
+            )
+            hilo.start() # Esto lanza el correo y continúa sin esperar
+            
+            messages.success(request, f"Paciente {paciente.nombre_completo} creado. El correo de activación está en camino.")
             return redirect('lista_pacientes')
     else:
         form = PacienteForm()
