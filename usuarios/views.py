@@ -611,11 +611,13 @@ def recuperar_password(request):
             asunto = "Restablece tu acceso a NeuroEsencia"
             mensaje = f"Hola {paciente.nombre_completo},\n\nHemos recibido una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:\n\n{link_recuperacion}\n\nSi no fuiste tú, ignora este mensaje."
             
-            try:
-                send_mail(asunto, mensaje, settings.EMAIL_HOST_USER, [email_input])
-                messages.success(request, "¡Enlace enviado! Revisa tu correo electrónico.")
-            except Exception as e:
-                messages.error(request, f"Hubo un error al enviar el correo: {e}")
+            hilo = threading.Thread(
+                target=enviar_correo_en_segundo_plano, 
+                args=(asunto, mensaje, email_input)
+            )
+            hilo.start()
+            
+            messages.success(request, "¡Enlace enviado! Revisa tu correo electrónico.")
         else:
             messages.error(request, "Este correo no está registrado en nuestro sistema.")
             
