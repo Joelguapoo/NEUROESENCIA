@@ -1,3 +1,4 @@
+import threading
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -75,12 +76,15 @@ def agendar_cita(request):
                         subtotal=50000, impuestos=0, total=50000, estado_pago='Pendiente'
                     )
             
-                    resultado = enviar_confirmacion_cita(cita)
+                    # ---> LANZAMOS EL HILO PARA EL PDF Y CORREO EN SEGUNDO PLANO <---
+                    hilo_correo = threading.Thread(
+                        target=enviar_confirmacion_cita, 
+                        args=(cita,)
+                    )
+                    hilo_correo.start()
                     
-                    if resultado == "EXITO":
-                        messages.success(request, f"Cita {cita.codigo_cita} agendada. Se envió el PDF al paciente.")
-                    else:
-                        messages.warning(request, f"Cita agendada, pero el correo falló: {resultado}")
+                    # Respondemos inmediatamente al usuario sin esperar el correo
+                    messages.success(request, f"Cita {cita.codigo_cita} agendada. Se está generando el PDF y enviando al paciente en segundo plano.")
                         
                 return redirect('lista_citas')
             
@@ -281,11 +285,13 @@ def enviar_confirmacion_cita(cita):
         email.content_subtype = "html"
         email.attach(f"Cita_{cita.codigo_cita}.pdf", pdf_final, 'application/pdf')
         email.send(fail_silently=False)
-        return "EXITO"
+        
+        # Imprimimos en la consola de Railway para confirmar que todo salió bien
+        print(f"ÉXITO: Correo y PDF de cita {cita.codigo_cita} enviado en segundo plano.")
         
     except Exception as e:
-        print(f"Error en el envío: {e}")
-        return str(e)
+        # Si algo falla (como la contraseña bloqueada de Google), lo veremos en los Logs
+        print(f"ERROR enviando confirmación de cita en segundo plano: {e}")
 
 @login_required
 def obtener_disponibilidad(request):
