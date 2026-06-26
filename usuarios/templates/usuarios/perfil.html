@@ -191,20 +191,21 @@
                     {% endif %}
                 </h3>
                 <div class="d-flex align-items-center justify-content-center gap-2 mt-2 flex-wrap">
-                    <span class="badge" style="background: rgba(124, 58, 237, 0.1); color: var(--purple-brand); border: 1px solid var(--purple-brand); padding: 8px 16px; border-radius: 50px; font-weight: 700;">
-                        <i class="fa-solid fa-id-card-clip me-2"></i>
-                        {% if es_superuser_consola %}
-                            Administrador Root (Consola)
-                        {% elif es_paciente %}
-                            Paciente Titular
-                        {% else %}
-                            {{ perfil.rol.nombre_rol }}
-                        {% endif %}
-                    </span>
-                    <span class="text-muted small fw-bold" style="font-family: 'Courier New', Courier, monospace;">
-                        @{{ perfil.usuario|default:perfil.username }}
-                    </span>
-                </div>
+    <span class="badge" style="background: rgba(124, 58, 237, 0.1); color: var(--purple-brand); border: 1px solid var(--purple-brand); padding: 8px 16px; border-radius: 50px; font-weight: 700;">
+        <i class="fa-solid fa-id-card-clip me-2"></i>
+        {% if es_superuser_consola %}
+            Administrador Root (Consola)
+        {% elif es_paciente %}
+            Paciente Titular
+        {% else %}
+            {{ perfil.rol.nombre_rol }}
+        {% endif %}
+    </span>
+    
+    <span class="text-muted small fw-bold" style="font-family: 'Courier New', Courier, monospace;">
+        @{% if es_superuser_consola %}{{ perfil.username }}{% else %}{{ perfil.usuario }}{% endif %}
+    </span>
+</div>                </div>
             </div>
 
             <form method="POST" class="text-start">
