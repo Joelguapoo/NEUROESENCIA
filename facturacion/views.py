@@ -1,4 +1,5 @@
 import uuid
+import threading
 from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -106,6 +107,25 @@ def generar_pago_automatico(request, cita_id, metodo):
         
     return redirect('lista_facturas')
 
+# ---- FUNCIÓN AUXILIAR PARA EVITAR ERROR 500 EN RAILWAY ----
+def enviar_recibo_segundo_plano(factura, obj_metodo):
+    try:
+        template = get_template('facturacion/factura_pdf.html')
+        html = template.render({'factura': factura})
+        result = BytesIO()
+        pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
+        pdf_recibo = result.getvalue()
+
+        asunto = f"Recibo de Pago - Factura {factura.nro_factura} - NeuroEsencia"
+        cuerpo = f"Hola {factura.paciente.nombre_completo},\n\nHemos recibido exitosamente tu pago por un valor de ${factura.total} COP mediante {obj_metodo.nombre_metodo}. Adjuntamos el recibo oficial de esta transacción.\n\nGracias por confiar en nosotros."
+        
+        email = EmailMessage(asunto, cuerpo, settings.EMAIL_HOST_USER, [factura.paciente.correo])
+        email.attach(f"Recibo_{factura.nro_factura}.pdf", pdf_recibo, 'application/pdf')
+        email.send(fail_silently=False)
+        print(f"ÉXITO: Recibo PDF enviado al paciente {factura.paciente.nombre_completo}")
+    except Exception as e:
+        print(f"Error técnico enviando recibo PDF en segundo plano: {e}")
+
 def detalle_factura(request, factura_id):
     factura = get_object_or_404(Factura, id=factura_id)
     
@@ -126,26 +146,15 @@ def detalle_factura(request, factura_id):
         factura.estado_pago = 'Pagada'
         factura.save()
         
-        # 3. Enviar el correo de Recibo de Pago
-        try:
-            # Aquí generamos el PDF del recibo usando tu vista existente
-            template = get_template('facturacion/factura_pdf.html')
-            html = template.render({'factura': factura})
-            result = BytesIO()
-            pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
-            pdf_recibo = result.getvalue()
-
-            asunto = f"Recibo de Pago - Factura {factura.nro_factura} - NeuroEsencia"
-            cuerpo = f"Hola {factura.paciente.nombre_completo},\n\nHemos recibido exitosamente tu pago por un valor de ${factura.total} COP mediante {obj_metodo.nombre_metodo}. Adjuntamos el recibo oficial de esta transacción.\n\nGracias por confiar en nosotros."
-            
-            email = EmailMessage(asunto, cuerpo, settings.EMAIL_HOST_USER, [factura.paciente.correo])
-            email.attach(f"Recibo_{factura.nro_factura}.pdf", pdf_recibo, 'application/pdf')
-            email.send(fail_silently=False)
-            
-            messages.success(request, f"¡Pago procesado con {obj_metodo.nombre_metodo}! El recibo ha sido enviado al paciente.")
-        except Exception as e:
-            messages.warning(request, f"Pago registrado, pero hubo un error enviando el correo: {e}")
-            
+        # 3. Lanzar el envío del recibo PDF a un Hilo en segundo plano
+        hilo_recibo = threading.Thread(
+            target=enviar_recibo_segundo_plano, 
+            args=(factura, obj_metodo)
+        )
+        hilo_recibo.start()
+        
+        # Respuesta inmediata a la pantalla para evitar el colapso
+        messages.success(request, f"¡Pago procesado con {obj_metodo.nombre_metodo}! El recibo se está generando y enviando al paciente.")
         return redirect('lista_facturas')
         
     return render(request, 'facturacion/detalle_factura.html', {'factura': factura})
