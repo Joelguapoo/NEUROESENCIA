@@ -122,7 +122,22 @@ def crear_paciente(request):
             esquema = request.scheme
             url_activacion = f"{esquema}://{host}/activar/{paciente.dni_paciente}/"
             
-            mensaje = f"Hola {paciente.nombre_completo},\n\nActiva tu cuenta de Neuroesencia aquí: {url_activacion}"
+            mensaje = f"""Estimado/a {paciente.nombre_completo},
+
+Nos llena de alegría darte la bienvenida a NeuroEsencia. Tu expediente clínico digital ha sido creado exitosamente en nuestro sistema.
+
+Para finalizar tu registro y acceder a tu portal de paciente —donde podrás agendar tus sesiones, consultar tus facturas y llevar un seguimiento de tu proceso— es necesario activar tu cuenta.
+
+Por favor, ingresa al siguiente enlace seguro para crear tus credenciales de acceso:
+🔗 {url_activacion}
+
+Por protocolos de privacidad y protección de datos médicos, te recomendamos no compartir este enlace con nadie. Si no esperabas este correo, puedes ignorarlo de manera segura.
+
+Atentamente,
+
+El equipo de NeuroEsencia
+Ciencia y Bienestar integral
+"""
             
             # ---> NUEVA LÓGICA DE CORREO <---
             hilo = threading.Thread(
