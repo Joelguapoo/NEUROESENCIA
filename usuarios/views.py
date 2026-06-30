@@ -21,6 +21,8 @@ from django.db import transaction
 import pandas as pd
 from django.db import transaction
 from .forms import RolForm
+from django.shortcuts import render, redirect, get_object_or_404
+from clinica.models import Paciente
 
 
 def inicio(request):
@@ -788,3 +790,18 @@ def cambiar_estado_rol(request, rol_id):
         })
         
     return JsonResponse({'status': 'error', 'mensaje': 'Método no permitido.'}, status=400)
+
+ # O de donde sea que importes el modelo Paciente
+
+def perfil_paciente(request):
+    """Vista del perfil exclusivo para el Paciente"""
+    p_id = request.session.get('paciente_id')
+    
+    # Si no hay sesión, lo devuelve al login
+    if not p_id: 
+        return redirect('iniciar_sesion')
+    
+    # Buscamos sus datos en la base de datos
+    paciente = get_object_or_404(Paciente, id=p_id)
+    
+    return render(request, 'usuarios/perfil_paciente.html', {'paciente': paciente})
