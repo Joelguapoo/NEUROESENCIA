@@ -520,8 +520,11 @@
 
                     const btnSubmit = document.getElementById('btnSubmit');
                     if (btnSubmit) {
-                        btnSubmit.disabled = true;
-                        btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando Transacción...';
+                        // AQUÍ ESTÁ LA CORRECCIÓN: El setTimeout evita que el navegador cancele el envío accidentalmente
+                        setTimeout(() => {
+                            btnSubmit.disabled = true;
+                            btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando Transacción...';
+                        }, 50);
                     }
                 }
             });
