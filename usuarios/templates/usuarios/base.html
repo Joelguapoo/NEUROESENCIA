@@ -422,21 +422,28 @@
         });
     </script>
 </body>
-<!-- <style>
+    <style>
+    /* ==========================================================================
+       PANTALLA DE CARGA GLOBAL (Optimizada y Estilo Glassmorphism)
+       ========================================================================== */
     .neuro-loader-overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: #F4F7FE; /* Color de fondo claro original */
+        /* Fondo cristalino moderno en lugar de color sólido */
+        background-color: rgba(244, 247, 254, 0.85); 
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         z-index: 999999;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        /* Aumentamos la duración de la transición al desvanecerse */
-        transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+        /* Transiciones más rápidas (0.3s) para que la UX se sienta ágil */
+        transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+        will-change: opacity, visibility;
     }
 
     .neuro-loader-hidden {
@@ -458,11 +465,11 @@
 
     /* Icono del cerebro pulsante */
     .brain-icon-loader {
-        font-size: 3rem;
-        color: #7C3AED; /* Tu morado principal */
+        font-size: 3.5rem;
+        color: #7C3AED; /* Morado principal */
         position: relative;
         z-index: 2;
-        animation: pulse-brain 1.5s ease-in-out infinite alternate;
+        animation: pulse-brain 1.2s ease-in-out infinite alternate;
         filter: drop-shadow(0 0 15px rgba(124, 58, 237, 0.4));
     }
 
@@ -478,32 +485,32 @@
         height: 100px;
         border-top-color: #7C3AED;
         border-right-color: rgba(124, 58, 237, 0.3);
-        animation: spin-orbit 2s linear infinite;
+        animation: spin-orbit 1.5s linear infinite; /* Animación más ágil */
     }
 
     .brain-orbit-2 {
         width: 120px;
         height: 120px;
-        border-bottom-color: #C4B5FD; /* Tu morado claro */
+        border-bottom-color: #C4B5FD;
         border-left-color: rgba(196, 181, 253, 0.3);
-        animation: spin-orbit-reverse 3s linear infinite;
+        animation: spin-orbit-reverse 2.5s linear infinite;
     }
 
     /* Texto de carga */
     .neuro-loading-text {
         font-family: 'Poppins', sans-serif;
         font-weight: 800;
-        font-size: 1.2rem;
-        color: #111827; /* Texto oscuro */
+        font-size: 1.3rem;
+        color: #111827; 
         letter-spacing: 1px;
         margin: 0;
     }
 
     .neuro-loading-subtext {
         font-family: 'Poppins', sans-serif;
-        font-weight: 500;
+        font-weight: 600;
         font-size: 0.85rem;
-        color: #6B7280; /* Texto gris */
+        color: #6B7280; 
         margin-top: 5px;
     }
 
@@ -513,6 +520,7 @@
         animation: dots 1.5s steps(5, end) infinite;
     }
 
+    /* --- Keyframes --- */
     @keyframes pulse-brain {
         0% { transform: scale(0.95); opacity: 0.8; }
         100% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 25px rgba(124, 58, 237, 0.7)); }
@@ -543,28 +551,29 @@
         <i class="fa-solid fa-brain brain-icon-loader"></i>
     </div>
     <h3 class="neuro-loading-text">Cargando<span class="loading-dots"></span></h3>
-    <p class="neuro-loading-subtext">Procesando información neuronal</p>
+    <p class="neuro-loading-subtext">Procesando información de forma segura</p>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const loader = document.getElementById('neuro-global-loader');
 
-        // 1. Ocultar el loader cuando la página termina de cargar (CON RETRASO)
+        // 1. Ocultar el loader cuando la página termina de cargar (Más rápido)
         window.addEventListener('load', function() {
             if (loader) {
-                // El retraso de 800ms asegura que el usuario alcance a ver la animación
+                // Reducimos el tiempo a 400ms para no desesperar al usuario
                 setTimeout(function() {
                     loader.classList.add('neuro-loader-hidden');
-                }, 800); 
+                }, 400); 
             }
         });
 
         // 2. Mostrar el loader al hacer clic en enlaces de navegación
         document.addEventListener('click', function(e) {
-            // Buscar si el clic fue en un enlace (<a>) o dentro de uno
+            // Evitamos activar el loader si el clic fue cancelado por otra función
+            if (e.defaultPrevented) return;
+
             const link = e.target.closest('a');
-            
             if (link && link.href) {
                 const urlObj = new URL(link.href);
                 const isExternal = link.target === '_blank';
@@ -572,17 +581,24 @@
                 const isJs = link.getAttribute('href').startsWith('javascript:');
                 const isDownload = link.hasAttribute('download');
                 
-                // Evitamos activar el loader si es una ruta local pura (#), abre otra pestaña o es un script
                 if (!isExternal && !isHash && !isJs && !isDownload && urlObj.origin === window.location.origin) {
                     if (loader) loader.classList.remove('neuro-loader-hidden');
                 }
             }
         });
 
-        // 3. Mostrar el loader al enviar cualquier formulario
+        // 3. Mostrar el loader al enviar cualquier formulario (CON PROTECCIÓN ANTI-ERRORES)
         document.addEventListener('submit', function(e) {
-            // Solo activamos si el formulario no tiene target="_blank"
-            if (e.target.target !== '_blank') {
+            const form = e.target;
+
+            // LÓGICA DE SEGURIDAD: 
+            // Solo mostramos la pantalla de carga si el formulario cumple todas las reglas (required, minlength, etc.)
+            // y si ningún otro script ha bloqueado el envío (e.defaultPrevented).
+            if (!form.checkValidity() || e.defaultPrevented) {
+                return; // Cortamos la ejecución aquí, NO mostramos la pantalla de carga
+            }
+
+            if (form.target !== '_blank') {
                 if (loader) loader.classList.remove('neuro-loader-hidden');
             }
         });
@@ -594,5 +610,5 @@
             }
         });
     });
-</script> -->
+</script>
 </html>
