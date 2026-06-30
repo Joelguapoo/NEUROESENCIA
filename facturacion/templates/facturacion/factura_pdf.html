@@ -5,220 +5,185 @@
     <style>
         @page {
             size: letter;
-            margin: 0cm;
+            margin: 2cm;
         }
-        body { 
-            font-family: 'Helvetica', 'Arial', sans-serif; 
-            color: #1a142e; 
-            margin: 0;
-            padding: 0;
-            background-color: #ffffff;
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #2a1f45;
+            font-size: 12px;
         }
-
-        /* --- Elementos de Marca --- */
-        .sidebar {
-            position: absolute;
-            left: 0; top: 0; bottom: 0;
-            width: 12px;
-            background: #2a1f45;
+        .header-table {
+            width: 100%;
+            margin-bottom: 40px;
         }
-        .top-accent {
-            position: absolute;
-            left: 0; top: 0; right: 0;
-            height: 6px;
-            background: #b09ade;
-        }
-
-        /* --- Contenedor Principal --- */
-        .wrapper {
-            padding: 60px 50px;
-        }
-
-        /* --- Encabezado de Lujo --- */
-        .header { width: 100%; margin-bottom: 40px; }
-        .logo-box { width: 60%; }
-        .logo-text { font-size: 34px; color: #2a1f45; font-weight: bold; letter-spacing: -1.5px; margin: 0; }
-        .logo-sub { font-size: 11px; color: #b09ade; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; margin-top: 5px; }
-        
-        .meta-box { width: 40%; text-align: right; }
-        .invoice-number { font-size: 20px; color: #2a1f45; font-weight: bold; margin-bottom: 5px; }
-        .invoice-label { font-size: 9px; color: #a3aed1; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* --- Bloques de Datos --- */
-        .section-title {
-            font-size: 10px;
-            text-transform: uppercase;
-            color: #a3aed1;
+        .title {
+            font-size: 38px;
             font-weight: bold;
-            border-bottom: 1px solid #f1f1f1;
-            padding-bottom: 8px;
-            margin-bottom: 15px;
+            color: #2a1f45;
+            letter-spacing: 2px;
+        }
+        .logo-text {
+            font-size: 26px;
+            font-weight: bold;
+            color: #2a1f45;
+            text-align: right;
+        }
+        .logo-sub {
+            font-size: 10px;
+            color: #b09ade;
+            text-transform: uppercase;
+            text-align: right;
             letter-spacing: 1px;
         }
-        
-        .data-grid { width: 100%; margin-bottom: 40px; }
-        .data-cell { vertical-align: top; font-size: 13px; line-height: 1.6; color: #2b3674; }
-        .data-bold { font-weight: bold; color: #2a1f45; }
-
-        /* --- Tabla de Servicios --- */
-        .table-container { margin-top: 20px; min-height: 250px; }
-        .main-table { width: 100%; border-collapse: collapse; }
-        .main-table th { 
-            background-color: #fcfcfd; 
-            color: #a3aed1; 
-            font-size: 9px; 
-            text-transform: uppercase; 
-            padding: 15px 12px; 
-            text-align: left;
-            border-bottom: 2px solid #2a1f45;
+        .info-table {
+            width: 100%;
+            margin-bottom: 40px;
         }
-        .main-table td { 
-            padding: 25px 12px; 
-            border-bottom: 1px solid #f8f9fb; 
-            font-size: 13px; 
-        }
-        .item-desc { font-weight: bold; color: #2a1f45; font-size: 14px; display: block; margin-bottom: 4px; }
-        .item-sub { color: #a3aed1; font-size: 11px; font-weight: normal; }
-
-        /* --- Total Estilo Recibo Bancario --- */
-        .summary-wrapper { width: 100%; margin-top: 30px; }
-        .summary-table { width: 320px; margin-left: auto; }
-        .summary-row td { padding: 8px 12px; font-size: 13px; }
-        .total-row { background-color: #2a1f45; color: #ffffff; }
-        .total-row td { padding: 20px 15px; border-radius: 12px 0 0 12px; }
-        .total-amount { font-size: 24px; font-weight: bold; }
-
-        /* --- Sello de Validación --- */
-        .stamp-container {
-            position: absolute;
-            top: 180px;
-            right: 60px;
-            width: 160px;
-            height: 160px;
-            opacity: 0.15;
-            z-index: -1;
-        }
-
-        .status-badge {
-            position: absolute;
-            top: 45px;
-            right: 50px;
-            border: 2px solid #10b981;
-            color: #10b981;
-            padding: 8px 20px;
-            font-weight: bold;
-            font-size: 14px;
-            text-transform: uppercase;
-            border-radius: 8px;
-            transform: rotate(-5deg);
-        }
-
-        .footer { 
-            position: absolute;
-            bottom: 40px; left: 50px; right: 50px;
-            text-align: center;
+        .info-title {
             font-size: 10px;
-            color: #a3aed1;
-            line-height: 1.5;
+            color: #b09ade;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .info-data {
+            font-size: 13px;
+            color: #2a1f45;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .main-table th {
+            background-color: #b09ade;
+            color: #ffffff;
+            padding: 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            text-align: left;
+        }
+        .main-table td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2a1f45;
+        }
+        .totals-table {
+            width: 40%;
+            margin-left: 60%;
+            border-collapse: collapse;
+        }
+        .totals-table td {
+            padding: 10px;
+            font-size: 13px;
+        }
+        .total-row {
+            background-color: #2a1f45;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        .footer {
+            margin-top: 60px;
+            border-top: 2px solid #b09ade;
+            padding-top: 15px;
+            font-size: 10px;
+            color: #64748b;
+        }
+        .status-paid {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
-    <div class="sidebar"></div>
-    <div class="top-accent"></div>
+    <table class="header-table">
+        <tr>
+            <td width="50%" valign="middle">
+                <div class="title">FACTURA</div>
+            </td>
+            <td width="50%" valign="middle">
+                <div class="logo-text">NeuroEsencia</div>
+                <div class="logo-sub">Clínica de Salud Mental</div>
+            </td>
+        </tr>
+    </table>
 
-    <div class="stamp-container">
-        <svg viewBox="0 0 100 100" opacity="0.5">
-            <circle cx="50" cy="50" r="45" fill="none" stroke="#2a1f45" stroke-width="2" />
-            <text x="50%" y="55%" text-anchor="middle" font-size="8" fill="#2a1f45" font-weight="bold">NEUROESENCIA</text>
-        </svg>
-    </div>
+    <table class="info-table">
+        <tr>
+            <td width="50%" valign="top">
+                <div class="info-title">REFERENCIA DE PAGO</div>
+                <div class="info-data">{{ factura.nro_factura|default:factura.id }}</div>
+                
+                <div class="info-title">FECHA DE EMISIÓN</div>
+                <div class="info-data">{{ factura.fecha|date:"d/m/Y" }}</div>
+            </td>
+            <td width="50%" align="right" valign="top">
+                <div class="info-title">FACTURADO A:</div>
+                <div class="info-data" style="margin-bottom: 2px;">{{ factura.paciente.nombre_completo }}</div>
+                <div style="color: #64748b; font-size: 11px;">DNI: {{ factura.paciente.dni_paciente }}</div>
+                <div style="color: #64748b; font-size: 11px; margin-bottom: 10px;">{{ factura.paciente.correo }}</div>
+                
+                <div class="info-title">ESTADO:</div>
+                <div class="status-paid">{{ factura.estado_pago }}</div>
+            </td>
+        </tr>
+    </table>
 
-    <div class="wrapper">
-        
-        {% if factura.estado_pago == 'Pagada' %}
-        <div class="status-badge">Pago Verificado</div>
-        {% endif %}
-
-        <table class="header">
+    <table class="main-table">
+        <thead>
             <tr>
-                <td class="logo-box">
-                    <h1 class="logo-text">NeuroEsencia</h1>
-                    <div class="logo-sub">Clínica de Salud Mental</div>
+                <th width="50%">DESCRIPCIÓN DEL SERVICIO</th>
+                <th width="25%" align="center">MÉTODO PAGO</th>
+                <th width="25%" align="right">TOTAL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <strong>Sesión de Psicología Clínica</strong><br>
+                    <span style="font-size: 11px; color: #64748b;">Modalidad: {{ factura.cita.modalidad|default:"Presencial" }}</span>
                 </td>
-                <td class="meta-box">
-                    <div class="invoice-label">Referencia de Pago</div>
-                    <div class="invoice-number">{{ factura.nro_factura|default:factura.id }}</div>
-                    <div class="invoice-label">{{ factura.fecha|date:"d F, Y"|upper }}</div>
+                <td align="center">{{ factura.metodo.nombre_metodo|default:"Por definir" }}</td>
+                <td align="right">${{ factura.subtotal }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="totals-table">
+        <tr>
+            <td align="left" style="color: #64748b;">Subtotal</td>
+            <td align="right"><strong>${{ factura.subtotal }}</strong></td>
+        </tr>
+        <tr>
+            <td align="left" style="color: #64748b;">Impuestos</td>
+            <td align="right"><strong>$0</strong></td>
+        </tr>
+        <tr class="total-row">
+            <td align="left">TOTAL COP</td>
+            <td align="right">${{ factura.total }}</td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        <table width="100%">
+            <tr>
+                <td width="50%" valign="top">
+                    <strong style="color: #2a1f45;">Información de Pago</strong><br>
+                    Transacción procesada a través del portal seguro NeuroEsencia.<br>
+                    Gracias por confiar en nuestros profesionales.
+                </td>
+                <td width="50%" align="right" valign="top">
+                    <strong style="color: #2a1f45;">Términos y Condiciones</strong><br>
+                    Este documento es un soporte válido de prestación<br>
+                    de servicios de salud.
                 </td>
             </tr>
         </table>
-
-        <table class="data-grid">
-            <tr>
-                <td class="data-cell" width="50%">
-                    <div class="section-title">Información del Paciente</div>
-                    <span class="data-bold">{{ factura.paciente.nombre_completo }}</span><br>
-                    Documento: {{ factura.paciente.dni_paciente }}<br>
-                    {{ factura.paciente.correo }}
-                </td>
-                <td class="data-cell" width="50%" style="padding-left: 40px;">
-                    <div class="section-title">Detalles de Transacción</div>
-                    Método: <span class="data-bold">{{ factura.metodo.nombre_metodo }}</span><br>
-                    Tipo: Consulta Especializada<br>
-                    Estado: <span style="color: #10b981; font-weight: bold;">{{ factura.estado_pago }}</span>
-                </td>
-            </tr>
-        </table>
-
-        <div class="table-container">
-            <table class="main-table">
-                <thead>
-                    <tr>
-                        <th width="65%">Descripción del Servicio</th>
-                        <th width="15%" style="text-align: center;">Cant.</th>
-                        <th width="20%" style="text-align: right;">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <span class="item-desc">Sesión de Psicología Clínica</span>
-                            <span class="item-sub">Atención integral con especialista asignado. Modalidad: {{ factura.cita.modalidad|default:"Presencial" }}</span>
-                        </td>
-                        <td style="text-align: center; color: #2a1f45; font-weight: bold;">1</td>
-                        <td style="text-align: right; color: #2a1f45; font-weight: bold;">${{ factura.subtotal }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="summary-wrapper">
-            <table class="summary-table">
-                <tr class="summary-row">
-                    <td style="color: #a3aed1;">Subtotal</td>
-                    <td style="text-align: right; font-weight: bold;">${{ factura.subtotal }}</td>
-                </tr>
-                <tr class="summary-row">
-                    <td style="color: #a3aed1;">Impuestos (0%)</td>
-                    <td style="text-align: right; font-weight: bold;">$0</td>
-                </tr>
-                <tr class="total-row">
-                    <td style="font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Total Pagado</td>
-                    <td style="text-align: right;">
-                        <span class="total-amount">${{ factura.total }}</span>
-                        <span style="font-size: 10px; opacity: 0.8; margin-left: 5px;">COP</span>
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="footer">
-            <div style="margin-bottom: 10px; color: #2a1f45; font-weight: bold;">NeuroEsencia • Ciencia y Bienestar</div>
-            Este documento electrónico tiene validez contable y legal como soporte de servicios prestados.<br>
-            Generado automáticamente por el Sistema de Gestión Clínica NeuroEsencia.<br>
-            <strong>www.neuroesencia.com</strong>
-        </div>
     </div>
 </body>
 </html>
