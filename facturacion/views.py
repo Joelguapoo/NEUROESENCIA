@@ -3,58 +3,59 @@ from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
+from django.core.mail import EmailMessage
+from django.conf import settings
 from xhtml2pdf import pisa
 
 from clinica.models import Cita
 from .models import Factura, MetodoPago, Paciente
 from .forms import FacturaForm
-from django.core.mail import EmailMessage
-from django.conf import settings
-from django.http import JsonResponse
-from clinica.models import Cita
-from facturacion.models import Factura
 
 @login_required
 def lista_facturas(request):
     facturas = Factura.objects.all().order_by('-fecha_emision')
     return render(request, 'facturacion/lista_facturas.html', {'facturas': facturas})
 
-
-
 @login_required
-def api_citas_pendientes(request):
-    """Devuelve JSON con las citas del paciente que NO han sido pagadas"""
-    paciente_id = request.GET.get('paciente_id')
-    if not paciente_id:
-        return JsonResponse({'citas': []})
+def crear_factura(request):
+    if request.method == 'POST':
+        datos_post = request.POST.copy()
         
-    # EL TRUCO FINAL: Filtramos las citas activas, pero EXCLUIMOS las que ya están pagadas.
-    # Así también permitimos que salgan las facturas "Anuladas" por si hay que volver a cobrarlas.
-    citas_activas = Cita.objects.filter(
-        paciente_id=paciente_id,
-        estado_cita__in=['Programada', 'Asistida']
-    ).exclude(
-        factura__estado_pago='Pagada'
-    ).order_by('-fecha_cita')
+        # 1. Buscamos si la Cita seleccionada ya tiene una factura automática asignada
+        cita_id = datos_post.get('cita')
+        factura_existente = None
+        if cita_id:
+            factura_existente = Factura.objects.filter(cita_id=cita_id).first()
 
-    data = []
-    for c in citas_activas:
-        # Extraemos la fecha y hora de forma segura
-        fecha_str = c.fecha_cita.strftime('%d/%m/%Y') if c.fecha_cita else "Sin fecha"
-        hora_str = c.hora_cita.strftime('%H:%M') if c.hora_cita else "Sin hora"
+        # 2. Asignamos o mantenemos el número de factura
+        if not datos_post.get('nro_factura'):
+            # Si ya existía, usamos su número original. Si es totalmente nueva, creamos uno.
+            datos_post['nro_factura'] = factura_existente.nro_factura if factura_existente else f"FAC-{uuid.uuid4().hex[:8].upper()}"
+
+        # 3. EL TRUCO MAGISTRAL: Si la factura ya existe, le decimos al Formulario que la ACTUALICE (instance)
+        # Si no existe, creará una nueva.
+        if factura_existente:
+            form = FacturaForm(datos_post, instance=factura_existente)
+        else:
+            form = FacturaForm(datos_post)
         
-        data.append({
-            'id': c.id,
-            'fecha': f"{fecha_str} {hora_str}",
-            'modalidad': c.modalidad,
-            'valor_sugerido': 50000 if c.modalidad == 'Virtual' else 70000 
-        })
-        
-    return JsonResponse({'citas': data})
-
-
+        if form.is_valid():
+            factura = form.save(commit=False)
+            factura.total = factura.subtotal + factura.impuestos
+            factura.save()
+            messages.success(request, f"Factura {factura.nro_factura} procesada y guardada con éxito.")
+            return redirect('lista_facturas')
+        else:
+            # Mostramos en pantalla si falta algo más
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Error en {field}: {error}")
+    else:
+        form = FacturaForm()
+    
+    return render(request, 'facturacion/form_factura.html', {'form': form, 'editando': False})
 
 @login_required
 def anular_factura(request, factura_id):
@@ -65,7 +66,6 @@ def anular_factura(request, factura_id):
         messages.warning(request, f"La factura {factura.nro_factura} ha sido anulada.")
         return redirect('lista_facturas')
     return render(request, 'facturacion/confirmar_anular.html', {'factura': factura})
-
 
 @login_required
 def pre_facturacion(request, cita_id):
@@ -78,7 +78,6 @@ def pre_facturacion(request, cita_id):
     }
     return render(request, 'facturacion/pre_facturacion.html', context)
 
-
 @login_required
 def generar_pago_automatico(request, cita_id, metodo):
     """Crea la factura real basada en la elección del paciente."""
@@ -90,7 +89,7 @@ def generar_pago_automatico(request, cita_id, metodo):
     )
 
     nueva_factura = Factura.objects.create(
-        nro_factura=f"FAC-{uuid.uuid4().hex[:8].upper()}", # <-- Corrección de seguridad aplicada aquí
+        nro_factura=f"FAC-{uuid.uuid4().hex[:8].upper()}", 
         cita=cita,
         paciente=cita.paciente,
         metodo=obj_metodo,
@@ -106,7 +105,6 @@ def generar_pago_automatico(request, cita_id, metodo):
         messages.info(request, "Recuerda pagar en recepción al llegar.")
         
     return redirect('lista_facturas')
-
 
 def detalle_factura(request, factura_id):
     factura = get_object_or_404(Factura, id=factura_id)
@@ -152,7 +150,6 @@ def detalle_factura(request, factura_id):
         
     return render(request, 'facturacion/detalle_factura.html', {'factura': factura})
 
-
 @login_required
 def exportar_factura_pdf(request, factura_id):
     factura = get_object_or_404(Factura, id=factura_id)
@@ -165,7 +162,6 @@ def exportar_factura_pdf(request, factura_id):
     if not pdf.err:
         return HttpResponse(result.getvalue(), content_type='application/pdf')
     return None
-
 
 def mis_facturas(request):
     """Vista exclusiva para que el paciente vea su historial de facturas."""
@@ -182,24 +178,23 @@ def mis_facturas(request):
         'paciente': paciente
     })
 
-
 @login_required
 def api_citas_pendientes(request):
-    """Devuelve JSON con las citas activas del paciente para poder facturarlas"""
+    """Devuelve JSON con las citas del paciente que NO han sido pagadas"""
     paciente_id = request.GET.get('paciente_id')
     if not paciente_id:
         return JsonResponse({'citas': []})
         
-    # EL TRUCO: Quitamos la restricción de factura__isnull=True.
-    # Ahora traerá todas las citas 'Programadas' o 'Asistidas' de ese paciente.
+    # Filtramos las citas activas, pero EXCLUIMOS las que ya están pagadas.
     citas_activas = Cita.objects.filter(
         paciente_id=paciente_id,
         estado_cita__in=['Programada', 'Asistida']
+    ).exclude(
+        factura__estado_pago='Pagada'
     ).order_by('-fecha_cita')
 
     data = []
     for c in citas_activas:
-        # Extraemos la fecha y hora de forma segura
         fecha_str = c.fecha_cita.strftime('%d/%m/%Y') if c.fecha_cita else "Sin fecha"
         hora_str = c.hora_cita.strftime('%H:%M') if c.hora_cita else "Sin hora"
         
