@@ -12,6 +12,9 @@ from .models import Factura, MetodoPago, Paciente
 from .forms import FacturaForm
 from django.core.mail import EmailMessage
 from django.conf import settings
+from django.http import JsonResponse
+from clinica.models import Cita
+from facturacion.models import Factura
 
 @login_required
 def lista_facturas(request):
@@ -165,3 +168,29 @@ def mis_facturas(request):
         'facturas': facturas, 
         'paciente': paciente
     })
+
+
+@login_required
+def api_citas_pendientes(request):
+    """Devuelve JSON con las citas del paciente que NO tienen factura generada"""
+    paciente_id = request.GET.get('paciente_id')
+    if not paciente_id:
+        return JsonResponse({'citas': []})
+        
+    # Busca citas programadas/asistidas que NO están ligadas a una factura
+    citas_sin_factura = Cita.objects.filter(
+        paciente_id=paciente_id,
+        estado_cita__in=['Programada', 'Asistida'],
+        factura__isnull=True  # El truco: Filtra citas huérfanas de factura
+    ).order_by('-fecha_cita')
+
+    data = []
+    for c in citas_sin_factura:
+        data.append({
+            'id': c.id,
+            'fecha': c.fecha_cita.strftime('%d/%m/%Y %H:%M'),
+            'modalidad': c.modalidad,
+            'valor_sugerido': 50000 if c.modalidad == 'Virtual' else 70000 
+        })
+        
+    return JsonResponse({'citas': data})
