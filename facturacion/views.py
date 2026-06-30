@@ -25,23 +25,34 @@ def lista_facturas(request):
 @login_required
 def crear_factura(request):
     if request.method == 'POST':
-        # 1. Copiamos los datos que llegan de la pantalla para poder inyectarles información
         datos_post = request.POST.copy()
         
-        # 2. Generamos el número de factura ANTES de validarlo para que Django no rechace el form
-        if not datos_post.get('nro_factura'):
-            datos_post['nro_factura'] = f"FAC-{uuid.uuid4().hex[:8].upper()}"
+        # 1. Buscamos si la Cita seleccionada ya tiene una factura automática asignada
+        cita_id = datos_post.get('cita')
+        factura_existente = None
+        if cita_id:
+            factura_existente = Factura.objects.filter(cita_id=cita_id).first()
 
-        form = FacturaForm(datos_post)
+        # 2. Asignamos o mantenemos el número de factura
+        if not datos_post.get('nro_factura'):
+            # Si ya existía, usamos su número original. Si es totalmente nueva, creamos uno.
+            datos_post['nro_factura'] = factura_existente.nro_factura if factura_existente else f"FAC-{uuid.uuid4().hex[:8].upper()}"
+
+        # 3. EL TRUCO MAGISTRAL: Si la factura ya existe, le decimos al Formulario que la ACTUALICE (instance)
+        # Si no existe, creará una nueva.
+        if factura_existente:
+            form = FacturaForm(datos_post, instance=factura_existente)
+        else:
+            form = FacturaForm(datos_post)
         
         if form.is_valid():
             factura = form.save(commit=False)
             factura.total = factura.subtotal + factura.impuestos
             factura.save()
-            messages.success(request, f"Factura {factura.nro_factura} generada con éxito.")
+            messages.success(request, f"Factura {factura.nro_factura} procesada y guardada con éxito.")
             return redirect('lista_facturas')
         else:
-            # 3. ANTI-ERRORES SILENCIOSOS: Si Django rechaza el form, que nos lo diga en pantalla
+            # Mostramos en pantalla si falta algo más
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f"Error en {field}: {error}")
