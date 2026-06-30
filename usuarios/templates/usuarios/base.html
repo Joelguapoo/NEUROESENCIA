@@ -6,11 +6,9 @@
     <meta name="theme-color" content="#0D0B14">
     <title>{% block title %}NeuroEsencia | Portal{% endblock %}</title>
     
-    <!-- Frameworks & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Premium Typography (Cambiado a Poppins) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,14 +18,14 @@
         /* --- DESIGN SYSTEM PREMIUM --- */
         :root {
             /* Color Palette */
-            --bg-sidebar: #0D0B14; /* Deep Obsidian Purple */
+            --bg-sidebar: #0D0B14; 
             --bg-sidebar-glass: rgba(13, 11, 20, 0.85);
             --sidebar-border: rgba(255, 255, 255, 0.06);
-            --sidebar-accent: #7C3AED; /* Vibrant Indigo/Purple */
+            --sidebar-accent: #7C3AED; 
             --sidebar-accent-hover: rgba(124, 58, 237, 0.15);
             --purple-pastel: #C4B5FD;
             
-            --bg-main: #F9FAFB; /* Clean off-white */
+            --bg-main: #F9FAFB; 
             --text-main: #111827; 
             --text-muted: #6B7280;
             --text-subtle: #9CA3AF;
@@ -50,7 +48,7 @@
 
         /* Dark Mode Theme */
         body.dark-mode {
-            --bg-main: #030303; /* Deep dark Vercel style */
+            --bg-main: #030303; 
             --text-main: #F3F4F6;
             --text-muted: #9CA3AF;
             --white: #111111;
@@ -81,7 +79,7 @@
 
         /* --- SIDEBAR PREMIUM --- */
         .sidebar {
-            width: 260px; /* Thinner, more refined */
+            width: 260px; 
             flex-shrink: 0; 
             background-color: var(--bg-sidebar); 
             display: flex; 
@@ -99,7 +97,7 @@
             pointer-events: none;
         }
 
-        .brand-section { padding: 2rem 1.5rem 1.5rem; }
+        .brand-section { padding: 2rem 1.5rem 1.5rem; flex-shrink: 0; }
         .brand-logo { 
             display: flex; align-items: center; text-decoration: none; 
             color: #FFFFFF; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em;
@@ -114,8 +112,12 @@
             display: flex; align-items: center; justify-content: center; margin-right: 12px;
         }
 
-        /* Navigation Links */
-        .nav-menu { padding: 0 1rem; flex-grow: 1; overflow-y: overlay; }
+        /* Navigation Links - SCROLL HABILITADO */
+        .nav-menu { 
+            padding: 0 1rem 1rem 1rem; 
+            flex-grow: 1; 
+            overflow-y: auto; /* CORRECCIÓN MÓVIL: Esto asegura el scroll sin fallos */
+        }
 
         .nav-group-label {
             font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em;
@@ -175,8 +177,16 @@
         .submenu-item:hover { color: var(--sidebar-text-hover); background: rgba(255,255,255,0.03); }
         .submenu-item.active { color: var(--white); font-weight: 600; background: rgba(255,255,255,0.05); }
 
-        /* User Profile / Footer */
-        .sidebar-footer { padding: 1.2rem; border-top: 1px solid var(--sidebar-border); background: transparent; }
+        /* User Profile / Footer - FIJO AL FONDO */
+        .sidebar-footer { 
+            padding: 1.2rem; 
+            border-top: 1px solid var(--sidebar-border); 
+            background: var(--bg-sidebar); 
+            margin-top: auto; /* CORRECCIÓN MÓVIL: Empuja esto hasta abajo siempre */
+            flex-shrink: 0; /* CORRECCIÓN MÓVIL: Evita que el menú lo comprima */
+            position: relative;
+            z-index: 10;
+        }
         .user-widget {
             display: flex; align-items: center; gap: 12px; padding: 0.75rem;
             background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 0.8rem;
@@ -240,14 +250,19 @@
 
         /* --- RESPONSIVE LOGIC --- */
         @media (max-width: 991px) {
-            .sidebar { position: fixed; left: -280px; height: 100vh; box-shadow: var(--shadow-glass); }
+            .sidebar { 
+                position: fixed; 
+                left: -280px; 
+                height: 100dvh; /* CORRECCIÓN MÓVIL: Altura dinámica que no se oculta tras la barra del navegador */
+                box-shadow: var(--shadow-glass); 
+            }
             .sidebar.active { left: 0; transform: translateX(0); }
             .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
             .main-wrapper { padding: 1.5rem 1rem; }
             .mobile-toggle { display: flex; }
         }
 
-        /* --- UX CLASSES (Para ser usadas por templates hijos) --- */
+        /* --- UX CLASSES --- */
         .skeleton {
             background: linear-gradient(90deg, var(--border-light) 25%, rgba(156,163,175,0.2) 50%, var(--border-light) 75%);
             background-size: 200% 100%; animation: skeletonLoading 1.5s infinite; border-radius: 4px;
@@ -261,12 +276,149 @@
         }
         @media (max-width: 768px) { .table-responsive-wrapper .rotate-device-banner { display: block; } }
 
+        /* ==========================================================================
+           PANTALLA DE CARGA (MOVIDA AL <head> DONDE PERTENECE)
+           ========================================================================== */
+        .neuro-loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(244, 247, 254, 0.85); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+            will-change: opacity, visibility;
+        }
+
+        .neuro-loader-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .robot-loader-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .robot-svg-loader {
+            width: 85px; 
+            height: auto;
+            position: relative;
+            z-index: 2;
+            animation: float-robot 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 10px 15px rgba(124, 58, 237, 0.3));
+            will-change: transform, filter;
+        }
+
+        .robot-orbit-1, .robot-orbit-2 {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            will-change: transform;
+        }
+
+        .robot-orbit-1 {
+            width: 120px;
+            height: 120px;
+            border-top-color: #7C3AED;
+            border-right-color: rgba(124, 58, 237, 0.2);
+            animation: spin-orbit 1.5s linear infinite;
+        }
+
+        .robot-orbit-2 {
+            width: 150px;
+            height: 150px;
+            border-bottom-color: #C4B5FD;
+            border-left-color: rgba(196, 181, 253, 0.2);
+            animation: spin-orbit-reverse 2.5s linear infinite;
+        }
+
+        .neuro-loading-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #111827; 
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .neuro-loading-subtext {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #6B7280; 
+            margin-top: 5px;
+        }
+
+        .loading-dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes float-robot {
+            0% { transform: translateY(6px); filter: drop-shadow(0 5px 10px rgba(124, 58, 237, 0.15)); }
+            100% { transform: translateY(-6px); filter: drop-shadow(0 20px 25px rgba(124, 58, 237, 0.5)); }
+        }
+        @keyframes spin-orbit {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes spin-orbit-reverse {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
+        }
+        @keyframes dots {
+            0%, 20% { color: transparent; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
+            40% { color: #7C3AED; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
+            60% { text-shadow: .25em 0 0 #7C3AED, .5em 0 0 transparent; }
+            80%, 100% { text-shadow: .25em 0 0 #7C3AED, .5em 0 0 #7C3AED; }
+        }
     </style>
 </head>
 <body>
 
+    <div id="neuro-global-loader" class="neuro-loader-overlay">
+        <div class="robot-loader-container">
+            <div class="robot-orbit-1"></div>
+            <div class="robot-orbit-2"></div>
+            
+            <svg class="robot-svg-loader" viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="loaderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ffffff" />
+                        <stop offset="100%" stop-color="#7C3AED" />
+                    </linearGradient>
+                </defs>
+                <rect x="40" y="20" width="120" height="90" rx="35" fill="url(#loaderGrad)" />
+                <circle cx="75" cy="65" r="6" fill="#1e293b" />
+                <circle cx="125" cy="65" r="6" fill="#1e293b" />
+                <path d="M 90 80 Q 100 80 110 80" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" />
+                <rect x="55" y="115" width="90" height="85" rx="30" fill="url(#loaderGrad)" />
+                <rect x="35" y="125" width="16" height="55" rx="8" fill="url(#loaderGrad)" />
+                <rect x="149" y="125" width="16" height="55" rx="8" fill="url(#loaderGrad)" />
+                <rect x="70" y="190" width="16" height="40" rx="8" fill="url(#loaderGrad)" />
+                <rect x="114" y="190" width="16" height="40" rx="8" fill="url(#loaderGrad)" />
+            </svg>
+            
+        </div>
+        <h3 class="neuro-loading-text">Cargando<span class="loading-dots"></span></h3>
+        <p class="neuro-loading-subtext">Procesando información de forma segura</p>
+    </div>
+
     <div class="app-container">
-        <!-- Overlay for Mobile -->
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
         {% if not ocultar_sidebar and user.is_authenticated or request.session.paciente_id %}
@@ -325,7 +477,13 @@
                 {% endif %}
 
                 <div class="nav-group-label">Sistema</div>
-                <a href="{% url 'perfil_usuario' %}" class="nav-item-main"><i class="fa-solid fa-circle-user"></i> Mi Perfil</a>
+                
+                {% if request.session.paciente_id %}
+                    <a href="{% url 'perfil_paciente' %}" class="nav-item-main"><i class="fa-solid fa-circle-user"></i> Mi Perfil</a>
+                {% else %}
+                    <a href="{% url 'perfil_usuario' %}" class="nav-item-main"><i class="fa-solid fa-circle-user"></i> Mi Perfil</a>
+                {% endif %}
+                
                 <a href="{% url 'configuracion_sistema' %}" class="nav-item-main"><i class="fa-solid fa-sliders"></i> Ajustes UI</a>
             </nav>
 
@@ -347,21 +505,17 @@
         {% endif %}
 
         <main class="main-wrapper">
-            <!-- Botón Flotante para Móviles -->
             <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Abrir menú">
                 <i class="fa-solid fa-bars fs-5"></i>
             </button>
 
-            <!-- Contenedor Principal de la App -->
             <div class="container-fluid p-0 position-relative">
                 
-                <!-- Notificaciones Premium (Toasts) -->
                 {% if messages %}
                     <div class="floating-alerts-container">
                         {% for message in messages %}
                             <div class="premium-alert alert-{{ message.tags }} alert-dismissible" role="alert">
                                 <div>
-                                    <!-- Iconografía dinámica según el tag de Django -->
                                     {% if message.tags == 'success' %}
                                         <i class="fa-solid fa-circle-check" style="color: #10B981; font-size: 1.2rem;"></i>
                                     {% elif message.tags == 'error' or message.tags == 'danger' %}
@@ -381,22 +535,21 @@
                     </div>
                 {% endif %}
                 
-                <!-- Contenido Dinámico inyectado por las vistas -->
                 {% block content %}{% endblock %}
             </div>
         </main>
     </div>
 
-    <!-- Scripts Esenciales -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // Lógica para el toggle del Sidebar (Móvil)
+        // 1. Lógica para el toggle del Sidebar (Móvil)
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('sidebarOverlay').classList.toggle('active');
         }
 
-        // Aplicación inmediata de Dark Mode evitando FOUC (Flash of Unstyled Content)
+        // 2. Aplicación inmediata de Dark Mode evitando FOUC (Flash of Unstyled Content)
         (function() {
             try {
                 const darkMode = localStorage.getItem('neuro_dark_mode') === 'true';
@@ -408,7 +561,7 @@
             }
         })();
 
-        // Auto-cierre de alertas Premium después de 5 segundos
+        // 3. Auto-cierre de alertas Premium después de 5 segundos
         document.addEventListener('DOMContentLoaded', () => {
             const alerts = document.querySelectorAll('.premium-alert');
             alerts.forEach(alert => {
@@ -420,201 +573,52 @@
                 }, 5000);
             });
         });
-    </script>
-</body>
-    <style>
-    .neuro-loader-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        /* Fondo cristalino moderno (Glassmorphism) */
-        background-color: rgba(244, 247, 254, 0.85); 
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        z-index: 999999;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        /* Transiciones rápidas para una UX ágil */
-        transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
-        will-change: opacity, visibility;
-    }
 
-    .neuro-loader-hidden {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-    }
+        // 4. Lógica Inteligente de la Pantalla de Carga
+        document.addEventListener("DOMContentLoaded", function() {
+            const loader = document.getElementById('neuro-global-loader');
 
-    /* Contenedor del Robot y Órbitas */
-    .robot-loader-container {
-        position: relative;
-        width: 150px;
-        height: 150px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 25px;
-    }
+            window.addEventListener('load', function() {
+                if (loader) {
+                    setTimeout(function() {
+                        loader.classList.add('neuro-loader-hidden');
+                    }, 400); 
+                }
+            });
 
-    /* Animación del Robot SVG (Levitación dinámica) */
-    .robot-svg-loader {
-        width: 85px; 
-        height: auto;
-        position: relative;
-        z-index: 2;
-        animation: float-robot 2s ease-in-out infinite alternate;
-        filter: drop-shadow(0 10px 15px rgba(124, 58, 237, 0.3));
-        will-change: transform, filter;
-    }
+            document.addEventListener('click', function(e) {
+                if (e.defaultPrevented) return;
 
-    /* Órbitas tecnológicas de procesamiento */
-    .robot-orbit-1, .robot-orbit-2 {
-        position: absolute;
-        border-radius: 50%;
-        border: 2px solid transparent;
-        will-change: transform;
-    }
+                const link = e.target.closest('a');
+                if (link && link.href) {
+                    const urlObj = new URL(link.href);
+                    const isExternal = link.target === '_blank';
+                    const isHash = link.getAttribute('href').startsWith('#');
+                    const isJs = link.getAttribute('href').startsWith('javascript:');
+                    const isDownload = link.hasAttribute('download');
+                    
+                    if (!isExternal && !isHash && !isJs && !isDownload && urlObj.origin === window.location.origin) {
+                        if (loader) loader.classList.remove('neuro-loader-hidden');
+                    }
+                }
+            });
 
-    .robot-orbit-1 {
-        width: 120px;
-        height: 120px;
-        border-top-color: #7C3AED;
-        border-right-color: rgba(124, 58, 237, 0.2);
-        animation: spin-orbit 1.5s linear infinite;
-    }
-
-    .robot-orbit-2 {
-        width: 150px;
-        height: 150px;
-        border-bottom-color: #C4B5FD;
-        border-left-color: rgba(196, 181, 253, 0.2);
-        animation: spin-orbit-reverse 2.5s linear infinite;
-    }
-
-    /* Textos */
-    .neuro-loading-text {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 800;
-        font-size: 1.3rem;
-        color: #111827; 
-        letter-spacing: 1px;
-        margin: 0;
-    }
-
-    .neuro-loading-subtext {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: #6B7280; 
-        margin-top: 5px;
-    }
-
-    .loading-dots::after {
-        content: '.';
-        animation: dots 1.5s steps(5, end) infinite;
-    }
-
-    /* --- Keyframes --- */
-    @keyframes float-robot {
-        0% { transform: translateY(6px); filter: drop-shadow(0 5px 10px rgba(124, 58, 237, 0.15)); }
-        100% { transform: translateY(-6px); filter: drop-shadow(0 20px 25px rgba(124, 58, 237, 0.5)); }
-    }
-    @keyframes spin-orbit {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    @keyframes spin-orbit-reverse {
-        0% { transform: rotate(360deg); }
-        100% { transform: rotate(0deg); }
-    }
-    @keyframes dots {
-        0%, 20% { color: transparent; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
-        40% { color: #7C3AED; text-shadow: .25em 0 0 transparent, .5em 0 0 transparent; }
-        60% { text-shadow: .25em 0 0 #7C3AED, .5em 0 0 transparent; }
-        80%, 100% { text-shadow: .25em 0 0 #7C3AED, .5em 0 0 #7C3AED; }
-    }
-</style>
-
-<div id="neuro-global-loader" class="neuro-loader-overlay">
-    <div class="robot-loader-container">
-        <div class="robot-orbit-1"></div>
-        <div class="robot-orbit-2"></div>
-        
-        <svg class="robot-svg-loader" viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="loaderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ffffff" />
-                    <stop offset="100%" stop-color="#7C3AED" />
-                </linearGradient>
-            </defs>
-            <rect x="40" y="20" width="120" height="90" rx="35" fill="url(#loaderGrad)" />
-            <circle cx="75" cy="65" r="6" fill="#1e293b" />
-            <circle cx="125" cy="65" r="6" fill="#1e293b" />
-            <path d="M 90 80 Q 100 80 110 80" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none" />
-            <rect x="55" y="115" width="90" height="85" rx="30" fill="url(#loaderGrad)" />
-            <rect x="35" y="125" width="16" height="55" rx="8" fill="url(#loaderGrad)" />
-            <rect x="149" y="125" width="16" height="55" rx="8" fill="url(#loaderGrad)" />
-            <rect x="70" y="190" width="16" height="40" rx="8" fill="url(#loaderGrad)" />
-            <rect x="114" y="190" width="16" height="40" rx="8" fill="url(#loaderGrad)" />
-        </svg>
-        
-    </div>
-    <h3 class="neuro-loading-text">Cargando<span class="loading-dots"></span></h3>
-    <p class="neuro-loading-subtext">Procesando información de forma segura</p>
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const loader = document.getElementById('neuro-global-loader');
-
-        // 1. Ocultar el loader cuando la página termina de cargar
-        window.addEventListener('load', function() {
-            if (loader) {
-                setTimeout(function() {
-                    loader.classList.add('neuro-loader-hidden');
-                }, 400); 
-            }
-        });
-
-        // 2. Mostrar el loader al hacer clic en enlaces de navegación
-        document.addEventListener('click', function(e) {
-            if (e.defaultPrevented) return;
-
-            const link = e.target.closest('a');
-            if (link && link.href) {
-                const urlObj = new URL(link.href);
-                const isExternal = link.target === '_blank';
-                const isHash = link.getAttribute('href').startsWith('#');
-                const isJs = link.getAttribute('href').startsWith('javascript:');
-                const isDownload = link.hasAttribute('download');
-                
-                if (!isExternal && !isHash && !isJs && !isDownload && urlObj.origin === window.location.origin) {
+            document.addEventListener('submit', function(e) {
+                const form = e.target;
+                if (!form.checkValidity() || e.defaultPrevented) {
+                    return; 
+                }
+                if (form.target !== '_blank') {
                     if (loader) loader.classList.remove('neuro-loader-hidden');
                 }
-            }
-        });
+            });
 
-        // 3. Mostrar el loader al enviar cualquier formulario (CON PROTECCIÓN ANTI-ERRORES)
-        document.addEventListener('submit', function(e) {
-            const form = e.target;
-            if (!form.checkValidity() || e.defaultPrevented) {
-                return; 
-            }
-            if (form.target !== '_blank') {
-                if (loader) loader.classList.remove('neuro-loader-hidden');
-            }
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted && loader) {
+                    loader.classList.add('neuro-loader-hidden');
+                }
+            });
         });
-
-        // 4. Fallback: Manejar el botón de "Atrás" del navegador (BFCache)
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted && loader) {
-                loader.classList.add('neuro-loader-hidden');
-            }
-        });
-    });
-</script>
+    </script>
+</body>
 </html>
