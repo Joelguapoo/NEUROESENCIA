@@ -405,31 +405,35 @@
         const correo = document.getElementById('id_correo');
         
         if (correo) {
+            // 1. Lo hacemos estrictamente obligatorio
             correo.setAttribute('required', 'true');
-            correo.setAttribute('minlength', '7');
-            correo.setAttribute('maxlength', '50');
+            
+            // 2. Mínimo y máximo recomendado
+            correo.setAttribute('minlength', '10');
+            correo.setAttribute('maxlength', '65');
 
             correo.addEventListener('input', function(e) {
                 const valor = e.target.value.trim();
-                const tieneLetras = /[a-zA-Z]/.test(valor);
-                const tieneNumeros = /[0-9]/.test(valor);
-                const formatoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
+                
+                // 3. Expresión regular estándar: Permite solo letras, o letras y números antes del @
+                const formatoValido = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(valor);
 
                 if (valor.length === 0) {
                     correo.setCustomValidity("El correo es obligatorio.");
+                } else if (valor.length > 0 && valor.length < 10) {
+                    // Advertencia si es demasiado corto según el mínimo recomendado
+                    correo.setCustomValidity("El correo es muy corto.");
+                    mostrarError(correo, 'El correo parece muy corto (mínimo recomendado 10 caracteres).');
                 } else if (!formatoValido) {
                     correo.setCustomValidity("Formato de correo inválido.");
-                    mostrarError(correo, 'Ingresa un formato válido (Ej: usuario1@dominio.com).');
-                } else if (!tieneLetras || !tieneNumeros) {
-                    correo.setCustomValidity("Debe contener letras y números.");
-                    mostrarError(correo, 'El correo debe contener al menos una letra y un número.');
+                    mostrarError(correo, 'Ingresa un formato válido (Ej: tucorreo@dominio.com).');
                 } else {
+                    // Si todo está bien, limpiamos los errores
                     correo.setCustomValidity("");
                     ocultarError(correo);
                 }
             });
         }
-
 
         /**
          * ====================================================================
