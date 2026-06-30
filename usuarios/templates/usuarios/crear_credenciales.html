@@ -12,6 +12,9 @@
         --text-dark: #2b3674;
         --text-gray: #a3aed1;
         --shadow-soft: 0 15px 40px rgba(42, 31, 69, 0.08);
+        --danger-color: #EF4444;
+        --warning-color: #F59E0B;
+        --success-color: #10B981;
     }
 
     /* --- ANIMACIONES --- */
@@ -42,8 +45,8 @@
     .security-icon-wrapper {
         width: 80px; 
         height: 80px;
-        background: rgba(16, 185, 129, 0.1); /* Verde esmeralda suave para denotar "Éxito/Seguridad" */
-        color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
         border-radius: 24px;
         display: inline-flex;
         align-items: center;
@@ -53,7 +56,7 @@
         box-shadow: inset 0 0 0 2px rgba(16, 185, 129, 0.2);
     }
     .activation-card:hover .security-icon-wrapper {
-        background: #10b981;
+        background: var(--success-color);
         color: white;
         transform: scale(1.05);
         box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
@@ -75,7 +78,7 @@
         border-radius: 14px !important;
         border: 2px solid transparent !important;
         background-color: var(--page-bg) !important;
-        padding: 14px 15px 14px 50px !important; /* Espacio izquierdo para el ícono */
+        padding: 14px 15px 14px 50px !important; 
         font-weight: 500;
         color: var(--text-dark) !important;
         transition: all 0.3s ease;
@@ -115,6 +118,53 @@
     }
     .password-toggle:hover { color: var(--purple-brand); }
 
+    /* --- MEDIDOR DE SEGURIDAD (SUPER WOW) --- */
+    .strength-meter {
+        display: flex;
+        gap: 6px;
+        height: 6px;
+        margin-top: 10px;
+    }
+    .strength-bar {
+        flex: 1;
+        background-color: #E2E8F0;
+        border-radius: 10px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .strength-text {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-align: right;
+        margin-top: 6px;
+        transition: color 0.3s;
+    }
+
+    /* Lista de Requisitos */
+    .password-requirements {
+        list-style: none;
+        padding: 0;
+        margin: 15px 0 0 0;
+        font-size: 0.75rem;
+        color: var(--text-gray);
+        font-weight: 600;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .password-requirements li {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.3s;
+    }
+    .password-requirements li i {
+        font-size: 0.8rem;
+        transition: transform 0.3s, color 0.3s;
+    }
+    .password-requirements li.valid {
+        color: var(--success-color);
+    }
+
     /* --- BOTÓN PRINCIPAL --- */
     .btn-activate {
         background: var(--purple-brand);
@@ -136,8 +186,8 @@
     }
 </style>
 
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 85vh;">
-    <div class="activation-card fade-in-up" style="max-width: 480px; width: 100%;">
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 85vh; padding: 40px 0;">
+    <div class="activation-card fade-in-up" style="max-width: 520px; width: 100%;">
         
         <div class="text-center mb-4">
             <div class="security-icon-wrapper">
@@ -149,7 +199,7 @@
             </p>
         </div>
         
-        <form method="POST">
+        <form method="POST" id="activationForm">
             {% csrf_token %}
             
             <div class="mb-4">
@@ -160,16 +210,37 @@
                 </div>
             </div>
             
-            <div class="mb-5">
+            <div class="mb-4">
                 <label class="form-label-custom">Contraseña Segura</label>
                 <div class="position-relative input-wrapper">
                     <span class="custom-icon"><i class="fa-solid fa-lock"></i></span>
                     <input type="password" name="password" id="passwordInput" class="form-control input-custom" style="padding-right: 50px !important;" placeholder="••••••••" required autocomplete="new-password">
-                    <span class="password-toggle" id="togglePassword"><i class="fa-regular fa-eye"></i></span>
+                    <span class="password-toggle" onclick="toggleVisibility('passwordInput', this)"><i class="fa-regular fa-eye"></i></span>
                 </div>
-                <small class="d-block mt-2" style="color: var(--text-gray); font-size: 0.75rem; font-weight: 500;">
-                    <i class="fa-solid fa-circle-info me-1"></i> Usa al menos 8 caracteres para mayor seguridad.
-                </small>
+                
+                <div class="strength-meter">
+                    <div class="strength-bar" id="bar-1"></div>
+                    <div class="strength-bar" id="bar-2"></div>
+                    <div class="strength-bar" id="bar-3"></div>
+                </div>
+                <div class="strength-text" id="strengthText" style="color: var(--text-gray);">Nivel de Seguridad: Nula</div>
+
+                <ul class="password-requirements">
+                    <li id="req-length"><i class="fa-solid fa-circle-xmark"></i> Mínimo 8 caracteres</li>
+                    <li id="req-upper"><i class="fa-solid fa-circle-xmark"></i> Letra mayúscula</li>
+                    <li id="req-number"><i class="fa-solid fa-circle-xmark"></i> Un número</li>
+                    <li id="req-symbol"><i class="fa-solid fa-circle-xmark"></i> Símbolo (Ej: @$!%*)</li>
+                </ul>
+            </div>
+
+            <div class="mb-5">
+                <label class="form-label-custom">Confirmar Contraseña</label>
+                <div class="position-relative input-wrapper">
+                    <span class="custom-icon"><i class="fa-solid fa-lock-check"></i></span>
+                    <input type="password" name="confirm_password" id="confirmPasswordInput" class="form-control input-custom" style="padding-right: 50px !important;" placeholder="••••••••" required>
+                    <span class="password-toggle" onclick="toggleVisibility('confirmPasswordInput', this)"><i class="fa-regular fa-eye"></i></span>
+                </div>
+                <small class="d-block mt-2" id="matchMessage" style="display: none; font-weight: 700;"></small>
             </div>
             
             <button type="submit" class="btn btn-activate w-100 d-flex justify-content-center align-items-center gap-2">
@@ -181,19 +252,127 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Lógica del Ojo de Contraseña
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('passwordInput');
+    // 1. Función para mostrar/ocultar contraseña (Reutilizable para ambos campos)
+    function toggleVisibility(inputId, iconElement) {
+        const input = document.getElementById(inputId);
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+        iconElement.innerHTML = type === 'password' ? '<i class="fa-regular fa-eye"></i>' : '<i class="fa-regular fa-eye-slash"></i>';
+    }
 
-        if (togglePassword && passwordInput) {
-            togglePassword.addEventListener('click', function () {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                
-                this.innerHTML = type === 'password' ? '<i class="fa-regular fa-eye"></i>' : '<i class="fa-regular fa-eye-slash"></i>';
-            });
+    document.addEventListener("DOMContentLoaded", function() {
+        const passInput = document.getElementById('passwordInput');
+        const confirmInput = document.getElementById('confirmPasswordInput');
+        const matchMessage = document.getElementById('matchMessage');
+        const form = document.getElementById('activationForm');
+        
+        // Elementos visuales
+        const bars = [document.getElementById('bar-1'), document.getElementById('bar-2'), document.getElementById('bar-3')];
+        const strengthText = document.getElementById('strengthText');
+        
+        // Nodos de requisitos
+        const reqs = {
+            length: document.getElementById('req-length'),
+            upper: document.getElementById('req-upper'),
+            number: document.getElementById('req-number'),
+            symbol: document.getElementById('req-symbol')
+        };
+
+        let isPasswordSecure = false;
+
+        // 2. Analizador de Fuerza de Contraseña
+        passInput.addEventListener('input', function() {
+            const val = this.value;
+            let score = 0;
+
+            // Validaciones Regex
+            const rules = {
+                length: val.length >= 8,
+                upper: /[A-Z]/.test(val),
+                number: /[0-9]/.test(val),
+                symbol: /[^A-Za-z0-9]/.test(val) // Cualquier cosa que no sea letra o número
+            };
+
+            // Actualizar Checkmarks
+            for (let rule in rules) {
+                const el = reqs[rule];
+                const icon = el.querySelector('i');
+                if (rules[rule]) {
+                    el.classList.add('valid');
+                    icon.className = 'fa-solid fa-circle-check';
+                    score++;
+                } else {
+                    el.classList.remove('valid');
+                    icon.className = 'fa-solid fa-circle-xmark';
+                }
+            }
+
+            // Pintar las barras de poder
+            bars.forEach(b => b.style.backgroundColor = '#E2E8F0'); // Reset
+            
+            if (val.length === 0) {
+                strengthText.innerText = 'Nivel de Seguridad: Nula';
+                strengthText.style.color = 'var(--text-gray)';
+                isPasswordSecure = false;
+            } else if (score <= 2) {
+                bars[0].style.backgroundColor = 'var(--danger-color)';
+                strengthText.innerText = 'Seguridad: Baja';
+                strengthText.style.color = 'var(--danger-color)';
+                isPasswordSecure = false;
+            } else if (score === 3) {
+                bars[0].style.backgroundColor = 'var(--warning-color)';
+                bars[1].style.backgroundColor = 'var(--warning-color)';
+                strengthText.innerText = 'Seguridad: Media';
+                strengthText.style.color = 'var(--warning-color)';
+                isPasswordSecure = false;
+            } else if (score === 4) {
+                bars[0].style.backgroundColor = 'var(--success-color)';
+                bars[1].style.backgroundColor = 'var(--success-color)';
+                bars[2].style.backgroundColor = 'var(--success-color)';
+                strengthText.innerText = 'Seguridad: Completa';
+                strengthText.style.color = 'var(--success-color)';
+                isPasswordSecure = true;
+            }
+
+            checkPasswordsMatch(); // Re-chequear coincidencia si edita la original
+        });
+
+        // 3. Validador de Coincidencia de Contraseñas
+        function checkPasswordsMatch() {
+            if (confirmInput.value.length === 0) {
+                matchMessage.style.display = 'none';
+                confirmInput.style.borderColor = 'transparent';
+                return false;
+            }
+
+            matchMessage.style.display = 'block';
+            if (passInput.value === confirmInput.value) {
+                matchMessage.innerHTML = '<i class="fa-solid fa-check"></i> Las contraseñas coinciden';
+                matchMessage.style.color = 'var(--success-color)';
+                confirmInput.style.borderColor = 'var(--success-color)';
+                return true;
+            } else {
+                matchMessage.innerHTML = '<i class="fa-solid fa-xmark"></i> Las contraseñas no coinciden';
+                matchMessage.style.color = 'var(--danger-color)';
+                confirmInput.style.borderColor = 'var(--danger-color)';
+                return false;
+            }
         }
+
+        confirmInput.addEventListener('input', checkPasswordsMatch);
+
+        // 4. Interceptor Final (La Alerta JavaScript solicitada)
+        form.addEventListener('submit', function(e) {
+            if (!isPasswordSecure) {
+                e.preventDefault(); // Detiene el envío del formulario
+                alert("Crea una contraseña segura que cumpla con todos los requisitos.");
+                passInput.focus();
+            } else if (passInput.value !== confirmInput.value) {
+                e.preventDefault();
+                alert("Las contraseñas no coinciden. Por favor, verifica.");
+                confirmInput.focus();
+            }
+        });
     });
 </script>
 {% endblock %}
