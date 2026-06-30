@@ -25,23 +25,30 @@ def lista_facturas(request):
 @login_required
 def crear_factura(request):
     if request.method == 'POST':
-        form = FacturaForm(request.POST)
+        # 1. Copiamos los datos que llegan de la pantalla para poder inyectarles información
+        datos_post = request.POST.copy()
+        
+        # 2. Generamos el número de factura ANTES de validarlo para que Django no rechace el form
+        if not datos_post.get('nro_factura'):
+            datos_post['nro_factura'] = f"FAC-{uuid.uuid4().hex[:8].upper()}"
+
+        form = FacturaForm(datos_post)
+        
         if form.is_valid():
             factura = form.save(commit=False)
-            
-            # Blindaje: Si el formulario no generó un número, lo creamos aquí
-            if not factura.nro_factura:
-                factura.nro_factura = f"FAC-{uuid.uuid4().hex[:8].upper()}"
-                
             factura.total = factura.subtotal + factura.impuestos
             factura.save()
             messages.success(request, f"Factura {factura.nro_factura} generada con éxito.")
             return redirect('lista_facturas')
+        else:
+            # 3. ANTI-ERRORES SILENCIOSOS: Si Django rechaza el form, que nos lo diga en pantalla
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Error en {field}: {error}")
     else:
         form = FacturaForm()
     
     return render(request, 'facturacion/form_factura.html', {'form': form, 'editando': False})
-
 
 @login_required
 def anular_factura(request, factura_id):
