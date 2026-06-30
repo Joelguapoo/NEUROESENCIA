@@ -10,4 +10,5 @@ urlpatterns = [
     path('factura/<int:factura_id>/', views.detalle_factura, name='detalle_factura'),
     path('mis-facturas/', views.mis_facturas, name='mis_facturas'),
     path('exportar-pdf/<int:factura_id>/', views.exportar_factura_pdf, name='exportar_factura_pdf'),
+    path('api/citas_pendientes/', views.api_citas_pendientes, name='api_citas_pendientes'),
 ]
