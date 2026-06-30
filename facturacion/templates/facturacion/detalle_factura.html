@@ -70,7 +70,7 @@
             <div id="campos-banco" class="payment-fields mb-4" style="display: none;">
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Seleccionar Banco / Billetera</label>
-                    <select class="form-select rounded-pill px-4" name="banco_seleccionado">
+                    <select class="form-select rounded-pill px-4" name="banco_seleccionado" id="banco_seleccionado">
                         <option value="Nequi">Nequi</option>
                         <option value="Daviplata">Daviplata</option>
                         <option value="Bancolombia">Bancolombia</option>
@@ -81,11 +81,11 @@
                 </div>
                 <div class="mb-3" id="campo-telefono">
                     <label class="form-label small fw-bold text-muted">Número de Celular (Para Nequi/Daviplata)</label>
-                    <input type="text" class="form-control rounded-pill px-4" placeholder="300 000 0000">
+                    <input type="text" id="telefono_pago" class="form-control rounded-pill px-4" placeholder="300 000 0000" minlength="10" maxlength="10">
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Documento del Titular</label>
-                    <input type="text" class="form-control rounded-pill px-4" value="{{ factura.paciente.dni_paciente }}">
+                    <input type="text" id="documento_pago" class="form-control rounded-pill px-4" value="{{ factura.paciente.dni_paciente }}">
                 </div>
             </div>
 
@@ -158,6 +158,46 @@
     // Ejecutar al cargar la página
     document.addEventListener("DOMContentLoaded", function() {
         toggleCampos();
+
+        // VALIDACIÓN DE SEGURIDAD (CELULAR Y DNI) ANTES DE ENVIAR
+        const form = document.getElementById('pagoForm');
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Solo validamos estos campos si escogieron la opción de Banco / PSE
+            if (document.getElementById('btn-banco').checked) {
+                const banco = document.getElementById('banco_seleccionado').value;
+                const telefono = document.getElementById('telefono_pago').value.trim();
+                const documento = document.getElementById('documento_pago').value.trim();
+                const dniCorrecto = "{{ factura.paciente.dni_paciente }}";
+                
+                // 1. Validar Celular (Requerido solo para billeteras digitales)
+                if (banco === 'Nequi' || banco === 'Daviplata') {
+                    const soloNumeros = /^[0-9]+$/.test(telefono);
+                    if (telefono.length !== 10 || !soloNumeros) {
+                        alert(`Para procesar pagos con ${banco}, debes ingresar un celular válido de exactamente 10 dígitos.`);
+                        document.getElementById('telefono_pago').focus();
+                        isValid = false;
+                    }
+                }
+                
+                // 2. Validar Documento de Identidad (Anti-fraude)
+                if (documento !== dniCorrecto) {
+                    alert(`¡Alerta de Seguridad!\nEl documento ingresado (${documento}) no coincide con el DNI del titular de la cuenta médica (${dniCorrecto}).\n\nPor políticas del sistema, la transacción ha sido bloqueada.`);
+                    document.getElementById('documento_pago').focus();
+                    isValid = false;
+                }
+            }
+            
+            if (!isValid) {
+                e.preventDefault(); // Detenemos el envío al servidor
+            } else {
+                // Si pasa las pruebas, bloqueamos el botón para evitar que hagan doble clic
+                const btnSubmit = document.getElementById('btn-submit-pago');
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = 'Enviando al banco... <i class="fa-solid fa-circle-notch fa-spin ms-2"></i>';
+            }
+        });
     });
 </script>
 {% endblock %}
