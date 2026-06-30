@@ -172,23 +172,27 @@ def mis_facturas(request):
 
 @login_required
 def api_citas_pendientes(request):
-    """Devuelve JSON con las citas del paciente que NO tienen factura generada"""
+    """Devuelve JSON con las citas activas del paciente para poder facturarlas"""
     paciente_id = request.GET.get('paciente_id')
     if not paciente_id:
         return JsonResponse({'citas': []})
         
-    # Busca citas programadas/asistidas que NO están ligadas a una factura
-    citas_sin_factura = Cita.objects.filter(
+    # EL TRUCO: Quitamos la restricción de factura__isnull=True.
+    # Ahora traerá todas las citas 'Programadas' o 'Asistidas' de ese paciente.
+    citas_activas = Cita.objects.filter(
         paciente_id=paciente_id,
-        estado_cita__in=['Programada', 'Asistida'],
-        factura__isnull=True  # El truco: Filtra citas huérfanas de factura
+        estado_cita__in=['Programada', 'Asistida']
     ).order_by('-fecha_cita')
 
     data = []
-    for c in citas_sin_factura:
+    for c in citas_activas:
+        # Extraemos la fecha y hora de forma segura
+        fecha_str = c.fecha_cita.strftime('%d/%m/%Y') if c.fecha_cita else "Sin fecha"
+        hora_str = c.hora_cita.strftime('%H:%M') if c.hora_cita else "Sin hora"
+        
         data.append({
             'id': c.id,
-            'fecha': c.fecha_cita.strftime('%d/%m/%Y %H:%M'),
+            'fecha': f"{fecha_str} {hora_str}",
             'modalidad': c.modalidad,
             'valor_sugerido': 50000 if c.modalidad == 'Virtual' else 70000 
         })
