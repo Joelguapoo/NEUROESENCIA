@@ -232,7 +232,7 @@ def agendar_cita_paciente(request):
                         hora_cita=hora, codigo_cita=codigo_generado, modalidad='Virtual', estado_cita='Programada'
                     )
                     
-                    # 🔴 LÍNEA MÁGICA: Obliga a Django a convertir los textos en objetos Fecha/Hora
+                    # LÍNEA MÁGICA: Obliga a Django a convertir los textos en objetos Fecha/Hora
                     cita_nueva.refresh_from_db()
                     
                     metodo_defecto, _ = MetodoPago.objects.get_or_create(nombre_metodo='Por Definir')
@@ -247,14 +247,15 @@ def agendar_cita_paciente(request):
                     # --- IMPORTACIÓN LOCAL PARA EVITAR CONFLICTOS ---
                     from clinica.views import enviar_confirmacion_cita
                     
-                    # Llamamos a tu función original intacta
-                    resultado = enviar_confirmacion_cita(cita_nueva)
-                
-                if resultado == "EXITO":
-                    messages.success(request, "¡Cita reservada! Hemos enviado la confirmación con el PDF a tu correo.")
-                else:
-                    messages.warning(request, f"Cita reservada, pero hubo un problema al enviar el correo: {resultado}")
-
+                    # ---> APLICAMOS EL HILO PARA EVITAR EL ERROR 500 EN RAILWAY <---
+                    hilo_correo = threading.Thread(
+                        target=enviar_confirmacion_cita, 
+                        args=(cita_nueva,)
+                    )
+                    hilo_correo.start()
+                    
+                # Respondemos de inmediato al paciente
+                messages.success(request, "¡Cita reservada! La confirmación y el PDF se están enviando a tu correo en segundo plano.")
                 return redirect('detalle_factura', factura_id=nueva_factura.id) 
                 
             except Exception as e:
@@ -266,6 +267,7 @@ def agendar_cita_paciente(request):
 
     psicologos = Empleado.objects.filter(rol__nombre_rol='Psicologo', estado_empleado='Activo') 
     return render(request, 'usuarios/agendar_cita_paciente.html', {'psicologos': psicologos})
+
 
 def verificar_limite_paciente(request):
     """Verifica si el paciente ya tiene una cita el día seleccionado (Devuelve JSON)"""
