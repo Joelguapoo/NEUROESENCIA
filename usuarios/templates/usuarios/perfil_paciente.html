@@ -1,0 +1,48 @@
+{% extends 'usuarios/base.html' %}
+{% block title %}Mi Perfil - NeuroEsencia{% endblock %}
+
+{% block content %}
+<div class="container py-4 fade-in-up">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="base-card text-center p-5">
+                
+                <div class="mb-4">
+                    <img src="https://ui-avatars.com/api/?name={{ paciente.nombre_completo }}&background=7C3AED&color=fff&size=120&bold=true" alt="Avatar" class="rounded-circle shadow-sm" style="border: 4px solid var(--purple-pastel);">
+                </div>
+                
+                <h2 class="fw-bold mb-1" style="color: var(--purple-brand);">{{ paciente.nombre_completo }}</h2>
+                <p class="text-muted mb-4">Paciente de NeuroEsencia</p>
+                
+                <div class="row g-3 text-start mt-2">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4" style="background: var(--page-bg);">
+                            <small class="text-muted d-block fw-bold mb-1">Documento de Identidad</small>
+                            <span class="fs-6 fw-semibold text-dark"><i class="fa-regular fa-id-card me-2" style="color: var(--sidebar-accent);"></i>{{ paciente.dni_paciente }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4" style="background: var(--page-bg);">
+                            <small class="text-muted d-block fw-bold mb-1">Correo Electrónico</small>
+                            <span class="fs-6 fw-semibold text-dark"><i class="fa-regular fa-envelope me-2" style="color: var(--sidebar-accent);"></i>{{ paciente.correo }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4" style="background: var(--page-bg);">
+                            <small class="text-muted d-block fw-bold mb-1">Teléfono</small>
+                            <span class="fs-6 fw-semibold text-dark"><i class="fa-solid fa-mobile-screen me-2" style="color: var(--sidebar-accent);"></i>{{ paciente.telefono|default:"No registrado" }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4" style="background: var(--page-bg);">
+                            <small class="text-muted d-block fw-bold mb-1">Estado en Clínica</small>
+                            <span class="fs-6 fw-semibold text-dark"><i class="fa-solid fa-shield-check me-2" style="color: #10B981;"></i>Activo</span>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
